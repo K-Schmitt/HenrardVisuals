@@ -1,0 +1,121 @@
+# =========================================
+# Kong API Gateway Configuration
+# Supabase Self-Hosted Routes
+# =========================================
+
+_format_version: "2.1"
+_transform: true
+
+# ----------------------------------------
+# Services
+# ----------------------------------------
+services:
+  # Auth Service (GoTrue)
+  - name: auth-v1
+    url: http://auth:9999/
+    routes:
+      - name: auth-v1-route
+        strip_path: true
+        paths:
+          - /auth/v1/
+    plugins:
+      - name: cors
+        config:
+          origins:
+            - "*"
+          methods:
+            - GET
+            - POST
+            - PUT
+            - PATCH
+            - DELETE
+            - OPTIONS
+          headers:
+            - Accept
+            - Authorization
+            - Content-Type
+            - apikey
+            - x-client-info
+            - x-supabase-api-version
+          exposed_headers:
+            - Content-Length
+            - Content-Range
+            - X-Supabase-Api-Version
+          credentials: true
+          max_age: 3600
+
+  # REST API (PostgREST)
+  - name: rest-v1
+    url: http://rest:3000/
+    routes:
+      - name: rest-v1-route
+        strip_path: true
+        paths:
+          - /rest/v1/
+    plugins:
+      - name: cors
+        config:
+          origins:
+            - "*"
+          methods:
+            - GET
+            - POST
+            - PUT
+            - PATCH
+            - DELETE
+            - OPTIONS
+          headers:
+            - Accept
+            - Authorization
+            - Content-Type
+            - apikey
+            - x-client-info
+            - x-supabase-api-version
+            - Prefer
+            - Range
+            - accept-profile
+            - content-profile
+          exposed_headers:
+            - Content-Length
+            - Content-Range
+          credentials: true
+          max_age: 3600
+
+  # Storage API
+  - name: storage-v1
+    url: http://storage:5000/
+    routes:
+      - name: storage-v1-route
+        strip_path: true
+        paths:
+          - /storage/v1/
+    plugins:
+      - name: cors
+        config:
+          origins:
+            - "*"
+          methods:
+            - GET
+            - POST
+            - PUT
+            - PATCH
+            - DELETE
+            - OPTIONS
+          headers:
+            - Accept
+            - Authorization
+            - Content-Type
+            - apikey
+            - x-client-info
+            - x-supabase-api-version
+            - upload-length
+            - upload-offset
+            - tus-resumable
+            - upload-metadata
+            - x-upsert
+          exposed_headers:
+            - Content-Length
+            - Content-Range
+            - upload-offset
+          credentials: true
+          max_age: 3600

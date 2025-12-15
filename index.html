@@ -1,0 +1,58 @@
+<!DOCTYPE html>
+<html lang="fr">
+  <head>
+    <meta charset="UTF-8" />
+    <link rel="icon" type="image/jpeg" href="/favicon.jpg" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    
+    <!-- Critical CSS - Prevent flash of unstyled content -->
+    <style>
+      html, body, #root {
+        background-color: #000000 !important;
+        margin: 0;
+        padding: 0;
+      }
+      body {
+        color: #ffffff;
+        min-height: 100vh;
+      }
+      /* Initial loading state */
+      #root:empty::after {
+        content: '';
+        display: block;
+        width: 100vw;
+        height: 100vh;
+        background-color: #000000;
+      }
+    </style>
+    
+    <!-- SEO Meta Tags -->
+    <title>HenrardVisuals | Photography Portfolio</title>
+    <meta name="description" content="Professional photography portfolio showcasing stunning visual stories through the lens of HenrardVisuals." />
+    <meta name="keywords" content="photography, portfolio, photographer, visual, art, professional" />
+    <meta name="author" content="HenrardVisuals" />
+    
+    <!-- Open Graph -->
+    <meta property="og:title" content="HenrardVisuals | Photography Portfolio" />
+    <meta property="og:description" content="Professional photography portfolio showcasing stunning visual stories." />
+    <meta property="og:type" content="website" />
+    <meta property="og:image" content="/og-image.jpg" />
+    
+    <!-- Twitter Card -->
+    <meta name="twitter:card" content="summary_large_image" />
+    <meta name="twitter:title" content="HenrardVisuals | Photography Portfolio" />
+    <meta name="twitter:description" content="Professional photography portfolio showcasing stunning visual stories." />
+    
+    <!-- Fonts -->
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,300;0,400;0,500;0,600;1,400&family=Inter:wght@300;400;500;600&family=Playfair+Display:ital,wght@0,400;0,500;0,600;1,400&display=swap" rel="stylesheet" />
+    
+    <!-- Theme Color -->
+    <meta name="theme-color" content="#171717" />
+  </head>
+  <body class="bg-surface-950 text-primary-50 antialiased">
+    <div id="root"></div>
+    <script type="module" src="/src/main.tsx"></script>
+  </body>
+</html>

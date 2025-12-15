@@ -1,0 +1,265 @@
+# =========================================
+# HenrardVisuals - Docker Compose Stack
+# Self-Hosted Supabase + React Frontend
+# =========================================
+
+services:
+  # ----------------------------------------
+  # Frontend Application (Production)
+  # ----------------------------------------
+  app:
+    build:
+      context: .
+      dockerfile: Dockerfile
+      target: production
+      args:
+        - VITE_SUPABASE_URL=http://109.123.244.31:8000
+        - VITE_SUPABASE_ANON_KEY=${ANON_KEY}
+        - VITE_UPLOAD_URL=http://109.123.244.31:3001
+    container_name: henrard-app
+    environment:
+      - VITE_SUPABASE_URL=http://109.123.244.31:8000
+      - VITE_SUPABASE_ANON_KEY=${ANON_KEY}
+      - VITE_UPLOAD_URL=http://109.123.244.31:3001
+    ports:
+      - "5173:80"
+    networks:
+      - henrard-network
+    depends_on:
+      kong:
+        condition: service_healthy
+
+  # ----------------------------------------
+  # Upload Server (Local Storage)
+  # ----------------------------------------
+  upload:
+    build:
+      context: ./server
+      dockerfile: Dockerfile
+    container_name: henrard-upload
+    volumes:
+      - ./uploads:/app/uploads
+    ports:
+      - "3001:3001"
+    networks:
+      - henrard-network
+
+  # ----------------------------------------
+  # Nginx Reverse Proxy
+  # ----------------------------------------
+  nginx:
+    image: nginx:alpine
+    container_name: henrard-nginx
+    ports:
+      - "8080:80"     # Changed from 80:80 to avoid conflict
+      # - "8443:443"  # Disabled until SSL configured
+    volumes:
+      - ./nginx/nginx.conf:/etc/nginx/nginx.conf:ro
+      # - ./nginx/ssl:/etc/nginx/ssl:ro  # Uncomment for SSL
+    networks:
+      - henrard-network
+    depends_on:
+      - app
+      - kong
+
+  # ----------------------------------------
+  # Supabase - PostgreSQL Database
+  # ----------------------------------------
+  db:
+    image: postgres:15-alpine
+    container_name: henrard-db
+    ports:
+      - "5432:5432"
+    environment:
+      POSTGRES_USER: postgres
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:-henrard_secret_123}
+      POSTGRES_DB: henrard_db
+    volumes:
+      - ./volumes/db/data:/var/lib/postgresql/data
+      - ./volumes/db/init:/docker-entrypoint-initdb.d
+    networks:
+      - henrard-network
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U postgres"]
+      interval: 5s
+      timeout: 5s
+      retries: 5
+
+  # ----------------------------------------
+  # Supabase - Kong API Gateway
+  # ----------------------------------------
+  kong:
+    image: kong:2.8
+    container_name: henrard-kong
+    environment:
+      KONG_DATABASE: "off"
+      KONG_DECLARATIVE_CONFIG: /var/lib/kong/kong.yml
+      KONG_DNS_ORDER: LAST,A,CNAME
+      KONG_PLUGINS: request-transformer,cors,key-auth,acl
+      KONG_NGINX_PROXY_PROXY_BUFFER_SIZE: 160k
+      KONG_NGINX_PROXY_PROXY_BUFFERS: 64 160k
+    volumes:
+      - ./volumes/kong/kong.yml:/var/lib/kong/kong.yml:ro
+    ports:
+      - "8000:8000"
+      - "8443:8443"
+    networks:
+      - henrard-network
+    healthcheck:
+      test: ["CMD", "kong", "health"]
+      interval: 10s
+      timeout: 10s
+      retries: 5
+    depends_on:
+      db:
+        condition: service_healthy
+
+  # ----------------------------------------
+  # Supabase - GoTrue Auth Service
+  # ----------------------------------------
+  auth:
+    image: supabase/gotrue:v2.132.3
+    container_name: henrard-auth
+    environment:
+      GOTRUE_API_HOST: 0.0.0.0
+      GOTRUE_API_PORT: 9999
+      API_EXTERNAL_URL: ${API_EXTERNAL_URL:-http://localhost:8000}
+      GOTRUE_DB_DRIVER: postgres
+      GOTRUE_DB_DATABASE_URL: postgres://postgres:${POSTGRES_PASSWORD:-henrard_secret_123}@db:5432/henrard_db?search_path=auth
+      GOTRUE_SITE_URL: ${SITE_URL:-http://localhost:5173}
+      GOTRUE_URI_ALLOW_LIST: ${ADDITIONAL_REDIRECT_URLS:-}
+      GOTRUE_DISABLE_SIGNUP: ${DISABLE_SIGNUP:-false}
+      GOTRUE_JWT_ADMIN_ROLES: service_role
+      GOTRUE_JWT_AUD: authenticated
+      GOTRUE_JWT_DEFAULT_GROUP_NAME: authenticated
+      GOTRUE_JWT_EXP: ${JWT_EXPIRY:-3600}
+      GOTRUE_JWT_SECRET: ${JWT_SECRET:-super-secret-jwt-token-with-at-least-32-characters-long}
+      GOTRUE_EXTERNAL_EMAIL_ENABLED: ${ENABLE_EMAIL_SIGNUP:-true}
+      GOTRUE_MAILER_AUTOCONFIRM: ${ENABLE_EMAIL_AUTOCONFIRM:-true}
+      GOTRUE_SMTP_ADMIN_EMAIL: ${SMTP_ADMIN_EMAIL:-admin@example.com}
+      GOTRUE_SMTP_HOST: ${SMTP_HOST:-}
+      GOTRUE_SMTP_PORT: ${SMTP_PORT:-587}
+      GOTRUE_SMTP_USER: ${SMTP_USER:-}
+      GOTRUE_SMTP_PASS: ${SMTP_PASS:-}
+      GOTRUE_SMTP_SENDER_NAME: ${SMTP_SENDER_NAME:-HenrardVisuals}
+      GOTRUE_MAILER_URLPATHS_INVITE: ${MAILER_URLPATHS_INVITE:-/auth/v1/verify}
+      GOTRUE_MAILER_URLPATHS_CONFIRMATION: ${MAILER_URLPATHS_CONFIRMATION:-/auth/v1/verify}
+      GOTRUE_MAILER_URLPATHS_RECOVERY: ${MAILER_URLPATHS_RECOVERY:-/auth/v1/verify}
+      GOTRUE_MAILER_URLPATHS_EMAIL_CHANGE: ${MAILER_URLPATHS_EMAIL_CHANGE:-/auth/v1/verify}
+    networks:
+      - henrard-network
+    depends_on:
+      db:
+        condition: service_healthy
+
+  # ----------------------------------------
+  # Supabase - PostgREST API
+  # ----------------------------------------
+  rest:
+    image: postgrest/postgrest:v11.2.2
+    container_name: henrard-rest
+    environment:
+      PGRST_DB_URI: postgres://postgres:${POSTGRES_PASSWORD:-henrard_secret_123}@db:5432/henrard_db
+      PGRST_DB_SCHEMAS: public,storage,graphql_public
+      PGRST_DB_ANON_ROLE: anon
+      PGRST_JWT_SECRET: ${JWT_SECRET:-super-secret-jwt-token-with-at-least-32-characters-long}
+      PGRST_DB_USE_LEGACY_GUCS: "false"
+    networks:
+      - henrard-network
+    depends_on:
+      db:
+        condition: service_healthy
+
+  # ----------------------------------------
+  # Supabase - Storage API
+  # ----------------------------------------
+  storage:
+    image: supabase/storage-api:v0.43.11
+    container_name: henrard-storage
+    environment:
+      ANON_KEY: ${ANON_KEY:-eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZS1kZW1vIiwicm9sZSI6ImFub24iLCJleHAiOjE5ODM4MTI5OTZ9.CRXP1A7WOeoJeXxjNni43kdQwgnWNReilDMblYTn_I0}
+      SERVICE_KEY: ${SERVICE_ROLE_KEY:-eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZS1kZW1vIiwicm9sZSI6InNlcnZpY2Vfcm9sZSIsImV4cCI6MTk4MzgxMjk5Nn0.EGIM96RAZx35lJzdJsyH-qQwv8Hdp7fsn3W0YpN81IU}
+      POSTGREST_URL: http://rest:3000
+      PGRST_JWT_SECRET: ${JWT_SECRET:-super-secret-jwt-token-with-at-least-32-characters-long}
+      DATABASE_URL: postgres://postgres:${POSTGRES_PASSWORD:-henrard_secret_123}@db:5432/henrard_db
+      FILE_SIZE_LIMIT: 52428800
+      STORAGE_BACKEND: file
+      FILE_STORAGE_BACKEND_PATH: /var/lib/storage
+      TENANT_ID: stub
+      REGION: stub
+      GLOBAL_S3_BUCKET: stub
+      ENABLE_IMAGE_TRANSFORMATION: "true"
+      IMGPROXY_URL: http://imgproxy:8080
+    volumes:
+      - ./volumes/storage:/var/lib/storage
+    networks:
+      - henrard-network
+    depends_on:
+      db:
+        condition: service_healthy
+      rest:
+        condition: service_started
+
+  # ----------------------------------------
+  # Supabase - Studio (Admin UI)
+  # ----------------------------------------
+  studio:
+    image: supabase/studio:20231123-64a766a
+    container_name: henrard-studio
+    environment:
+      STUDIO_PG_META_URL: http://meta:8080
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:-henrard_secret_123}
+      DEFAULT_ORGANIZATION_NAME: HenrardVisuals
+      DEFAULT_PROJECT_NAME: Portfolio
+      SUPABASE_URL: http://kong:8000
+      SUPABASE_PUBLIC_URL: http://109.123.244.31:8000
+      SUPABASE_ANON_KEY: ${ANON_KEY:-eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZS1kZW1vIiwicm9sZSI6ImFub24iLCJleHAiOjE5ODM4MTI5OTZ9.CRXP1A7WOeoJeXxjNni43kdQwgnWNReilDMblYTn_I0}
+      SUPABASE_SERVICE_KEY: ${SERVICE_ROLE_KEY:-eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZS1kZW1vIiwicm9sZSI6InNlcnZpY2Vfcm9sZSIsImV4cCI6MTk4MzgxMjk5Nn0.EGIM96RAZx35lJzdJsyH-qQwv8Hdp7fsn3W0YpN81IU}
+    ports:
+      - "3000:3000"
+    networks:
+      - henrard-network
+    depends_on:
+      - kong
+      - meta
+
+  # ----------------------------------------
+  # Supabase - Postgres Meta (for Studio)
+  # ----------------------------------------
+  meta:
+    image: supabase/postgres-meta:v0.68.0
+    container_name: henrard-meta
+    environment:
+      PG_META_PORT: 8080
+      PG_META_DB_HOST: db
+      PG_META_DB_PORT: 5432
+      PG_META_DB_NAME: henrard_db
+      PG_META_DB_USER: postgres
+      PG_META_DB_PASSWORD: ${POSTGRES_PASSWORD:-henrard_secret_123}
+    networks:
+      - henrard-network
+    depends_on:
+      db:
+        condition: service_healthy
+
+  # ----------------------------------------
+  # Image Proxy (for image transformations)
+  # ----------------------------------------
+  imgproxy:
+    image: darthsim/imgproxy:v3.8.0
+    container_name: henrard-imgproxy
+    environment:
+      IMGPROXY_BIND: ":8080"
+      IMGPROXY_LOCAL_FILESYSTEM_ROOT: /
+      IMGPROXY_USE_ETAG: "true"
+    volumes:
+      - ./volumes/storage:/var/lib/storage:ro
+    networks:
+      - henrard-network
+
+# ----------------------------------------
+# Networks
+# ----------------------------------------
+networks:
+  henrard-network:
+    driver: bridge
