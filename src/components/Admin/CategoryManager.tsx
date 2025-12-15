@@ -1,8 +1,3 @@
-// =========================================
-// CategoryManager Component
-// Manage Portfolio Categories
-// =========================================
-
 import { useState, useEffect } from 'react';
 import { supabase, insertRow, updateRow } from '@/lib/supabase';
 import type { Category } from '@/types';

@@ -1,14 +1,7 @@
-// =========================================
-// FileUpload Component
-// Drag & Drop + Click to Browse
-// Uses local upload server instead of Supabase Storage
-// =========================================
-
 /// <reference types="vite/client" />
 
 import { useState, useRef, useCallback } from 'react';
 
-// Get upload server URL from environment or use default
 const UPLOAD_URL =
   (import.meta.env['VITE_UPLOAD_URL'] as string | undefined) || 'http://localhost:3001';
 
@@ -56,12 +49,10 @@ export function FileUpload({
   }, []);
 
   const validateFile = (file: File): string | null => {
-    // Check file type
     const allowedTypes = accept.split(',').map((t) => t.trim());
     if (!allowedTypes.some((type) => file.type.match(type.replace('*', '.*')))) {
       return `Type "${file.type}" non supporté`;
     }
-    // Check file size
     if (file.size > maxSize) {
       return `Fichier trop volumineux (max ${Math.round(maxSize / 1024 / 1024)}MB)`;
     }
@@ -80,7 +71,6 @@ export function FileUpload({
     const errors: string[] = [];
 
     for (const file of fileArray) {
-      // Validate file
       const validationError = validateFile(file);
       if (validationError) {
         errors.push(`${file.name}: ${validationError}`);
@@ -90,7 +80,6 @@ export function FileUpload({
       setUploadProgress((prev) => [...prev, `Uploading ${file.name}...`]);
 
       try {
-        // Use local upload server
         const formData = new FormData();
         formData.append('file', file);
 
@@ -131,7 +120,6 @@ export function FileUpload({
       onError?.(errors.join('\n'));
     }
 
-    // Clear progress after delay
     setTimeout(() => setUploadProgress([]), 3000);
   };
 
@@ -156,7 +144,6 @@ export function FileUpload({
     if (files) {
       processFiles(files);
     }
-    // Reset input so same file can be selected again
     e.target.value = '';
   };
 
@@ -178,7 +165,6 @@ export function FileUpload({
                 ${isUploading ? 'pointer-events-none opacity-70' : ''}
             `}
     >
-      {/* Hidden file input */}
       <input
         ref={inputRef}
         type="file"
@@ -188,7 +174,6 @@ export function FileUpload({
         className="hidden"
       />
 
-      {/* Upload icon */}
       <svg
         xmlns="http://www.w3.org/2000/svg"
         width="48"
@@ -206,7 +191,6 @@ export function FileUpload({
         <line x1="12" x2="12" y1="3" y2="15" />
       </svg>
 
-      {/* Loading spinner */}
       {isUploading && (
         <div className="absolute inset-0 flex items-center justify-center bg-white/80 rounded-elegant">
           <div className="text-center">
@@ -216,7 +200,6 @@ export function FileUpload({
         </div>
       )}
 
-      {/* Instructions */}
       {!isUploading && (
         <>
           <p className="text-gray-500">
@@ -235,7 +218,6 @@ export function FileUpload({
         </>
       )}
 
-      {/* Upload progress */}
       {uploadProgress.length > 0 && (
         <div className="mt-4 text-left space-y-1">
           {uploadProgress.map((msg, i) => (

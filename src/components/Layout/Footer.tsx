@@ -24,8 +24,8 @@ export function Footer() {
             </Link>
             <p className="text-gray-500 text-sm leading-relaxed">
               {t(
-                "Photographe et modèle basé en Europe. Capturant la beauté à travers l'objectif.",
-                'Photographer and model based in Europe. Capturing beauty through the lens.'
+                "L'essentiel, sans démonstration - l'image au service de l'art.",
+                "The essential, without demonstration - the image at the service of art."
               )}
             </p>
           </div>

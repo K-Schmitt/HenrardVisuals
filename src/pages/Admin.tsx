@@ -1,8 +1,3 @@
-// =========================================
-// Admin Page
-// Protected Administration Panel
-// =========================================
-
 import { useState, useEffect } from 'react';
 import { useAuth } from '@/hooks/useAuth';
 import { Login } from '@/components/Auth/Login';

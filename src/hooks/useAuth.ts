@@ -1,8 +1,3 @@
-// =========================================
-// useAuth Hook
-// Authentication State Management
-// =========================================
-
 import { useState, useEffect, useCallback } from 'react';
 import { supabase } from '@/lib/supabase';
 import type { AuthState, LoginCredentials, AuthContextValue } from '@/types';
@@ -160,18 +155,10 @@ export function useAuth(): AuthContextValue {
   };
 }
 
-// ----------------------------------------
-// useUser Hook (convenience)
-// ----------------------------------------
-
 export function useUser(): User | null {
   const { user } = useAuth();
   return user;
 }
-
-// ----------------------------------------
-// useSession Hook (convenience)
-// ----------------------------------------
 
 export function useSession(): Session | null {
   const { session } = useAuth();

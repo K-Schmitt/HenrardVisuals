@@ -1,8 +1,3 @@
-// =========================================
-// Login Component
-// Authentication Form
-// =========================================
-
 import { useState, useCallback } from 'react';
 import { useAuth } from '@/hooks/useAuth';
 import type { LoginFormProps } from '@/types';

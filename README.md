@@ -168,23 +168,3 @@ Voir [SETUP.md](./docs/SETUP.md) pour le guide de configuration complet.
 MIT License - voir [LICENSE](./LICENSE) pour les détails.
 
 ---
-
-## 👤 Auteur
-
-**Tristan Henrard** - Photographe & Modèle
-
-- Instagram: [@dyavol_litso](https://www.instagram.com/dyavol_litso)
-- LinkedIn: [Tristan Henrard](https://www.linkedin.com/in/tristan-henrard-2688a6198/)
-- Email: henrard.tristan@proton.me
-
----
-
-## 🙏 Crédits
-
-Site développé par [Kylian Schmitt](https://slackliniste.com)
-
----
-
-<p align="center">
-  Made with ❤️ in Europe
-</p>

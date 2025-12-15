@@ -4,7 +4,6 @@ import { BurgerMenu } from '@/components/Navigation/BurgerMenu';
 import { Footer } from '@/components/Layout/Footer';
 import { useLanguage } from '@/context/LanguageContext';
 
-// Composants SVG pour les drapeaux (compatibles tous navigateurs)
 const FrenchFlag = ({ className = 'w-6 h-4' }: { className?: string }) => (
   <svg className={className} viewBox="0 0 900 600" xmlns="http://www.w3.org/2000/svg">
     <rect width="300" height="600" fill="#002395" />
@@ -42,23 +41,19 @@ export function SiteLayout({ children }: SiteLayoutProps) {
   const [lastScrollY, setLastScrollY] = useState(0);
   const location = useLocation();
 
-  // Close menu on route change
   useEffect(() => {
     setIsMenuOpen(false);
   }, [location]);
 
-  // Handle navbar visibility on scroll
   useEffect(() => {
     const handleScroll = () => {
       const currentScrollY = window.scrollY;
 
       if (currentScrollY < lastScrollY || currentScrollY < 50) {
-        // Scrolling up or at the top
         setShowNavbar(true);
       } else if (currentScrollY > lastScrollY && currentScrollY > 100) {
-        // Scrolling down
         setShowNavbar(false);
-        setIsMenuOpen(false); // Close menu when hiding navbar
+        setIsMenuOpen(false);
       }
 
       setLastScrollY(currentScrollY);
@@ -70,14 +65,12 @@ export function SiteLayout({ children }: SiteLayoutProps) {
 
   return (
     <div className="min-h-screen bg-black text-white">
-      {/* Fixed Header - Transparent with hide on scroll */}
       <header
         className={`fixed top-0 left-0 right-0 z-50 bg-gradient-to-b from-black/80 to-transparent backdrop-blur-sm transition-transform duration-300 ${
           showNavbar ? 'translate-y-0' : '-translate-y-full'
         }`}
       >
         <div className="flex items-center justify-between px-6 py-4">
-          {/* Left: Logo */}
           <Link
             to="/"
             className="font-serif text-xl tracking-[0.3em] uppercase text-white hover:opacity-80 transition-opacity"
@@ -85,13 +78,10 @@ export function SiteLayout({ children }: SiteLayoutProps) {
             HENRARDVISUALS
           </Link>
 
-          {/* Right: Menu + Burger */}
           <div className="flex items-center gap-8">
-            {/* Desktop Menu - Hidden on mobile, shown on lg+ when menu is open */}
             <nav
               className={`hidden lg:flex items-center gap-6 ${isMenuOpen ? '' : 'opacity-0 pointer-events-none'}`}
             >
-              {/* Language Selector with Flag */}
               <div className="relative group">
                 <button
                   className="hover:opacity-70 transition-opacity"
@@ -107,7 +97,6 @@ export function SiteLayout({ children }: SiteLayoutProps) {
                     <UKFlag className="w-6 h-4" />
                   )}
                 </button>
-                {/* Dropdown Menu */}
                 <div className="absolute top-full left-0 mt-2 bg-black border border-gray-800 rounded-lg overflow-hidden opacity-0 invisible group-hover:opacity-100 group-hover:visible transition-all duration-200 min-w-[100px]">
                   <button
                     onClick={() => setLanguage('fr')}
@@ -124,7 +113,6 @@ export function SiteLayout({ children }: SiteLayoutProps) {
                 </div>
               </div>
 
-              {/* Home Button */}
               <Link
                 to="/"
                 className="text-sm uppercase tracking-wider text-white hover:text-gray-300 transition-colors"
@@ -137,7 +125,6 @@ export function SiteLayout({ children }: SiteLayoutProps) {
                 {t('Accueil', 'Home')}
               </Link>
 
-              {/* Contact Button */}
               <Link
                 to="/contact"
                 className="text-sm uppercase tracking-wider text-white hover:text-gray-300 transition-colors"
@@ -151,20 +138,17 @@ export function SiteLayout({ children }: SiteLayoutProps) {
               </Link>
             </nav>
 
-            {/* Menu Burger */}
             <BurgerMenu isOpen={isMenuOpen} onClick={() => setIsMenuOpen(!isMenuOpen)} />
           </div>
         </div>
       </header>
 
-      {/* Mobile Sidebar Menu */}
       <div
         className={`fixed top-0 right-0 h-full w-64 bg-black border-l border-gray-800 z-40 transform transition-transform duration-300 ease-in-out lg:hidden ${
           isMenuOpen ? 'translate-x-0' : 'translate-x-full'
         }`}
       >
         <nav className="flex flex-col gap-6 px-8 pt-24">
-          {/* Mobile Language Selector */}
           <div className="flex gap-4 mb-4">
             <button
               onClick={() => setLanguage('fr')}
@@ -197,7 +181,6 @@ export function SiteLayout({ children }: SiteLayoutProps) {
         </nav>
       </div>
 
-      {/* Overlay for mobile menu */}
       {isMenuOpen && (
         <div
           className="fixed inset-0 bg-black bg-opacity-50 z-30 lg:hidden"
@@ -205,10 +188,8 @@ export function SiteLayout({ children }: SiteLayoutProps) {
         />
       )}
 
-      {/* Main Content */}
       <main>{children}</main>
 
-      {/* Footer */}
       <Footer />
     </div>
   );

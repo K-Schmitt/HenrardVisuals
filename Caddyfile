@@ -1,0 +1,39 @@
+# HenrardVisuals - Caddy Configuration
+# SSL automatique avec Let's Encrypt
+
+# Site principal
+henrardvisuals.com, www.henrardvisuals.com {
+    reverse_proxy app:80
+}
+
+# API Supabase
+api.henrardvisuals.com {
+    # Gérer les requêtes OPTIONS (preflight) directement dans Caddy
+    @options method OPTIONS
+    handle @options {
+        header Access-Control-Allow-Origin "https://henrardvisuals.com"
+        header Access-Control-Allow-Methods "GET, POST, PUT, PATCH, DELETE, OPTIONS"
+        header Access-Control-Allow-Headers "Accept, Authorization, Content-Type, apikey, x-client-info, x-supabase-api-version, Prefer, Range, accept-profile, content-profile"
+        header Access-Control-Allow-Credentials "true"
+        header Access-Control-Max-Age "3600"
+        respond 204
+    }
+    
+    # Pour les autres requêtes, supprimer les headers CORS de Kong et ajouter les nôtres
+    reverse_proxy kong:8000 {
+        header_down -Access-Control-Allow-Origin
+        header_down -Access-Control-Allow-Methods
+        header_down -Access-Control-Allow-Headers
+        header_down -Access-Control-Allow-Credentials
+        header_down -Access-Control-Max-Age
+        header_down -Access-Control-Expose-Headers
+    }
+    
+    header Access-Control-Allow-Origin "https://henrardvisuals.com"
+    header Access-Control-Allow-Credentials "true"
+}
+
+# Upload Server
+upload.henrardvisuals.com {
+    reverse_proxy upload:3001
+}

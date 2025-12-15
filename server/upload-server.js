@@ -15,6 +15,7 @@ const __dirname = path.dirname(__filename);
 
 const app = express();
 const PORT = 3001;
+const PUBLIC_URL = process.env.PUBLIC_URL || `http://localhost:${PORT}`;
 
 // Create uploads directory
 const uploadsDir = path.join(__dirname, 'uploads');
@@ -112,7 +113,7 @@ app.get('/uploads-list', (req, res) => {
         const fileList = files.map(filename => ({
             filename,
             path: `/uploads/${filename}`,
-            url: `http://localhost:${PORT}/uploads/${filename}`
+            url: `${PUBLIC_URL}/uploads/${filename}`
         }));
 
         res.json({ files: fileList });
