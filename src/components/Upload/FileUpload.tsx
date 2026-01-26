@@ -1,9 +1,7 @@
 /// <reference types="vite/client" />
 
 import { useState, useRef, useCallback } from 'react';
-
-const UPLOAD_URL =
-  (import.meta.env['VITE_UPLOAD_URL'] as string | undefined) || 'http://localhost:3001';
+import { supabase } from '@/lib/supabase';
 
 interface FileUploadProps {
   onUploadComplete?: (files: UploadedFile[]) => void;
@@ -11,12 +9,14 @@ interface FileUploadProps {
   accept?: string;
   maxSize?: number; // in bytes
   multiple?: boolean;
+  bucket?: string; // Supabase bucket name
 }
 
 interface UploadedFile {
   name: string;
   path: string;
   size: number;
+  publicUrl: string;
 }
 
 export function FileUpload({
@@ -25,6 +25,7 @@ export function FileUpload({
   accept = 'image/jpeg,image/png,image/webp',
   maxSize = 52428800, // 50MB
   multiple = true,
+  bucket = 'photos',
 }: FileUploadProps) {
   const [isDragging, setIsDragging] = useState(false);
   const [isUploading, setIsUploading] = useState(false);
@@ -80,23 +81,32 @@ export function FileUpload({
       setUploadProgress((prev) => [...prev, `Uploading ${file.name}...`]);
 
       try {
-        const formData = new FormData();
-        formData.append('file', file);
+        // Generate unique filename
+        const timestamp = Date.now();
+        const safeName = file.name.replace(/[^a-zA-Z0-9.-]/g, '_');
+        const filePath = `${timestamp}-${safeName}`;
 
-        const response = await fetch(`${UPLOAD_URL}/upload`, {
-          method: 'POST',
-          body: formData,
-        });
+        // Upload to Supabase Storage
+        const { data, error } = await supabase.storage
+          .from(bucket)
+          .upload(filePath, file, {
+            cacheControl: '3600',
+            upsert: false,
+          });
 
-        const result = await response.json();
-
-        if (!response.ok) {
-          errors.push(`${file.name}: ${result.error || 'Upload failed'}`);
+        if (error) {
+          errors.push(`${file.name}: ${error.message}`);
         } else {
+          // Get public URL
+          const { data: urlData } = supabase.storage
+            .from(bucket)
+            .getPublicUrl(data.path);
+
           uploadedFiles.push({
             name: file.name,
-            path: `${UPLOAD_URL}${result.file.path}`,
+            path: data.path,
             size: file.size,
+            publicUrl: urlData.publicUrl,
           });
           setUploadProgress((prev) => [
             ...prev.filter((p) => !p.includes(file.name)),

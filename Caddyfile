@@ -33,7 +33,3 @@ api.henrardvisuals.com {
     header Access-Control-Allow-Credentials "true"
 }
 
-# Upload Server
-upload.henrardvisuals.com {
-    reverse_proxy upload:3001
-}

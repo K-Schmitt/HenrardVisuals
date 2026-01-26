@@ -1,0 +1,14 @@
+# =========================================
+# Kong Custom Image
+# Embed kong.yml config file
+# =========================================
+
+FROM kong:2.8
+
+# Copy Kong configuration
+COPY volumes/kong/kong.yml /kong.yml
+
+# Set proper permissions
+USER root
+RUN chmod 644 /kong.yml
+USER kong

@@ -10,13 +10,11 @@ services:
       args:
         - VITE_SUPABASE_URL=https://api.henrardvisuals.com
         - VITE_SUPABASE_ANON_KEY=${ANON_KEY}
-        - VITE_UPLOAD_URL=https://upload.henrardvisuals.com
     container_name: henrard-app
     restart: unless-stopped
     environment:
       - VITE_SUPABASE_URL=https://api.henrardvisuals.com
       - VITE_SUPABASE_ANON_KEY=${ANON_KEY}
-      - VITE_UPLOAD_URL=https://upload.henrardvisuals.com
     expose:
       - "80"
     networks:
@@ -25,23 +23,6 @@ services:
     depends_on:
       kong:
         condition: service_healthy
-
-  # Upload Server (Local Storage)
-  upload:
-    build:
-      context: ./server
-      dockerfile: Dockerfile
-    container_name: henrard-upload
-    restart: unless-stopped
-    environment:
-      - PUBLIC_URL=https://upload.henrardvisuals.com
-    volumes:
-      - ./uploads:/app/uploads
-    expose:
-      - "3001"
-    networks:
-      - henrard-network
-      - proxy-public
 
   # Supabase - PostgreSQL Database
   db:

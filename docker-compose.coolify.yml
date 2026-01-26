@@ -1,0 +1,41 @@
+# =========================================
+# HenrardVisuals - Production Coolify
+# Frontend uniquement (Supabase externe)
+# =========================================
+
+version: '3.8'
+
+services:
+  # ----------------------------------------
+  # Frontend (React + Nginx)
+  # Se connecte au Supabase Coolify externe
+  # ----------------------------------------
+  app:
+    build:
+      context: .
+      dockerfile: Dockerfile
+      target: production
+      args:
+        # URL de ton Supabase Coolify (ex: https://supabase.tondomaine.com)
+        - VITE_SUPABASE_URL=${VITE_SUPABASE_URL}
+        # Clé anon de ton Supabase Coolify
+        - VITE_SUPABASE_ANON_KEY=${VITE_SUPABASE_ANON_KEY}
+    restart: unless-stopped
+    # Coolify gère le reverse proxy, on expose juste le port interne
+    expose:
+      - "80"
+    environment:
+      - VITE_SUPABASE_URL=${VITE_SUPABASE_URL}
+      - VITE_SUPABASE_ANON_KEY=${VITE_SUPABASE_ANON_KEY}
+    healthcheck:
+      test: ["CMD", "wget", "-q", "--spider", "http://localhost:80"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+      start_period: 10s
+
+# =========================================
+# Variables d'environnement requises:
+# =========================================
+# VITE_SUPABASE_URL=https://ton-supabase.coolify.app
+# VITE_SUPABASE_ANON_KEY=eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9...

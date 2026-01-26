@@ -18,9 +18,15 @@ GRANT ALL ON ALL TABLES IN SCHEMA auth TO postgres;
 GRANT ALL ON ALL SEQUENCES IN SCHEMA auth TO postgres;
 
 -- ----------------------------------------
--- Note: Storage schema is NOT created here
--- Supabase Storage API manages its own schema and migrations
+-- Storage Schema (for Supabase Storage)
 -- ----------------------------------------
+CREATE SCHEMA IF NOT EXISTS storage;
+
+-- Grant permissions
+GRANT USAGE ON SCHEMA storage TO postgres;
+GRANT ALL ON ALL TABLES IN SCHEMA storage TO postgres;
+GRANT ALL ON ALL SEQUENCES IN SCHEMA storage TO postgres;
+GRANT ALL ON ALL ROUTINES IN SCHEMA storage TO postgres;
 
 -- ----------------------------------------
 -- Create Roles
@@ -181,6 +187,3 @@ CREATE TRIGGER on_settings_updated
     BEFORE UPDATE ON public.site_settings
     FOR EACH ROW
     EXECUTE FUNCTION public.handle_updated_at();
-
--- Note: Storage schema is managed entirely by Supabase Storage API
--- Do NOT add any storage-related SQL here
