@@ -4,7 +4,7 @@ import { Login } from '@/components/Auth/Login';
 import { FileUpload } from '@/components/Upload/FileUpload';
 import { CategoryManager } from '@/components/Admin/CategoryManager';
 import { ProfileSettings } from '@/components/Admin/ProfileSettings';
-import { supabase, insertRow, updateRow } from '@/lib/supabase';
+import { supabase, insertRow, updateRow, getStorageUrl } from '@/lib/supabase';
 
 interface Photo {
   id: string;
@@ -279,7 +279,7 @@ export function Admin() {
                     {/* Image container with hover actions */}
                     <div className="relative group">
                       <img
-                        src={photo.storage_path}
+                        src={getStorageUrl(photo.storage_path)}
                         alt={photo.title}
                         className="w-full h-40 object-cover"
                         onError={(e) => {

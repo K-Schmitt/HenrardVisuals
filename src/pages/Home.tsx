@@ -1,5 +1,5 @@
 import { useState, useEffect, useCallback, useMemo } from 'react';
-import { supabase } from '@/lib/supabase';
+import { supabase, getStorageUrl } from '@/lib/supabase';
 import { useLanguage } from '@/context/LanguageContext';
 import { OptimizedImage } from '@/components/OptimizedImage';
 import type { Photo, Category, ProfileSettings } from '@/types';
@@ -123,7 +123,7 @@ export function Home() {
             <div className="h-full flex items-start justify-center">
               {heroPhoto ? (
                 <OptimizedImage
-                  src={heroPhoto.storage_path}
+                  src={getStorageUrl(heroPhoto.storage_path)}
                   alt={heroPhoto.title}
                   className="w-full h-auto max-h-[calc(100vh-5rem)] object-contain grayscale hover:grayscale-0 transition-all duration-700"
                   priority={true}
@@ -242,7 +242,7 @@ export function Home() {
             {filteredPhotos.map((photo) => (
               <div key={photo.id} className="break-inside-avoid">
                 <OptimizedImage
-                  src={photo.storage_path}
+                  src={getStorageUrl(photo.storage_path)}
                   alt={photo.title}
                   className="w-full h-auto"
                   onClick={() => setSelectedPhoto(photo)}
@@ -332,7 +332,7 @@ export function Home() {
           </div>
 
           <img
-            src={selectedPhoto.storage_path}
+            src={getStorageUrl(selectedPhoto.storage_path)}
             alt={selectedPhoto.title}
             className="max-w-[90vw] max-h-[90vh] object-contain"
             onClick={(e) => e.stopPropagation()}
