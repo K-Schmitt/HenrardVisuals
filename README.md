@@ -134,8 +134,7 @@ pnpm build          # Production build
 ├── docs/
 │   ├── ARCHITECTURE.md
 │   ├── SETUP.md
-│   ├── DEPLOY.md
-│   └── TESTING.md
+│   └── DEPLOY.md
 ├── nginx/                  # Nginx config
 ├── volumes/                # Docker volume mounts (gitignored data)
 ├── docker-compose.yml      # Production
@@ -174,9 +173,8 @@ Copy `.env.example` to `.env` and fill in every value. Run `node generate-keys.c
 | Document | Description |
 |---|---|
 | [ARCHITECTURE.md](docs/ARCHITECTURE.md) | System architecture & data flow |
-| [SETUP.md](docs/SETUP.md) | Full developer setup guide |
+| [SETUP.md](docs/SETUP.md) | Developer setup guide & testing |
 | [DEPLOY.md](docs/DEPLOY.md) | VPS / Coolify deployment guide |
-| [TESTING.md](docs/TESTING.md) | Testing strategy |
 
 ---
 

@@ -83,7 +83,42 @@ pnpm type-check    # TypeScript type check (no emit)
 pnpm lint          # ESLint
 pnpm format        # Prettier
 pnpm check         # type-check + lint combined
+pnpm test          # Run unit tests (vitest)
+pnpm test:watch    # Run tests in watch mode
 ```
+
+---
+
+## Tests
+
+The test suite uses **Vitest** + **React Testing Library** + **jsdom**.
+
+```bash
+pnpm test          # Run all tests once
+pnpm test:watch    # Watch mode (re-runs on file change)
+```
+
+### What is tested
+
+| File | Coverage |
+|---|---|
+| `src/hooks/useAuth.test.ts` | Initial loading state, session resolution, `signIn`, `signOut`, error handling, cleanup |
+| `src/components/Auth/Login.test.tsx` | Rendering, field validation, successful submit, error display, disabled states |
+
+### Structure
+
+```
+src/
+├── test/
+│   └── setup.ts               # @testing-library/jest-dom matchers
+├── hooks/
+│   └── useAuth.test.ts
+└── components/
+    └── Auth/
+        └── Login.test.tsx
+```
+
+Supabase is fully mocked via `vi.mock('@/lib/supabase')` — no network calls, no env vars required.
 
 ---
 
