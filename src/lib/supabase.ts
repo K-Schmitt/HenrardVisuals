@@ -6,7 +6,7 @@
 
 import { createClient } from '@supabase/supabase-js';
 
-import type { Database } from '@/types';
+import type { Database, PublicTableName } from '@/types';
 
 const supabaseUrl = import.meta.env['VITE_SUPABASE_URL'] as string;
 const supabaseAnonKey = import.meta.env['VITE_SUPABASE_ANON_KEY'] as string;
@@ -69,16 +69,18 @@ export async function uploadFile(
 }
 
 /**
- * Insert a row into a table (uses any to bypass strict typing)
+ * Insert a row into a typed table
  */
-export async function insertRow<T>(
-  table: string,
-  data: Record<string, unknown>
-): Promise<{ data: T | null; error: Error | null }> {
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  const { data: result, error } = await (supabase as any)
+export async function insertRow<T extends PublicTableName>(
+  table: T,
+  data: Database['public']['Tables'][T]['Insert']
+): Promise<{
+  data: Database['public']['Tables'][T]['Row'] | null;
+  error: Error | null;
+}> {
+  const { data: result, error } = await supabase
     .from(table)
-    .insert(data)
+    .insert(data as never)
     .select()
     .single();
 
@@ -86,21 +88,23 @@ export async function insertRow<T>(
     return { data: null, error: new Error(error.message) };
   }
 
-  return { data: result as T, error: null };
+  return { data: result as Database['public']['Tables'][T]['Row'], error: null };
 }
 
 /**
- * Update a row in a table
+ * Update a row by id in a typed table
  */
-export async function updateRow<T>(
-  table: string,
+export async function updateRow<T extends PublicTableName>(
+  table: T,
   id: string,
-  data: Record<string, unknown>
-): Promise<{ data: T | null; error: Error | null }> {
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  const { data: result, error } = await (supabase as any)
+  data: Database['public']['Tables'][T]['Update']
+): Promise<{
+  data: Database['public']['Tables'][T]['Row'] | null;
+  error: Error | null;
+}> {
+  const { data: result, error } = await supabase
     .from(table)
-    .update(data)
+    .update(data as never)
     .eq('id', id)
     .select()
     .single();
@@ -109,21 +113,20 @@ export async function updateRow<T>(
     return { data: null, error: new Error(error.message) };
   }
 
-  return { data: result as T, error: null };
+  return { data: result as Database['public']['Tables'][T]['Row'], error: null };
 }
 
 /**
- * Update multiple rows in a table
+ * Update multiple rows matching a filter in a typed table
  */
-export async function updateRows(
-  table: string,
-  data: Record<string, unknown>,
+export async function updateRows<T extends PublicTableName>(
+  table: T,
+  data: Database['public']['Tables'][T]['Update'],
   filter: { column: string; value: unknown }
 ): Promise<{ error: Error | null }> {
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  const { error } = await (supabase as any)
+  const { error } = await supabase
     .from(table)
-    .update(data)
+    .update(data as never)
     .eq(filter.column, filter.value);
 
   if (error) {

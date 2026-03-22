@@ -47,6 +47,12 @@ export interface Category {
   created_at: string;
 }
 
+export interface SiteSettingsRow {
+  key: string;
+  value: unknown;
+  updated_at: string;
+}
+
 export interface ProfileSettings {
   subtitle: string;
   subtitle_en?: string;
@@ -108,6 +114,14 @@ export interface Database {
         Insert: Omit<Category, 'id' | 'created_at'>;
         Update: Partial<Omit<Category, 'id' | 'created_at'>>;
       };
+      site_settings: {
+        Row: SiteSettingsRow;
+        Insert: Omit<SiteSettingsRow, 'updated_at'>;
+        Update: Partial<Omit<SiteSettingsRow, 'updated_at'>>;
+      };
     };
   };
 }
+
+/** Union of all public table names — used for type-safe DB helpers */
+export type PublicTableName = keyof Database['public']['Tables'];
