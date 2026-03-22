@@ -4,6 +4,7 @@ import { Login } from '@/components/Auth/Login';
 import { FileUpload } from '@/components/Upload/FileUpload';
 import { CategoryManager } from '@/components/Admin/CategoryManager';
 import { ProfileSettings } from '@/components/Admin/ProfileSettings';
+import { AccountSettings } from '@/components/Admin/AccountSettings';
 import { supabase, insertRow, updateRow, getStorageUrl } from '@/lib/supabase';
 
 interface Photo {
@@ -34,7 +35,7 @@ export function Admin() {
   const [photos, setPhotos] = useState<Photo[]>([]);
   const [categories, setCategories] = useState<Category[]>([]);
   const [loadingPhotos, setLoadingPhotos] = useState(false);
-  const [activeTab, setActiveTab] = useState<'photos' | 'categories' | 'settings'>('photos');
+  const [activeTab, setActiveTab] = useState<'photos' | 'categories' | 'settings' | 'account'>('photos');
 
   // Fetch photos on mount
   useEffect(() => {
@@ -202,7 +203,7 @@ export function Admin() {
 
       {/* Tabs */}
       <div className="flex gap-4 mb-8 border-b border-gray-200">
-        {(['photos', 'categories', 'settings'] as const).map((tab) => (
+        {(['photos', 'categories', 'settings', 'account'] as const).map((tab) => (
           <button
             key={tab}
             onClick={() => setActiveTab(tab)}
@@ -366,6 +367,9 @@ export function Admin() {
 
       {/* Settings Tab */}
       {activeTab === 'settings' && <ProfileSettings />}
+
+      {/* Account Tab */}
+      {activeTab === 'account' && <AccountSettings />}
     </div>
   );
 }
