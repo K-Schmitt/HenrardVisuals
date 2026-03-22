@@ -38,8 +38,8 @@ export function Login({ onSuccess, onError }: LoginFormProps) {
     // Password validation
     if (!formState.password) {
       newErrors.password = 'Password is required';
-    } else if (formState.password.length < 6) {
-      newErrors.password = 'Password must be at least 6 characters';
+    } else if (formState.password.length < 8) {
+      newErrors.password = 'Password must be at least 8 characters';
     }
 
     setErrors(newErrors);
