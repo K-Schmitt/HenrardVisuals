@@ -1,170 +1,185 @@
 # HenrardVisuals
 
-**Portfolio Photographique Professionnel** construit avec React, TypeScript, Tailwind CSS et un serveur d'upload personnalisé.
+**Professional photography portfolio** built with React 18, TypeScript, Supabase, and Docker.
 
-![License](https://img.shields.io/badge/license-MIT-blue.svg)
-![Node](https://img.shields.io/badge/node-20.x-green.svg)
-![TypeScript](https://img.shields.io/badge/typescript-5.x-blue.svg)
-![React](https://img.shields.io/badge/react-18.x-61dafb.svg)
+[![License: MIT](https://img.shields.io/badge/License-MIT-blue.svg)](LICENSE)
+[![TypeScript](https://img.shields.io/badge/TypeScript-5.x-3178C6?logo=typescript&logoColor=white)](https://www.typescriptlang.org/)
+[![React](https://img.shields.io/badge/React-18.x-61DAFB?logo=react&logoColor=black)](https://react.dev/)
+[![Supabase](https://img.shields.io/badge/Supabase-self--hosted-3ECF8E?logo=supabase&logoColor=white)](https://supabase.com/)
+[![Docker](https://img.shields.io/badge/Docker-ready-2496ED?logo=docker&logoColor=white)](https://www.docker.com/)
 
----
-
-## ✨ Fonctionnalités
-
-- **Galerie Masonry** - Grille asymétrique élégante pour les photos
-- **Design System** - Style luxe/éditorial inspiré des magazines de mode
-- **Upload d'images** - Serveur Node.js pour la gestion des fichiers
-- **Panel Admin** - Interface d'administration sécurisée
-- **Multi-langue** - Support Français / Anglais
-- **Docker Ready** - Déploiement conteneurisé complet
-- **Responsive** - Design adaptatif mobile-first
+**Live demo:** [henrardvisuals.com](https://henrardvisuals.com)
 
 ---
 
-## 🚀 Démarrage Rapide
+## Overview
+
+HenrardVisuals is a full-stack photography portfolio designed for editorial and fashion photography. It features an elegant masonry gallery, a bilingual interface (FR/EN), and a complete admin panel for managing photos, categories, and site settings — all backed by a self-hosted Supabase instance.
+
+---
+
+## Features
+
+- **Masonry gallery** with category filtering and a modal lightbox (keyboard-navigable)
+- **Admin panel** — upload photos, manage categories, edit profile settings, change account credentials
+- **Row-Level Security** — write operations restricted to admin role via JWT app_metadata
+- **Bilingual UI** — French / English with `localStorage` persistence
+- **Self-hosted Supabase** — full control over auth, database, and storage
+- **Docker-ready** — single `docker compose up` for local development
+- **Responsive** — mobile-first layout with a custom Tailwind design system
+
+---
+
+## Tech Stack
+
+| Layer | Technology |
+|---|---|
+| Frontend | React 18, TypeScript, Vite 5 |
+| Styling | Tailwind CSS (custom design system) |
+| Routing | React Router DOM v6 |
+| Backend | Supabase (self-hosted) — Auth, PostgreSQL, Storage |
+| Proxy | Kong API Gateway |
+| Container | Docker, Docker Compose |
+
+---
+
+## Getting Started
+
+### Prerequisites
+
+- [Docker](https://docs.docker.com/get-docker/) & Docker Compose
+- [Node.js](https://nodejs.org/) 20+ (for local frontend dev)
+- [pnpm](https://pnpm.io/) (`npm install -g pnpm`)
+
+### 1. Clone & configure
 
 ```bash
-# Cloner le repository
-git clone https://github.com/votre-username/HenrardVisuals.git
+git clone https://github.com/K-Schmitt/HenrardVisuals.git
 cd HenrardVisuals
 
-# Lancer le script d'initialisation
-chmod +x init.sh
-./init.sh
+# Generate JWT keys and copy the example env file
+node generate-keys.cjs
+cp .env.example .env
+# Fill in the values printed by generate-keys.cjs
+```
 
-# Démarrer l'environnement de développement
+### 2. Start the stack
+
+```bash
+# Start all services (Supabase, DB, Storage, Kong, Frontend)
 docker compose up -d
 
-# Ouvrir dans le navigateur
-open http://localhost:5173
+# Watch logs
+docker compose logs -f app
 ```
 
----
+### 3. Initialize the database
 
-## 📁 Structure du Projet
-
-```
-├── src/                    # Application React
-│   ├── components/         # Composants UI
-│   │   ├── gallery/        # Composants galerie
-│   │   ├── layout/         # Layout & navigation
-│   │   └── ui/             # Composants réutilisables
-│   ├── context/            # Contextes React (Auth, Language)
-│   ├── hooks/              # Hooks personnalisés
-│   ├── lib/                # Utilitaires & clients API
-│   ├── pages/              # Pages de l'application
-│   └── types/              # Définitions TypeScript
-├── server/                 # Serveur d'upload Node.js
-├── public/                 # Assets statiques
-├── docs/                   # Documentation
-├── nginx/                  # Configuration Nginx
-├── uploads/                # Dossier des images uploadées
-├── docker-compose.yml      # Orchestration des conteneurs
-└── Dockerfile              # Build multi-stage
-```
-
----
-
-## 🛠 Stack Technique
-
-| Couche | Technologie |
-|--------|-------------|
-| **Frontend** | React 18, TypeScript, Vite |
-| **Styling** | Tailwind CSS (design system personnalisé) |
-| **Routing** | React Router DOM v6 |
-| **Backend** | Supabase (self-hosted), Node.js |
-| **Database** | PostgreSQL 15 |
-| **Storage** | Serveur d'upload custom |
-| **Proxy** | Kong API Gateway |
-| **Container** | Docker, Docker Compose |
-
----
-
-## 🔧 Commandes de Développement
+Run the setup script in the Supabase SQL editor or via psql:
 
 ```bash
-# Installer les dépendances
-pnpm install
+# Option A — Supabase Studio (http://localhost:8080 → SQL Editor)
+# Paste the contents of supabase/setup-complete.sql and run
 
-# Démarrer le serveur de développement
-pnpm dev
-
-# Build pour la production
-pnpm build
-
-# Vérification des types
-pnpm type-check
-
-# Linter
-pnpm lint
-
-# Formater le code
-pnpm format
+# Option B — psql
+psql "$DATABASE_URL" -f supabase/setup-complete.sql
 ```
 
----
-
-## 🐳 Commandes Docker
+### 4. Create the admin user
 
 ```bash
-# Démarrer tous les services
-docker compose up -d
-
-# Voir les logs
-docker compose logs -f
-
-# Arrêter tous les services
-docker compose down
-
-# Reconstruire
-docker compose up -d --build
-
-# Reconstruire sans cache
-docker compose build --no-cache && docker compose up -d
+psql "$DATABASE_URL" \
+  -v ADMIN_EMAIL='admin@example.com' \
+  -v ADMIN_PASSWORD='your_secure_password' \
+  -f supabase/create-admin-user.sql
 ```
+
+Open [http://localhost:5173](http://localhost:5173) — admin panel at `/admin`.
 
 ---
 
-## 🔐 Variables d'Environnement
-
-Copier `.env.example` vers `.env` et configurer :
+## Development
 
 ```bash
-# Base de données
-POSTGRES_PASSWORD=your_secure_password
-
-# JWT
-JWT_SECRET=your_jwt_secret_32_chars_min
-
-# Supabase
-VITE_SUPABASE_URL=http://localhost:8000
-VITE_SUPABASE_ANON_KEY=your_anon_key
+pnpm install        # Install dependencies
+pnpm dev            # Start Vite dev server (http://localhost:5173)
+pnpm type-check     # TypeScript check
+pnpm lint           # ESLint
+pnpm format         # Prettier
+pnpm build          # Production build
 ```
-
-Voir [SETUP.md](./docs/SETUP.md) pour le guide de configuration complet.
 
 ---
 
-## 📚 Documentation
+## Project Structure
+
+```
+├── src/
+│   ├── components/
+│   │   ├── Admin/          # Panel admin (photos, categories, account, profile)
+│   │   ├── Auth/           # Login form
+│   │   ├── Layout/         # SiteLayout, Footer
+│   │   ├── Navigation/     # BurgerMenu
+│   │   ├── Upload/         # FileUpload with drag-and-drop
+│   │   └── OptimizedImage  # Lazy-loaded image with Intersection Observer
+│   ├── context/            # LanguageContext (FR/EN)
+│   ├── hooks/              # useAuth
+│   ├── lib/                # Supabase client + typed DB helpers
+│   ├── pages/              # Home, Admin, Contact
+│   └── types/              # TypeScript interfaces + Database type
+├── supabase/
+│   ├── migrations/         # Schema migrations (versioned SQL)
+│   ├── setup-complete.sql  # Full setup script (tables, RLS, storage)
+│   └── create-admin-user.sql  # Admin user seed (uses psql variables)
+├── docs/
+│   ├── ARCHITECTURE.md
+│   ├── SETUP.md
+│   ├── DEPLOY.md
+│   └── TESTING.md
+├── nginx/                  # Nginx config
+├── volumes/                # Docker volume mounts (gitignored data)
+├── docker-compose.yml      # Production
+├── docker-compose.dev.yml  # Local development (self-hosted Supabase)
+└── Dockerfile              # Multi-stage build
+```
+
+---
+
+## Environment Variables
+
+Copy `.env.example` to `.env` and fill in every value. Run `node generate-keys.cjs` to generate `JWT_SECRET`, `ANON_KEY`, and `SERVICE_ROLE_KEY`.
+
+| Variable | Description |
+|---|---|
+| `POSTGRES_PASSWORD` | PostgreSQL password |
+| `JWT_SECRET` | JWT signing secret (≥ 32 chars) |
+| `ANON_KEY` | Supabase anon JWT (derived from JWT_SECRET) |
+| `SERVICE_ROLE_KEY` | Supabase service-role JWT |
+| `VITE_SUPABASE_URL` | Supabase API URL (Kong gateway) |
+| `VITE_SUPABASE_ANON_KEY` | Same as `ANON_KEY` |
+| `DISABLE_SIGNUP` | Set `true` in production |
+
+---
+
+## Security
+
+- **RLS** — all write operations (photos, categories, site_settings, storage) are gated by `public.is_admin()`, which verifies `app_metadata.role = "admin"` in the JWT
+- **Signup disabled** — set `DISABLE_SIGNUP=true` in production to prevent unauthorized account creation
+- **No hardcoded secrets** — all credentials are injected via environment variables; no fallback defaults in Docker Compose
+
+---
+
+## Documentation
 
 | Document | Description |
-|----------|-------------|
-| [ARCHITECTURE.md](./docs/ARCHITECTURE.md) | Architecture système & diagrammes |
-| [SETUP.md](./docs/SETUP.md) | Guide d'installation développeur |
-| [DEPLOY.md](./docs/DEPLOY.md) | Procédure de déploiement VPS |
-| [TESTING.md](./docs/TESTING.md) | Guide de tests |
+|---|---|
+| [ARCHITECTURE.md](docs/ARCHITECTURE.md) | System architecture & data flow |
+| [SETUP.md](docs/SETUP.md) | Full developer setup guide |
+| [DEPLOY.md](docs/DEPLOY.md) | VPS / Coolify deployment guide |
+| [TESTING.md](docs/TESTING.md) | Testing strategy |
 
 ---
 
-## 🌐 Démo
+## License
 
-- **Production** : [henrardvisuals.com](https://henrardvisuals.com)
-- **Port local** : `http://localhost:5173`
-
----
-
-## 📄 License
-
-MIT License - voir [LICENSE](./LICENSE) pour les détails.
-
----
+[MIT](LICENSE)

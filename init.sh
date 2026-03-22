@@ -159,18 +159,13 @@ create_initial_commit() {
         print_warning "Repository already has commits, skipping initial commit..."
     else
         git add .
-        git commit -m "feat: Initial HenrardVisuals project setup
+        git commit -m "feat: initial project setup
 
-- Docker configuration (multi-container with Supabase self-hosted)
-- React/Vite/TypeScript frontend with Tailwind CSS
-- Design system: New Madison / Bambi style
-- TDD setup with Vitest + React Testing Library + MSW
-- 80% coverage threshold configured
-- Professional documentation in /docs
-- Masonry gallery, sticky sidebar, auth components
-- Full test suite for components and hooks
-
-Co-authored-by: Antigravity <ai@anthropic.com>"
+- React 18 + TypeScript + Vite frontend
+- Self-hosted Supabase stack (auth, storage, REST API)
+- Docker Compose configuration for dev and production
+- Tailwind CSS custom design system
+- Professional documentation in /docs"
 
         print_success "Initial commit created"
     fi
@@ -220,14 +215,14 @@ print_summary() {
     echo "  1. Review and update .env with your settings"
     echo ""
     echo "  2. Start the development environment:"
-    echo "     ${BLUE}docker compose up -d${NC}"
+    echo "     ${BLUE}docker compose -f docker-compose.dev.yml up -d${NC}"
     echo ""
-    echo "  3. Run the tests:"
-    echo "     ${BLUE}pnpm test:coverage${NC}"
+    echo "  3. Run type checks and lint:"
+    echo "     ${BLUE}pnpm check${NC}"
     echo ""
     echo "  4. Access the application:"
     echo "     Frontend:        http://localhost:5173"
-    echo "     Supabase Studio: http://localhost:3000"
+    echo "     Supabase Studio: http://localhost:8080"
     echo "     API Gateway:     http://localhost:8000"
     echo ""
     echo "  5. Push to GitHub:"
@@ -237,7 +232,6 @@ print_summary() {
     echo "  - Architecture: docs/ARCHITECTURE.md"
     echo "  - Setup Guide:  docs/SETUP.md"
     echo "  - Deployment:   docs/DEPLOY.md"
-    echo "  - Testing:      docs/TESTING.md"
     echo ""
 }
 

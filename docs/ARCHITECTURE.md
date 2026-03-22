@@ -1,8 +1,8 @@
-# HenrardVisuals - Architecture Documentation
+# Architecture — HenrardVisuals
 
 ## Overview
 
-HenrardVisuals is a professional photography portfolio built with a modern, containerized architecture using **Docker**, **React/Vite/TypeScript**, and **self-hosted Supabase** for backend services.
+HenrardVisuals is a containerised photography portfolio built with **React/Vite/TypeScript** and a **self-hosted Supabase** stack (PostgreSQL, GoTrue auth, PostgREST, Storage API, Kong API Gateway).
 
 ---
 
@@ -10,134 +10,110 @@ HenrardVisuals is a professional photography portfolio built with a modern, cont
 
 ```mermaid
 graph TB
-    subgraph "Client Layer"
-        BROWSER((Web Browser))
+    subgraph "Client"
+        BROWSER((Browser))
     end
 
-    subgraph "VPS - Docker Host"
-        subgraph "Reverse Proxy Layer"
-            NGINX["Nginx<br/>:80/:443<br/>SSL Termination<br/>Load Balancing"]
+    subgraph "VPS — Docker Host"
+        subgraph "Reverse Proxy"
+            PROXY["Caddy / Nginx<br/>SSL Termination"]
         end
 
-        subgraph "Application Layer"
-            APP["React/Vite App<br/>:5173<br/>- TypeScript<br/>- Tailwind CSS<br/>- Design System"]
+        subgraph "Application"
+            APP["React App (Vite)<br/>:80"]
         end
 
         subgraph "Supabase Self-Hosted"
-            KONG["Kong API Gateway<br/>:8000<br/>Rate Limiting<br/>Auth Routing"]
-            
+            KONG["Kong API Gateway<br/>:8000"]
+
             subgraph "Core Services"
-                AUTH["GoTrue<br/>:9999<br/>Authentication<br/>JWT Tokens"]
-                REST["PostgREST<br/>:3000<br/>REST API<br/>Auto-generated"]
-                STORAGE["Storage API<br/>:5000<br/>File Uploads<br/>Image Transforms"]
+                AUTH["GoTrue (Auth)<br/>:9999"]
+                REST["PostgREST (API)<br/>:3000"]
+                STORAGE["Storage API<br/>:5000"]
             end
-            
-            subgraph "Admin & Tools"
-                STUDIO["Supabase Studio<br/>:3000<br/>Admin Dashboard"]
-                META["Postgres Meta<br/>:8080<br/>Schema Info"]
-                IMGPROXY["ImgProxy<br/>:8080<br/>Image Processing"]
-            end
-            
-            subgraph "Data Layer"
-                POSTGRES[("PostgreSQL 15<br/>:5432<br/>- Photos<br/>- Categories<br/>- Settings<br/>- Auth Users")]
+
+            subgraph "Data"
+                POSTGRES[("PostgreSQL 15<br/>photos · categories<br/>site_settings · auth")]
+                IMGPROXY["ImgProxy<br/>:8080"]
             end
         end
     end
 
-    BROWSER --> NGINX
-    NGINX -->|"/*"| APP
-    NGINX -->|"/rest/*, /auth/*, /storage/*"| KONG
-    
+    BROWSER --> PROXY
+    PROXY --> APP
+    PROXY --> KONG
+
     KONG --> AUTH
     KONG --> REST
     KONG --> STORAGE
-    
-    APP -.->|"Supabase SDK"| KONG
-    
+
+    APP -- "Supabase JS SDK" --> KONG
+
     AUTH --> POSTGRES
     REST --> POSTGRES
     STORAGE --> POSTGRES
-    STUDIO --> META
-    META --> POSTGRES
     STORAGE --> IMGPROXY
 ```
 
 ---
 
-## Data Flow
-
-### Authentication Flow
+## Authentication & Authorization Flow
 
 ```mermaid
 sequenceDiagram
-    participant U as User
+    participant U as Browser
     participant A as React App
-    participant K as Kong Gateway
-    participant G as GoTrue Auth
+    participant K as Kong
+    participant G as GoTrue
     participant D as PostgreSQL
 
     U->>A: Enter credentials
     A->>K: POST /auth/v1/token
-    K->>G: Forward auth request
+    K->>G: Forward request
     G->>D: Validate user
-    D-->>G: User data
-    G-->>K: JWT Token + Session
-    K-->>A: Auth response
-    A->>A: Store session (localStorage)
-    A-->>U: Redirect to dashboard
+    D-->>G: User row (with app_metadata)
+    G-->>A: JWT (contains app_metadata.role = "admin")
+    A->>A: Persist session
+
+    Note over A,D: Subsequent requests
+    A->>K: Request + Bearer JWT
+    K->>REST: Forward
+    REST->>D: Execute query
+    D->>D: RLS: is_admin() checks JWT claim
+    D-->>A: Row(s)
 ```
 
-### Photo Upload Flow
+### Admin Role
 
-```mermaid
-sequenceDiagram
-    participant U as User
-    participant A as React App
-    participant K as Kong Gateway
-    participant S as Storage API
-    participant R as PostgREST
-    participant D as PostgreSQL
-    participant I as ImgProxy
-
-    U->>A: Select photo file
-    A->>K: POST /storage/v1/object/photos
-    K->>S: Upload to storage
-    S->>D: Save file metadata
-    S-->>K: Upload success + path
-    K-->>A: File path
-    A->>K: POST /rest/v1/photos
-    K->>R: Insert photo record
-    R->>D: Save photo entry
-    D-->>R: Created
-    R-->>K: Photo record
-    K-->>A: Success
-    A-->>U: Photo added to gallery
-    
-    Note over A,I: On gallery view
-    A->>K: GET /storage/v1/object/public/photos/...
-    K->>S: Request with transforms
-    S->>I: Transform image
-    I-->>S: Optimized image
-    S-->>K: Image data
-    K-->>A: Serve image
-```
+The `is_admin()` Postgres function reads `app_metadata.role` from the JWT — set to `"admin"` when the user is created via `supabase/create-admin-user.sql`. No row-level ownership is needed because there is exactly one admin user.
 
 ---
 
-## Container Configuration
+## Photo Upload Flow
 
-| Container | Image | Port | Purpose |
-|-----------|-------|------|---------|
-| `henrard-app` | Custom (Vite) | 5173 | React frontend |
-| `henrard-nginx` | nginx:alpine | 80, 443 | Reverse proxy |
-| `henrard-db` | postgres:15-alpine | 5432 | PostgreSQL database |
-| `henrard-kong` | kong:2.8 | 8000 | API Gateway |
-| `henrard-auth` | supabase/gotrue | 9999 | Authentication |
-| `henrard-rest` | postgrest/postgrest | 3000 | REST API |
-| `henrard-storage` | supabase/storage-api | 5000 | File storage |
-| `henrard-studio` | supabase/studio | 3000 | Admin UI |
-| `henrard-meta` | supabase/postgres-meta | 8080 | DB metadata |
-| `henrard-imgproxy` | darthsim/imgproxy | 8080 | Image processing |
+```mermaid
+sequenceDiagram
+    participant A as React App
+    participant K as Kong
+    participant S as Storage API
+    participant R as PostgREST
+    participant D as PostgreSQL
+
+    A->>K: PUT /storage/v1/object/photos/<path>
+    K->>S: Upload (RLS checks is_admin())
+    S-->>A: Storage path
+
+    A->>K: POST /rest/v1/photos
+    K->>R: Insert row (RLS checks is_admin())
+    R->>D: INSERT INTO photos
+    D-->>A: Created photo record
+
+    Note over A,D: Gallery view
+    A->>K: GET /storage/v1/object/public/photos/<path>?width=800
+    K->>S: Proxy with transform params
+    S->>ImgProxy: Resize
+    ImgProxy-->>A: Optimised image
+```
 
 ---
 
@@ -145,132 +121,83 @@ sequenceDiagram
 
 ```mermaid
 erDiagram
-    USERS ||--o{ PHOTOS : uploads
-    CATEGORIES ||--o{ PHOTOS : contains
-    PHOTOS ||--o| STORAGE_OBJECTS : references
-
-    USERS {
-        uuid id PK
-        string email
-        string encrypted_password
-        timestamp created_at
-    }
-
     PHOTOS {
         uuid id PK
-        string title
+        varchar title
         text description
-        string category
-        string storage_path
-        int width
-        int height
-        bigint file_size
+        varchar category FK
+        varchar storage_path
         boolean is_published
+        boolean is_hero
         int sort_order
         jsonb metadata
-        timestamp created_at
-        timestamp updated_at
+        timestamptz created_at
+        timestamptz updated_at
     }
 
     CATEGORIES {
         uuid id PK
-        string name
-        string slug UK
+        varchar name
+        varchar slug UK
         text description
         uuid cover_photo_id FK
         int sort_order
-        timestamp created_at
+        timestamptz created_at
     }
 
     SITE_SETTINGS {
-        string key PK
+        varchar key PK
         jsonb value
-        timestamp updated_at
+        timestamptz updated_at
     }
 
-    STORAGE_OBJECTS {
-        uuid id PK
-        string bucket_id FK
-        string name
-        uuid owner FK
-        jsonb metadata
-        timestamp created_at
-    }
+    CATEGORIES ||--o{ PHOTOS : "groups"
+    PHOTOS ||--o| CATEGORIES : "cover_photo_id"
 ```
 
 ---
 
-## Security Architecture
+## Container Map
 
-### Row Level Security (RLS)
-
-All database tables have RLS enabled:
-
-- **Public read**: Published photos, categories, settings
-- **Authenticated write**: Full CRUD for authenticated users
-- **Service role bypass**: For admin operations
-
-### Authentication Flow
-
-1. **JWT-based**: GoTrue issues JWTs with configurable expiry
-2. **Session persistence**: Stored in localStorage
-3. **Auto-refresh**: SDK handles token refresh automatically
-4. **Role-based**: `anon`, `authenticated`, `service_role`
-
-### Network Security
-
-- **Isolated Docker network**: All services on `henrard-network`
-- **Internal-only access**: Database not exposed externally
-- **Rate limiting**: Kong enforces request limits
-- **CORS configuration**: Strict origin policies
+| Container | Image | Port(s) | Purpose |
+|---|---|---|---|
+| `henrard-app` | Custom (Vite prod build) | 80 | React SPA |
+| `henrard-db` | postgres:15-alpine | 5432 (internal) | PostgreSQL |
+| `henrard-kong` | kong:2.8 | 8000 | API Gateway |
+| `henrard-auth` | supabase/gotrue | 9999 (internal) | Auth / JWT |
+| `henrard-rest` | postgrest/postgrest | 3000 (internal) | REST API |
+| `henrard-storage` | supabase/storage-api | 5000 (internal) | File storage |
+| `henrard-meta` | supabase/postgres-meta | 8080 (internal) | DB introspection |
+| `henrard-imgproxy` | darthsim/imgproxy | 8080 (internal) | Image transforms |
 
 ---
 
-## Technology Decisions
+## Security Model
 
-### Why Self-Hosted Supabase?
-
-1. **Data sovereignty**: Full control over photography data
-2. **Cost efficiency**: No per-request pricing
-3. **Customization**: Full access to PostgreSQL
-4. **Privacy**: Client data stays on VPS
-
-### Why React + Vite?
-
-1. **Performance**: Fast HMR, optimized builds
-2. **TypeScript**: Type safety throughout
-3. **Ecosystem**: Rich component libraries
-4. **Developer experience**: Modern tooling
-
-### Why Masonry Layout?
-
-1. **Visual appeal**: Asymmetric grids suit photography
-2. **Flexibility**: Handles varying aspect ratios
-3. **Performant**: CSS Grid-based implementation
-4. **Responsive**: Adapts to screen sizes
+| Layer | Mechanism |
+|---|---|
+| Auth | GoTrue JWT (HS256), 1h expiry, auto-refresh |
+| Database | RLS enabled on all tables; writes gated by `public.is_admin()` |
+| Storage | Upload/update/delete policies call `public.is_admin()` |
+| Network | All services on isolated `henrard-network`; DB not exposed externally |
+| Signup | Disabled in production (`DISABLE_SIGNUP=true`) |
 
 ---
 
-## File Structure
+## Frontend Structure
 
 ```
-/home/kyky/Tristan/
-├── docker-compose.yml          # Container orchestration
-├── Dockerfile                  # Multi-stage React build
-├── nginx/
-│   └── nginx.conf              # Reverse proxy config
-├── volumes/
-│   ├── db/                     # PostgreSQL persistence
-│   │   └── init/init.sql       # Schema initialization
-│   ├── kong/kong.yml           # API Gateway config
-│   └── storage/                # Uploaded files
-├── src/                        # React application
-│   ├── components/             # UI components
-│   ├── hooks/                  # Custom React hooks
-│   ├── lib/                    # Supabase client
-│   ├── pages/                  # Route pages
-│   └── types/                  # TypeScript types
-├── tests/                      # Test setup
-│   └── mocks/                  # MSW handlers
-└── docs/                       # Documentation
+src/
+├── components/
+│   ├── Admin/          # AccountSettings, CategoryManager, ProfileSettings
+│   ├── Auth/           # Login
+│   ├── Layout/         # SiteLayout, Footer
+│   ├── Navigation/     # BurgerMenu
+│   ├── Upload/         # FileUpload (drag-and-drop → Supabase Storage)
+│   └── OptimizedImage  # Lazy-loaded image (Intersection Observer)
+├── context/            # LanguageContext (FR/EN, localStorage)
+├── hooks/              # useAuth
+├── lib/                # supabase.ts — typed client + DB helpers
+├── pages/              # Home, Admin, Contact
+└── types/              # TypeScript interfaces + Database type
 ```

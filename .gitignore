@@ -68,8 +68,7 @@ volumes/storage/stub/
 # ----------------------------------------
 # Uploaded Files (User Data)
 # ----------------------------------------
-uploads/*
-!uploads/.gitkeep
+uploads/
 
 # ----------------------------------------
 # TypeScript
@@ -77,9 +76,9 @@ uploads/*
 *.tsbuildinfo
 
 # ----------------------------------------
-# Server
+# Claude AI
 # ----------------------------------------
-server/node_modules/
+.claude/
 
 # ----------------------------------------
 # Misc
@@ -98,3 +97,9 @@ server/node_modules/
 *.bak
 *.backup
 *~
+
+# ----------------------------------------
+# Internal / Debug Docs (not for public repo)
+# ----------------------------------------
+docs/AUDIT.md
+docs/DEBUG_UPLOAD.md
