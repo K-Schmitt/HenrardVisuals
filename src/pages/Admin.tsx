@@ -83,7 +83,15 @@ export function Admin() {
         storage_path: file.path,
         file_size: file.size,
         is_published: false,
+        is_hero: false,
         sort_order: 0,
+        description: null,
+        category: null,
+        thumbnail_path: null,
+        width: null,
+        height: null,
+        mime_type: null,
+        metadata: {},
       });
 
       if (error) throw error;

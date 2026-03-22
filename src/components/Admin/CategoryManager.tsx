@@ -138,6 +138,7 @@ export function CategoryManager() {
           name: formData.name,
           slug: formData.slug,
           description: formData.description || null,
+          cover_photo_id: null,
           sort_order: formData.sort_order,
         });
 

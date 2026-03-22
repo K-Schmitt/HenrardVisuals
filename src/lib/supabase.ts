@@ -88,7 +88,7 @@ export async function insertRow<T extends PublicTableName>(
     return { data: null, error: new Error(error.message) };
   }
 
-  return { data: result as Database['public']['Tables'][T]['Row'], error: null };
+  return { data: result as unknown as Database['public']['Tables'][T]['Row'], error: null };
 }
 
 /**
@@ -105,7 +105,7 @@ export async function updateRow<T extends PublicTableName>(
   const { data: result, error } = await supabase
     .from(table)
     .update(data as never)
-    .eq('id', id)
+    .eq('id', id as never)
     .select()
     .single();
 
@@ -113,7 +113,7 @@ export async function updateRow<T extends PublicTableName>(
     return { data: null, error: new Error(error.message) };
   }
 
-  return { data: result as Database['public']['Tables'][T]['Row'], error: null };
+  return { data: result as unknown as Database['public']['Tables'][T]['Row'], error: null };
 }
 
 /**
@@ -127,7 +127,7 @@ export async function updateRows<T extends PublicTableName>(
   const { error } = await supabase
     .from(table)
     .update(data as never)
-    .eq(filter.column, filter.value);
+    .eq(filter.column, filter.value as never);
 
   if (error) {
     return { error: new Error(error.message) };
