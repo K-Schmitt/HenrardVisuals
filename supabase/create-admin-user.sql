@@ -1,6 +1,10 @@
 -- =========================================
--- Créer l'utilisateur Admin
--- Remplace EMAIL et PASSWORD par tes valeurs
+-- HenrardVisuals - Créer l'utilisateur Admin
+-- =========================================
+-- Usage:
+--   psql -v ADMIN_EMAIL='admin@example.com' \
+--        -v ADMIN_PASSWORD='your_secure_password' \
+--        -f create-admin-user.sql
 -- =========================================
 
 -- Insérer l'utilisateur dans auth.users
@@ -27,12 +31,12 @@ INSERT INTO auth.users (
     gen_random_uuid(),
     'authenticated',
     'authenticated',
-    'admin@henrardvisuals.com',  -- ⚠️ Change l'email si besoin
-    crypt('Admin123!', gen_salt('bf')),  -- ⚠️ Change le mot de passe ici
+    :'ADMIN_EMAIL',
+    crypt(:'ADMIN_PASSWORD', gen_salt('bf')),
     NOW(),
     NOW(),
     NOW(),
-    '{"provider":"email","providers":["email"]}',
+    '{"provider":"email","providers":["email"],"role":"admin"}',
     '{}',
     NOW(),
     NOW(),
@@ -54,17 +58,14 @@ INSERT INTO auth.identities (
     updated_at
 ) VALUES (
     gen_random_uuid(),
-    (SELECT id FROM auth.users WHERE email = 'admin@henrardvisuals.com')::text,
-    (SELECT id FROM auth.users WHERE email = 'admin@henrardvisuals.com'),
-    jsonb_build_object('sub', (SELECT id FROM auth.users WHERE email = 'admin@henrardvisuals.com')::text, 'email', 'admin@henrardvisuals.com'),
+    (SELECT id FROM auth.users WHERE email = :'ADMIN_EMAIL')::text,
+    (SELECT id FROM auth.users WHERE email = :'ADMIN_EMAIL'),
+    jsonb_build_object(
+        'sub', (SELECT id FROM auth.users WHERE email = :'ADMIN_EMAIL')::text,
+        'email', :'ADMIN_EMAIL'
+    ),
     'email',
     NOW(),
     NOW(),
     NOW()
 );
-
--- =========================================
--- ✅ Utilisateur créé !
--- Email: admin@henrardvisuals.com
--- Password: Admin123!
--- =========================================

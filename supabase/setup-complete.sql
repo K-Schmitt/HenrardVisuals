@@ -108,53 +108,87 @@ CREATE TRIGGER on_settings_updated
     EXECUTE FUNCTION public.handle_updated_at();
 
 -- ----------------------------------------
--- ÉTAPE 5: Row Level Security (RLS)
+-- ÉTAPE 5: Fonction de vérification admin
+-- ----------------------------------------
+-- Vérifie que l'utilisateur connecté a le rôle "admin"
+-- Ce rôle est assigné dans raw_app_meta_data lors de la création
+-- via le script create-admin-user.sql
+CREATE OR REPLACE FUNCTION public.is_admin()
+RETURNS boolean
+LANGUAGE sql
+STABLE
+SECURITY DEFINER
+AS $$
+  SELECT COALESCE(
+    (auth.jwt() -> 'app_metadata' ->> 'role') = 'admin',
+    false
+  );
+$$;
+
+-- ----------------------------------------
+-- ÉTAPE 6: Row Level Security (RLS)
 -- ----------------------------------------
 ALTER TABLE public.photos ENABLE ROW LEVEL SECURITY;
 ALTER TABLE public.categories ENABLE ROW LEVEL SECURITY;
 ALTER TABLE public.site_settings ENABLE ROW LEVEL SECURITY;
 
--- Policies pour photos
+-- ---- Policies photos ----
+
+-- Lecture publique: uniquement les photos publiées
 DROP POLICY IF EXISTS "Photos publiées visibles par tous" ON public.photos;
-CREATE POLICY "Photos publiées visibles par tous" 
-    ON public.photos FOR SELECT 
+CREATE POLICY "Photos publiées visibles par tous"
+    ON public.photos FOR SELECT
     USING (is_published = true);
 
-DROP POLICY IF EXISTS "Utilisateurs authentifiés gèrent les photos" ON public.photos;
-CREATE POLICY "Utilisateurs authentifiés gèrent les photos" 
-    ON public.photos FOR ALL 
-    TO authenticated 
-    USING (true) 
-    WITH CHECK (true);
+-- Lecture admin: toutes les photos (pour le panel admin)
+DROP POLICY IF EXISTS "Admin lit toutes les photos" ON public.photos;
+CREATE POLICY "Admin lit toutes les photos"
+    ON public.photos FOR SELECT
+    TO authenticated
+    USING (public.is_admin());
 
--- Policies pour categories
+-- Écriture admin uniquement
+DROP POLICY IF EXISTS "Admin gère les photos" ON public.photos;
+CREATE POLICY "Admin gère les photos"
+    ON public.photos FOR ALL
+    TO authenticated
+    USING (public.is_admin())
+    WITH CHECK (public.is_admin());
+
+-- ---- Policies categories ----
+
+-- Lecture publique: toutes les catégories
 DROP POLICY IF EXISTS "Catégories visibles par tous" ON public.categories;
-CREATE POLICY "Catégories visibles par tous" 
-    ON public.categories FOR SELECT 
+CREATE POLICY "Catégories visibles par tous"
+    ON public.categories FOR SELECT
     USING (true);
 
-DROP POLICY IF EXISTS "Utilisateurs authentifiés gèrent les catégories" ON public.categories;
-CREATE POLICY "Utilisateurs authentifiés gèrent les catégories" 
-    ON public.categories FOR ALL 
-    TO authenticated 
-    USING (true) 
-    WITH CHECK (true);
+-- Écriture admin uniquement
+DROP POLICY IF EXISTS "Admin gère les catégories" ON public.categories;
+CREATE POLICY "Admin gère les catégories"
+    ON public.categories FOR ALL
+    TO authenticated
+    USING (public.is_admin())
+    WITH CHECK (public.is_admin());
 
--- Policies pour site_settings
+-- ---- Policies site_settings ----
+
+-- Lecture publique: tous les paramètres
 DROP POLICY IF EXISTS "Paramètres visibles par tous" ON public.site_settings;
-CREATE POLICY "Paramètres visibles par tous" 
-    ON public.site_settings FOR SELECT 
+CREATE POLICY "Paramètres visibles par tous"
+    ON public.site_settings FOR SELECT
     USING (true);
 
-DROP POLICY IF EXISTS "Utilisateurs authentifiés gèrent les paramètres" ON public.site_settings;
-CREATE POLICY "Utilisateurs authentifiés gèrent les paramètres" 
-    ON public.site_settings FOR ALL 
-    TO authenticated 
-    USING (true) 
-    WITH CHECK (true);
+-- Écriture admin uniquement
+DROP POLICY IF EXISTS "Admin gère les paramètres" ON public.site_settings;
+CREATE POLICY "Admin gère les paramètres"
+    ON public.site_settings FOR ALL
+    TO authenticated
+    USING (public.is_admin())
+    WITH CHECK (public.is_admin());
 
 -- ----------------------------------------
--- ÉTAPE 6: Storage Bucket
+-- ÉTAPE 7: Storage Bucket
 -- ----------------------------------------
 INSERT INTO storage.buckets (id, name, public, file_size_limit, allowed_mime_types)
 VALUES (
@@ -175,28 +209,26 @@ CREATE POLICY "Images publiques accessibles à tous"
 ON storage.objects FOR SELECT
 USING (bucket_id = 'photos');
 
-DROP POLICY IF EXISTS "Utilisateurs authentifiés peuvent uploader" ON storage.objects;
-CREATE POLICY "Utilisateurs authentifiés peuvent uploader"
+DROP POLICY IF EXISTS "Admin peut uploader" ON storage.objects;
+CREATE POLICY "Admin peut uploader"
 ON storage.objects FOR INSERT
 TO authenticated
-WITH CHECK (bucket_id = 'photos');
+WITH CHECK (bucket_id = 'photos' AND public.is_admin());
 
-DROP POLICY IF EXISTS "Utilisateurs authentifiés peuvent modifier" ON storage.objects;
-CREATE POLICY "Utilisateurs authentifiés peuvent modifier"
+DROP POLICY IF EXISTS "Admin peut modifier" ON storage.objects;
+CREATE POLICY "Admin peut modifier"
 ON storage.objects FOR UPDATE
 TO authenticated
-USING (bucket_id = 'photos');
+USING (bucket_id = 'photos' AND public.is_admin());
 
-DROP POLICY IF EXISTS "Utilisateurs authentifiés peuvent supprimer" ON storage.objects;
-CREATE POLICY "Utilisateurs authentifiés peuvent supprimer"
+DROP POLICY IF EXISTS "Admin peut supprimer" ON storage.objects;
+CREATE POLICY "Admin peut supprimer"
 ON storage.objects FOR DELETE
 TO authenticated
-USING (bucket_id = 'photos');
+USING (bucket_id = 'photos' AND public.is_admin());
 
 -- =========================================
 -- ✅ TERMINÉ !
--- Tu peux maintenant:
--- 1. Aller dans Authentication > Users
--- 2. Créer un utilisateur admin
--- 3. Te connecter sur https://henrardvisuals.com/admin
+-- Pour créer l'admin, exécuter:
+--   psql -v ADMIN_EMAIL='...' -v ADMIN_PASSWORD='...' -f create-admin-user.sql
 -- =========================================

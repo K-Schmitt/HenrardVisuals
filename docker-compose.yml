@@ -31,7 +31,7 @@ services:
     restart: unless-stopped
     environment:
       POSTGRES_USER: postgres
-      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:-henrard_secret_123}
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD}
       POSTGRES_DB: henrard_db
     volumes:
       - ./volumes/db/data:/var/lib/postgresql/data
@@ -82,15 +82,15 @@ services:
       GOTRUE_API_PORT: 9999
       API_EXTERNAL_URL: https://api.henrardvisuals.com
       GOTRUE_DB_DRIVER: postgres
-      GOTRUE_DB_DATABASE_URL: postgres://postgres:${POSTGRES_PASSWORD:-henrard_secret_123}@db:5432/henrard_db?search_path=auth
+      GOTRUE_DB_DATABASE_URL: postgres://postgres:${POSTGRES_PASSWORD}@db:5432/henrard_db?search_path=auth
       GOTRUE_SITE_URL: https://henrardvisuals.com
       GOTRUE_URI_ALLOW_LIST: ${ADDITIONAL_REDIRECT_URLS:-}
-      GOTRUE_DISABLE_SIGNUP: ${DISABLE_SIGNUP:-false}
+      GOTRUE_DISABLE_SIGNUP: ${DISABLE_SIGNUP}
       GOTRUE_JWT_ADMIN_ROLES: service_role
       GOTRUE_JWT_AUD: authenticated
       GOTRUE_JWT_DEFAULT_GROUP_NAME: authenticated
       GOTRUE_JWT_EXP: ${JWT_EXPIRY:-3600}
-      GOTRUE_JWT_SECRET: ${JWT_SECRET:-super-secret-jwt-token-with-at-least-32-characters-long}
+      GOTRUE_JWT_SECRET: ${JWT_SECRET}
       GOTRUE_EXTERNAL_EMAIL_ENABLED: ${ENABLE_EMAIL_SIGNUP:-true}
       GOTRUE_MAILER_AUTOCONFIRM: ${ENABLE_EMAIL_AUTOCONFIRM:-true}
       GOTRUE_SMTP_ADMIN_EMAIL: ${SMTP_ADMIN_EMAIL:-admin@henrardvisuals.com}
@@ -111,10 +111,10 @@ services:
     container_name: henrard-rest
     restart: unless-stopped
     environment:
-      PGRST_DB_URI: postgres://postgres:${POSTGRES_PASSWORD:-henrard_secret_123}@db:5432/henrard_db
+      PGRST_DB_URI: postgres://postgres:${POSTGRES_PASSWORD}@db:5432/henrard_db
       PGRST_DB_SCHEMAS: public,storage,graphql_public
       PGRST_DB_ANON_ROLE: anon
-      PGRST_JWT_SECRET: ${JWT_SECRET:-super-secret-jwt-token-with-at-least-32-characters-long}
+      PGRST_JWT_SECRET: ${JWT_SECRET}
       PGRST_DB_USE_LEGACY_GUCS: "false"
     networks:
       - henrard-network
@@ -131,8 +131,8 @@ services:
       ANON_KEY: ${ANON_KEY}
       SERVICE_KEY: ${SERVICE_ROLE_KEY}
       POSTGREST_URL: http://rest:3000
-      PGRST_JWT_SECRET: ${JWT_SECRET:-super-secret-jwt-token-with-at-least-32-characters-long}
-      DATABASE_URL: postgres://postgres:${POSTGRES_PASSWORD:-henrard_secret_123}@db:5432/henrard_db
+      PGRST_JWT_SECRET: ${JWT_SECRET}
+      DATABASE_URL: postgres://postgres:${POSTGRES_PASSWORD}@db:5432/henrard_db
       FILE_SIZE_LIMIT: 52428800
       STORAGE_BACKEND: file
       FILE_STORAGE_BACKEND_PATH: /var/lib/storage
@@ -162,7 +162,7 @@ services:
       PG_META_DB_PORT: 5432
       PG_META_DB_NAME: henrard_db
       PG_META_DB_USER: postgres
-      PG_META_DB_PASSWORD: ${POSTGRES_PASSWORD:-henrard_secret_123}
+      PG_META_DB_PASSWORD: ${POSTGRES_PASSWORD}
     networks:
       - henrard-network
     depends_on:
