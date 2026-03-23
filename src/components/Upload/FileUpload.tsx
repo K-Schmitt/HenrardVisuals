@@ -3,6 +3,8 @@
 import { useState, useRef, useCallback } from 'react';
 import { supabase } from '@/lib/supabase';
 
+const UPLOAD_FEEDBACK_TIMEOUT_MS = 3_000;
+
 interface FileUploadProps {
   onUploadComplete?: (files: UploadedFile[]) => void;
   onError?: (error: string) => void;
@@ -130,7 +132,7 @@ export function FileUpload({
       onError?.(errors.join('\n'));
     }
 
-    setTimeout(() => setUploadProgress([]), 3000);
+    setTimeout(() => setUploadProgress([]), UPLOAD_FEEDBACK_TIMEOUT_MS);
   };
 
   const handleDrop = useCallback(
