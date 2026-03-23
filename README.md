@@ -98,6 +98,39 @@ Open [http://localhost:5173](http://localhost:5173) — admin panel at `/admin`.
 
 ---
 
+## Usage
+
+**As a visitor:**
+- Browse photos by category on the home page
+- Click any photo to open the lightbox — navigate with arrows or keyboard (`←` `→` `Esc`)
+- Switch language (FR/EN) from the navigation bar, persisted in `localStorage`
+
+**As an admin** — log in at `/admin`:
+- **Photos** — upload via drag-and-drop, delete, assign to a category
+- **Categories** — create, rename, reorder, delete
+- **Settings** — edit profile info (name, bio, social links)
+- **Account** — change your password or email address
+
+---
+
+## API
+
+The backend is **PostgREST** auto-generated from the PostgreSQL schema, exposed through Kong. All reads are public; writes require an admin JWT.
+
+| Table | Reads | Writes |
+|---|---|---|
+| `photos` | public | admin only (RLS) |
+| `categories` | public | admin only (RLS) |
+| `site_settings` | public | admin only (RLS) |
+
+**Storage:** photos are uploaded to the `photos` bucket as `{timestamp}-{sanitized_filename}`. Public URLs are served directly from Supabase Storage.
+
+**Auth:** JWT via GoTrue. The `ANON_KEY` is safe to ship in the frontend — RLS enforces access control, not the key itself.
+
+Base URL: `VITE_SUPABASE_URL` (Kong gateway, default port `:8000`)
+
+---
+
 ## Development
 
 ```bash
