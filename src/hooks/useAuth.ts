@@ -13,11 +13,9 @@ const initialState: AuthState = {
 export function useAuth(): AuthContextValue {
   const [state, setState] = useState<AuthState>(initialState);
 
-  // Initialize auth state
   useEffect(() => {
     let isMounted = true;
 
-    // Get initial session
     const initializeAuth = async () => {
       try {
         const {
@@ -28,48 +26,25 @@ export function useAuth(): AuthContextValue {
         if (!isMounted) return;
 
         if (error) {
-          setState({
-            user: null,
-            session: null,
-            isLoading: false,
-            error,
-          });
+          setState({ user: null, session: null, isLoading: false, error });
           return;
         }
 
-        setState({
-          user: session?.user ?? null,
-          session,
-          isLoading: false,
-          error: null,
-        });
+        setState({ user: session?.user ?? null, session, isLoading: false, error: null });
       } catch {
         if (isMounted) {
-          setState({
-            user: null,
-            session: null,
-            isLoading: false,
-            error: null,
-          });
+          setState({ user: null, session: null, isLoading: false, error: null });
         }
       }
     };
 
     initializeAuth();
 
-    // Subscribe to auth changes
     const {
       data: { subscription },
     } = supabase.auth.onAuthStateChange((_event: string, session: Session | null) => {
       if (!isMounted) return;
-
-      setState((prev: AuthState) => ({
-        ...prev,
-        user: session?.user ?? null,
-        session,
-        isLoading: false,
-        error: null,
-      }));
+      setState((prev) => ({ ...prev, user: session?.user ?? null, session, isLoading: false, error: null }));
     });
 
     return () => {
@@ -78,74 +53,31 @@ export function useAuth(): AuthContextValue {
     };
   }, []);
 
-  // Sign in with email and password
-  const signIn = useCallback(async (credentials: LoginCredentials): Promise<void> => {
-    setState((prev: AuthState) => ({ ...prev, isLoading: true, error: null }));
-
-    try {
-      const { data, error } = await supabase.auth.signInWithPassword({
-        email: credentials.email,
-        password: credentials.password,
-      });
-
-      if (error) {
-        setState((prev: AuthState) => ({
-          ...prev,
-          isLoading: false,
-          error,
-        }));
-        throw error;
+  const runAuthAction = useCallback(
+    async (action: () => Promise<{ error: AuthError | null }>): Promise<void> => {
+      setState((prev) => ({ ...prev, isLoading: true, error: null }));
+      try {
+        const { error } = await action();
+        if (error) throw error;
+      } catch (err) {
+        const authError = err as AuthError;
+        setState((prev) => ({ ...prev, isLoading: false, error: authError }));
+        throw authError;
       }
+    },
+    []
+  );
 
-      setState({
-        user: data.user,
-        session: data.session,
-        isLoading: false,
-        error: null,
-      });
-    } catch (error) {
-      const authError = error as AuthError;
-      setState((prev: AuthState) => ({
-        ...prev,
-        isLoading: false,
-        error: authError,
-      }));
-      throw authError;
-    }
-  }, []);
+  const signIn = useCallback(
+    (credentials: LoginCredentials) =>
+      runAuthAction(() => supabase.auth.signInWithPassword(credentials)),
+    [runAuthAction]
+  );
 
-  // Sign out
-  const signOut = useCallback(async (): Promise<void> => {
-    setState((prev: AuthState) => ({ ...prev, isLoading: true, error: null }));
-
-    try {
-      const { error } = await supabase.auth.signOut();
-
-      if (error) {
-        setState((prev: AuthState) => ({
-          ...prev,
-          isLoading: false,
-          error,
-        }));
-        throw error;
-      }
-
-      setState({
-        user: null,
-        session: null,
-        isLoading: false,
-        error: null,
-      });
-    } catch (error) {
-      const authError = error as AuthError;
-      setState((prev: AuthState) => ({
-        ...prev,
-        isLoading: false,
-        error: authError,
-      }));
-      throw authError;
-    }
-  }, []);
+  const signOut = useCallback(
+    () => runAuthAction(() => supabase.auth.signOut()),
+    [runAuthAction]
+  );
 
   return {
     ...state,
