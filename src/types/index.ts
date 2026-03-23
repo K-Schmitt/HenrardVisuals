@@ -123,5 +123,12 @@ export interface Database {
   };
 }
 
+export interface UploadedFile {
+  name: string;
+  path: string;
+  size: number;
+  publicUrl: string;
+}
+
 /** Union of all public table names — used for type-safe DB helpers */
 export type PublicTableName = keyof Database['public']['Tables'];
