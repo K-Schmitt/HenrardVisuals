@@ -12,19 +12,16 @@ WORKDIR /app
 # Install pnpm
 RUN corepack enable && corepack prepare pnpm@latest --activate
 
-# Copy package files
-COPY package.json pnpm-lock.yaml* ./
+# Copy package files and install deps as root, then hand off ownership
+COPY --chown=node:node package.json pnpm-lock.yaml* ./
+RUN pnpm install --frozen-lockfile
 
-# Install dependencies
-RUN pnpm install --frozen-lockfile || pnpm install
+COPY --chown=node:node . .
 
-# Copy source code
-COPY . .
+# Drop to non-root user
+USER node
 
-# Expose dev server port
 EXPOSE 5173
-
-# Start development server
 CMD ["pnpm", "dev", "--host", "0.0.0.0"]
 
 # ----------------------------------------
@@ -37,38 +34,37 @@ WORKDIR /app
 # Install pnpm
 RUN corepack enable && corepack prepare pnpm@latest --activate
 
-# Copy package files
-COPY package.json pnpm-lock.yaml* ./
+COPY --chown=node:node package.json pnpm-lock.yaml* ./
+RUN pnpm install --frozen-lockfile
 
-# Install dependencies
-RUN pnpm install --frozen-lockfile || pnpm install
+COPY --chown=node:node . .
 
-# Copy source code
-COPY . .
-
-# Build arguments for environment
+# Build arguments for Vite environment
 ARG VITE_SUPABASE_URL
 ARG VITE_SUPABASE_ANON_KEY
 
-# Build production bundle
+# Drop to non-root user before building
+USER node
+
 RUN pnpm build
 
 # ----------------------------------------
 # Stage 3: Production
 # ----------------------------------------
+# nginx master process binds port 80 (requires root), workers run as the
+# built-in `nginx` user — this is the standard and secure nginx pattern.
 FROM nginx:alpine AS production
 
 # Copy built assets from builder
 COPY --from=builder /app/dist /usr/share/nginx/html
 
-# Copy custom nginx configuration for SPA
+# Inline nginx config: SPA routing, gzip, aggressive asset caching
 RUN echo 'server { \
     listen 80; \
     listen [::]:80; \
     root /usr/share/nginx/html; \
     index index.html; \
     \
-    # Gzip compression \
     gzip on; \
     gzip_vary on; \
     gzip_min_length 1024; \
@@ -76,38 +72,30 @@ RUN echo 'server { \
     gzip_comp_level 6; \
     gzip_types text/plain text/css text/xml application/json application/javascript application/rss+xml application/atom+xml image/svg+xml; \
     \
-    # Cache static assets aggressively \
     location ~* \.(js|css|png|jpg|jpeg|gif|ico|svg|woff|woff2|ttf|eot|webp)$ { \
         expires 1y; \
         add_header Cache-Control "public, immutable"; \
         access_log off; \
     } \
     \
-    # HTML files - no cache to ensure fresh content \
     location ~* \.html$ { \
         expires -1; \
         add_header Cache-Control "no-store, no-cache, must-revalidate, proxy-revalidate, max-age=0"; \
         add_header Pragma "no-cache"; \
     } \
     \
-    # SPA fallback - serve index.html for client-side routing \
     location / { \
         try_files $uri $uri/ /index.html; \
-        # No cache for index.html fallback \
         add_header Cache-Control "no-store, no-cache, must-revalidate, proxy-revalidate, max-age=0"; \
         add_header Pragma "no-cache"; \
     } \
 }' > /etc/nginx/conf.d/default.conf
 
-# Remove default nginx config
 RUN rm -f /etc/nginx/nginx.conf.default
 
-# Expose ports
 EXPOSE 80
 
-# Health check
 HEALTHCHECK --interval=30s --timeout=3s --start-period=5s --retries=3 \
   CMD wget --no-verbose --tries=1 --spider http://localhost/ || exit 1
 
-# Start nginx
 CMD ["nginx", "-g", "daemon off;"]
