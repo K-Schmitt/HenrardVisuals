@@ -1,7 +1,9 @@
 {
   "title": "HenrardVisuals",
   "description": "Full-stack photography portfolio with a self-hosted Supabase backend. Features an admin panel for managing photos and categories, Row Level Security enforced via JWT claims, and a Docker Compose stack including PostgreSQL, GoTrue auth, and Kong API gateway.",
+  "image": "public/HenrardVisual.png",
   "status": "done",
   "language": "TypeScript",
-  "year": "2025"
+  "year": "2025",
+  "links": "https://henrardvisuals.com/"
 }
