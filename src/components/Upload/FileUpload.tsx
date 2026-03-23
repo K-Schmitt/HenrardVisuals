@@ -1,6 +1,7 @@
 /// <reference types="vite/client" />
 
 import { useState, useRef, useCallback } from 'react';
+
 import { supabase } from '@/lib/supabase';
 
 const UPLOAD_FEEDBACK_TIMEOUT_MS = 3_000;
@@ -51,21 +52,21 @@ export function FileUpload({
     e.stopPropagation();
   }, []);
 
-  const validateFile = (file: File): string | null => {
-    const allowedTypes = accept.split(',').map((t) => t.trim());
-    if (!allowedTypes.some((type) => file.type.match(type.replace('*', '.*')))) {
-      return `Type "${file.type}" non supporté`;
-    }
-    if (file.size > maxSize) {
-      return `Fichier trop volumineux (max ${Math.round(maxSize / 1024 / 1024)}MB)`;
-    }
-    return null;
-  };
-
-  const processFiles = async (files: FileList | File[]) => {
+  const processFiles = useCallback(async (files: FileList | File[]) => {
     const fileArray = Array.from(files);
 
     if (fileArray.length === 0) return;
+
+    const validateFile = (file: File): string | null => {
+      const allowedTypes = accept.split(',').map((t) => t.trim());
+      if (!allowedTypes.some((type) => file.type.match(type.replace('*', '.*')))) {
+        return `Type "${file.type}" non supporté`;
+      }
+      if (file.size > maxSize) {
+        return `Fichier trop volumineux (max ${Math.round(maxSize / 1024 / 1024)}MB)`;
+      }
+      return null;
+    };
 
     setIsUploading(true);
     setUploadProgress([]);
@@ -133,7 +134,7 @@ export function FileUpload({
     }
 
     setTimeout(() => setUploadProgress([]), UPLOAD_FEEDBACK_TIMEOUT_MS);
-  };
+  }, [accept, maxSize, bucket, onUploadComplete, onError]);
 
   const handleDrop = useCallback(
     (e: React.DragEvent) => {
@@ -144,7 +145,7 @@ export function FileUpload({
       const { files } = e.dataTransfer;
       processFiles(files);
     },
-    [accept, maxSize, onUploadComplete, onError]
+    [processFiles]
   );
 
   const handleClick = () => {

@@ -1,4 +1,5 @@
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useCallback } from 'react';
+
 import { supabase, insertRow, updateRow } from '@/lib/supabase';
 import type { Category } from '@/types';
 
@@ -55,11 +56,12 @@ export function CategoryManager() {
   });
   const [message, setMessage] = useState<{ type: 'success' | 'error'; text: string } | null>(null);
 
-  useEffect(() => {
-    fetchCategories();
+  const showMessage = useCallback((type: 'success' | 'error', text: string) => {
+    setMessage({ type, text });
+    setTimeout(() => setMessage(null), 3_000);
   }, []);
 
-  const fetchCategories = async () => {
+  const fetchCategories = useCallback(async () => {
     try {
       setIsLoading(true);
       const { data, error } = await supabase
@@ -75,12 +77,11 @@ export function CategoryManager() {
     } finally {
       setIsLoading(false);
     }
-  };
+  }, [showMessage]);
 
-  const showMessage = (type: 'success' | 'error', text: string) => {
-    setMessage({ type, text });
-    setTimeout(() => setMessage(null), 3000);
-  };
+  useEffect(() => {
+    fetchCategories();
+  }, [fetchCategories]);
 
   const generateSlug = (name: string) => {
     return name

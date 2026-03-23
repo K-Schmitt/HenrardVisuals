@@ -1,4 +1,5 @@
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useCallback } from 'react';
+
 import { supabase } from '@/lib/supabase';
 import type { ProfileSettings as ProfileSettingsType } from '@/types';
 
@@ -14,10 +15,10 @@ const SaveIcon = () => (
 const DEFAULT_SETTINGS: ProfileSettingsType = {
   subtitle: 'диво дьявола • Life is but a dream',
   stats: [
-    { value: '188', unit: '6\' 2\"', label: 'HEIGHT' },
-    { value: '94', unit: '37\"', label: 'CHEST' },
-    { value: '74', unit: '29\"', label: 'WAIST' },
-    { value: '92', unit: '36\"', label: 'HIPS' },
+    { value: '188', unit: "6' 2\"", label: 'HEIGHT' },
+    { value: '94', unit: '37"', label: 'CHEST' },
+    { value: '74', unit: '29"', label: 'WAIST' },
+    { value: '92', unit: '36"', label: 'HIPS' },
     { value: '44', unit: 'EU', label: 'SHOES' },
   ],
   attributes: 'Hair: Platinum Blonde | Eyes: Blue',
@@ -32,11 +33,12 @@ export function ProfileSettings() {
   const [isSaving, setIsSaving] = useState(false);
   const [message, setMessage] = useState<{ type: 'success' | 'error'; text: string } | null>(null);
 
-  useEffect(() => {
-    fetchSettings();
+  const showMessage = useCallback((type: 'success' | 'error', text: string) => {
+    setMessage({ type, text });
+    setTimeout(() => setMessage(null), 3_000);
   }, []);
 
-  const fetchSettings = async () => {
+  const fetchSettings = useCallback(async () => {
     try {
       const { data, error } = await supabase
         .from('site_settings')
@@ -47,7 +49,7 @@ export function ProfileSettings() {
       if (error && error.code !== 'PGRST116') throw error;
 
       if (data) {
-        setSettings((data as any).value as ProfileSettingsType);
+        setSettings((data as { value: ProfileSettingsType }).value);
       }
     } catch (err) {
       console.error('Error fetching settings:', err);
@@ -55,21 +57,19 @@ export function ProfileSettings() {
     } finally {
       setIsLoading(false);
     }
-  };
+  }, [showMessage]);
 
-  const showMessage = (type: 'success' | 'error', text: string) => {
-    setMessage({ type, text });
-    setTimeout(() => setMessage(null), 3000);
-  };
+  useEffect(() => {
+    fetchSettings();
+  }, [fetchSettings]);
 
   const handleSave = async () => {
     setIsSaving(true);
     try {
       const { error } = await supabase.from('site_settings').upsert({
         key: 'profile_settings',
-        value: settings as any,
-        updated_at: new Date().toISOString(),
-      } as any);
+        value: settings,
+      } as never);
 
       if (error) throw error;
       showMessage('success', 'Settings saved successfully');
