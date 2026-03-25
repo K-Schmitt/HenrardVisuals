@@ -8,6 +8,7 @@ vi.mock('@/hooks/useAuth', () => ({
 }));
 
 import { Login } from './Login';
+
 import { useAuth } from '@/hooks/useAuth';
 
 const mockSignIn = vi.fn();

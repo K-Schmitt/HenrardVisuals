@@ -14,6 +14,7 @@ vi.mock('@/lib/supabase', () => ({
 }));
 
 import { useAuth } from './useAuth';
+
 import { supabase } from '@/lib/supabase';
 
 const mockSupabase = supabase as {
@@ -26,11 +27,14 @@ const mockSupabase = supabase as {
 };
 
 const mockUnsubscribe = vi.fn();
+let capturedAuthCallback: ((event: string, session: unknown) => void) | null = null;
 
 beforeEach(() => {
   vi.clearAllMocks();
-  mockSupabase.auth.onAuthStateChange.mockReturnValue({
-    data: { subscription: { unsubscribe: mockUnsubscribe } },
+  capturedAuthCallback = null;
+  mockSupabase.auth.onAuthStateChange.mockImplementation((cb) => {
+    capturedAuthCallback = cb;
+    return { data: { subscription: { unsubscribe: mockUnsubscribe } } };
   });
 });
 
@@ -79,9 +83,9 @@ describe('useAuth', () => {
     const mockSession = { user: mockUser, access_token: 'token-abc' };
 
     mockSupabase.auth.getSession.mockResolvedValue({ data: { session: null }, error: null });
-    mockSupabase.auth.signInWithPassword.mockResolvedValue({
-      data: { user: mockUser, session: mockSession },
-      error: null,
+    mockSupabase.auth.signInWithPassword.mockImplementation(async () => {
+      capturedAuthCallback?.('SIGNED_IN', mockSession);
+      return { data: { user: mockUser, session: mockSession }, error: null };
     });
 
     const { result } = renderHook(() => useAuth());
@@ -134,7 +138,10 @@ describe('useAuth', () => {
       data: { session: mockSession },
       error: null,
     });
-    mockSupabase.auth.signOut.mockResolvedValue({ error: null });
+    mockSupabase.auth.signOut.mockImplementation(async () => {
+      capturedAuthCallback?.('SIGNED_OUT', null);
+      return { error: null };
+    });
 
     const { result } = renderHook(() => useAuth());
     await waitFor(() => expect(result.current.isAuthenticated).toBe(true));
