@@ -1,10 +1,11 @@
 import { useState } from 'react';
-import { useAuth } from '@/hooks/useAuth';
-import { Login } from '@/components/Auth/Login';
-import { PhotosTab } from '@/components/Admin/PhotosTab';
-import { CategoryManager } from '@/components/Admin/CategoryManager';
-import { ProfileSettings } from '@/components/Admin/ProfileSettings';
+
 import { AccountSettings } from '@/components/Admin/AccountSettings';
+import { CategoryManager } from '@/components/Admin/CategoryManager';
+import { PhotosTab } from '@/components/Admin/PhotosTab';
+import { ProfileSettings } from '@/components/Admin/ProfileSettings';
+import { Login } from '@/components/Auth/Login';
+import { useAuth } from '@/hooks/useAuth';
 
 type Tab = 'photos' | 'categories' | 'settings' | 'account';
 

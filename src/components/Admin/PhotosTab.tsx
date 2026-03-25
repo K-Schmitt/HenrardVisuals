@@ -1,5 +1,5 @@
-import { FileUpload } from '@/components/Upload/FileUpload';
 import { PhotoCard } from '@/components/Admin/PhotoCard';
+import { FileUpload } from '@/components/Upload/FileUpload';
 import { useAdminPhotos } from '@/hooks/useAdminPhotos';
 
 export function PhotosTab() {
