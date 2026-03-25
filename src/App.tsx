@@ -28,9 +28,9 @@ function NotFound() {
     <div className="min-h-screen flex items-center justify-center px-6">
       <div className="text-center">
         <h1 className="font-serif text-6xl text-white mb-4">404</h1>
-        <p className="text-gray-400">{t('Page non trouvée', 'Page not found')}</p>
+        <p className="text-gray-400">{t('notFound.message')}</p>
         <a href="/" className="inline-block mt-6 text-white hover:text-gray-300">
-          {t("Retour à l'accueil →", 'Go back home →')}
+          {t('notFound.back')}
         </a>
       </div>
     </div>

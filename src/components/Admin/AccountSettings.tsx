@@ -1,7 +1,10 @@
 import { useState } from 'react';
+
+import { useLanguage } from '@/context/LanguageContext';
 import { supabase } from '@/lib/supabase';
 
 export function AccountSettings() {
+  const { t } = useLanguage();
   const [passwordForm, setPasswordForm] = useState({
     newPassword: '',
     confirmPassword: '',
@@ -15,11 +18,11 @@ export function AccountSettings() {
   const handlePasswordChange = async (e: React.FormEvent) => {
     e.preventDefault();
     if (passwordForm.newPassword !== passwordForm.confirmPassword) {
-      setPasswordMsg({ type: 'error', text: 'Les mots de passe ne correspondent pas.' });
+      setPasswordMsg({ type: 'error', text: t('admin.accountSettings.passwordMismatch') });
       return;
     }
     if (passwordForm.newPassword.length < 8) {
-      setPasswordMsg({ type: 'error', text: 'Le mot de passe doit contenir au moins 8 caractères.' });
+      setPasswordMsg({ type: 'error', text: t('admin.accountSettings.passwordTooShort') });
       return;
     }
 
@@ -28,10 +31,10 @@ export function AccountSettings() {
     try {
       const { error } = await supabase.auth.updateUser({ password: passwordForm.newPassword });
       if (error) throw error;
-      setPasswordMsg({ type: 'success', text: 'Mot de passe mis à jour avec succès.' });
+      setPasswordMsg({ type: 'success', text: t('admin.accountSettings.passwordSuccess') });
       setPasswordForm({ newPassword: '', confirmPassword: '' });
     } catch (err: unknown) {
-      const message = err instanceof Error ? err.message : 'Erreur lors de la mise à jour.';
+      const message = err instanceof Error ? err.message : t('admin.accountSettings.updateError');
       setPasswordMsg({ type: 'error', text: message });
     } finally {
       setSavingPassword(false);
@@ -41,7 +44,7 @@ export function AccountSettings() {
   const handleEmailChange = async (e: React.FormEvent) => {
     e.preventDefault();
     if (!emailForm.newEmail.includes('@')) {
-      setEmailMsg({ type: 'error', text: 'Adresse email invalide.' });
+      setEmailMsg({ type: 'error', text: t('admin.accountSettings.invalidEmail') });
       return;
     }
 
@@ -50,13 +53,10 @@ export function AccountSettings() {
     try {
       const { error } = await supabase.auth.updateUser({ email: emailForm.newEmail });
       if (error) throw error;
-      setEmailMsg({
-        type: 'success',
-        text: 'Un email de confirmation a été envoyé à votre nouvelle adresse.',
-      });
+      setEmailMsg({ type: 'success', text: t('admin.accountSettings.emailSuccess') });
       setEmailForm({ newEmail: '' });
     } catch (err: unknown) {
-      const message = err instanceof Error ? err.message : 'Erreur lors de la mise à jour.';
+      const message = err instanceof Error ? err.message : t('admin.accountSettings.updateError');
       setEmailMsg({ type: 'error', text: message });
     } finally {
       setSavingEmail(false);
@@ -67,11 +67,11 @@ export function AccountSettings() {
     <div className="max-w-lg space-y-10">
       {/* Change password */}
       <section>
-        <h2 className="font-serif text-xl text-gray-900 mb-6">Changer le mot de passe</h2>
+        <h2 className="font-serif text-xl text-gray-900 mb-6">{t('admin.accountSettings.changePassword')}</h2>
         <form onSubmit={handlePasswordChange} className="space-y-4">
           <div>
             <label className="block text-sm font-medium text-gray-700 mb-1">
-              Nouveau mot de passe
+              {t('admin.accountSettings.newPassword')}
             </label>
             <input
               type="password"
@@ -85,7 +85,7 @@ export function AccountSettings() {
           </div>
           <div>
             <label className="block text-sm font-medium text-gray-700 mb-1">
-              Confirmer le mot de passe
+              {t('admin.accountSettings.confirmPassword')}
             </label>
             <input
               type="password"
@@ -115,7 +115,7 @@ export function AccountSettings() {
             disabled={savingPassword}
             className="px-6 py-2.5 bg-black text-white rounded-elegant hover:bg-gray-800 transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
           >
-            {savingPassword ? 'Enregistrement…' : 'Mettre à jour le mot de passe'}
+            {savingPassword ? t('admin.accountSettings.saving') : t('admin.accountSettings.updatePassword')}
           </button>
         </form>
       </section>
@@ -124,11 +124,11 @@ export function AccountSettings() {
 
       {/* Change email */}
       <section>
-        <h2 className="font-serif text-xl text-gray-900 mb-6">Changer l'adresse email</h2>
+        <h2 className="font-serif text-xl text-gray-900 mb-6">{t('admin.accountSettings.changeEmail')}</h2>
         <form onSubmit={handleEmailChange} className="space-y-4">
           <div>
             <label className="block text-sm font-medium text-gray-700 mb-1">
-              Nouvelle adresse email
+              {t('admin.accountSettings.newEmail')}
             </label>
             <input
               type="email"
@@ -157,7 +157,7 @@ export function AccountSettings() {
             disabled={savingEmail}
             className="px-6 py-2.5 bg-black text-white rounded-elegant hover:bg-gray-800 transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
           >
-            {savingEmail ? 'Enregistrement…' : "Mettre à jour l'email"}
+            {savingEmail ? t('admin.accountSettings.saving') : t('admin.accountSettings.updateEmail')}
           </button>
         </form>
       </section>

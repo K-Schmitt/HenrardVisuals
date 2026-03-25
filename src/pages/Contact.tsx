@@ -1,5 +1,6 @@
-import { useLanguage } from '@/context/LanguageContext';
 import { useState } from 'react';
+
+import { useLanguage } from '@/context/LanguageContext';
 
 // Icônes SVG inline pour éviter les dépendances
 const MailIcon = ({ className = "w-5 h-5 sm:w-6 sm:h-6" }) => (
@@ -131,7 +132,7 @@ export function Contact() {
         {/* Header */}
         <div className="text-center mb-10 sm:mb-14 md:mb-16 lg:mb-20 animate-fade-in">
           <span className="inline-block text-[10px] sm:text-xs uppercase tracking-[0.2em] sm:tracking-[0.3em] text-white/40 mb-4 sm:mb-6 font-medium">
-            {t('Travaillons ensemble', 'Let\'s work together')}
+            {t('contact.tagline')}
           </span>
           
           <h1 className="font-serif text-4xl sm:text-5xl md:text-6xl lg:text-7xl xl:text-8xl uppercase tracking-tight mb-4 sm:mb-6 md:mb-8">
@@ -141,10 +142,7 @@ export function Contact() {
           </h1>
 
           <p className="text-white/50 text-base sm:text-lg lg:text-xl max-w-xs sm:max-w-md lg:max-w-lg mx-auto font-light leading-relaxed px-2">
-            {t(
-              'Pour toute demande de collaboration, projet photographique ou booking, n\'hésitez pas à me contacter.',
-              'For any collaboration request, photography project, or booking inquiry, feel free to reach out.'
-            )}
+            {t('contact.description')}
           </p>
         </div>
 
@@ -180,10 +178,7 @@ export function Contact() {
         {/* Footer note */}
         <div className="mt-10 sm:mt-14 md:mt-16 lg:mt-20 text-center animate-fade-in" style={{ animationDelay: '400ms' }}>
           <p className="text-white/30 text-xs sm:text-sm font-light">
-            {t(
-              'Réponse sous 24-48h',
-              'Response within 24-48h'
-            )}
+            {t('contact.responseTime')}
           </p>
         </div>
       </div>

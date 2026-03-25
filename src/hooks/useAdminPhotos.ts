@@ -1,4 +1,5 @@
 import { useState, useEffect, useCallback } from 'react';
+
 import { supabase, insertRow, updateRow } from '@/lib/supabase';
 import type { Photo, Category, UploadedFile } from '@/types';
 

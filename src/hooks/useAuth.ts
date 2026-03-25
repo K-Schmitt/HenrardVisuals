@@ -1,7 +1,8 @@
+import type { AuthError, User, Session } from '@supabase/supabase-js';
 import { useState, useEffect, useCallback } from 'react';
+
 import { supabase } from '@/lib/supabase';
 import type { AuthState, LoginCredentials, AuthContextValue } from '@/types';
-import type { AuthError, User, Session } from '@supabase/supabase-js';
 
 const initialState: AuthState = {
   user: null,

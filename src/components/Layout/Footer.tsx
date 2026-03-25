@@ -1,4 +1,5 @@
 import { Link } from 'react-router-dom';
+
 import { useLanguage } from '@/context/LanguageContext';
 
 const SOCIAL_LINKS = {
@@ -23,10 +24,7 @@ export function Footer() {
               HENRARDVISUALS
             </Link>
             <p className="text-gray-500 text-sm leading-relaxed">
-              {t(
-                "L'essentiel, sans démonstration - l'image au service de l'art.",
-                "The essential, without demonstration - the image at the service of art."
-              )}
+              {t('footer.tagline')}
             </p>
           </div>
 
@@ -35,7 +33,7 @@ export function Footer() {
             <h4 className="text-xs uppercase tracking-[0.2em] text-gray-400">Navigation</h4>
             <nav className="flex flex-col gap-3">
               <Link to="/" className="text-gray-500 hover:text-white transition-colors text-sm">
-                {t('Accueil', 'Home')}
+                {t('nav.home')}
               </Link>
               <Link
                 to="/contact"
@@ -84,10 +82,10 @@ export function Footer() {
         <div className="border-t border-gray-800 pt-8">
           <div className="flex flex-col md:flex-row justify-between items-center gap-4">
             <p className="text-gray-600 text-xs">
-              © {currentYear} Tristan Henrard. {t('Tous droits réservés.', 'All rights reserved.')}
+              © {currentYear} Tristan Henrard. {t('footer.rights')}
             </p>
             <p className="text-gray-600 text-xs">
-              {t('Site créé par', 'Website created by')}{' '}
+              {t('footer.createdBy')}{' '}
               <a
                 href="https://slackliniste.com"
                 target="_blank"

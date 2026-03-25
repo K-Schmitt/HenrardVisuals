@@ -1,7 +1,8 @@
 import { useState, useEffect } from 'react';
 import { Link, useLocation } from 'react-router-dom';
-import { BurgerMenu } from '@/components/Navigation/BurgerMenu';
+
 import { Footer } from '@/components/Layout/Footer';
+import { BurgerMenu } from '@/components/Navigation/BurgerMenu';
 import { useLanguage } from '@/context/LanguageContext';
 
 const FrenchFlag = ({ className = 'w-6 h-4' }: { className?: string }) => (
@@ -122,7 +123,7 @@ export function SiteLayout({ children }: SiteLayoutProps) {
                     : 'none',
                 }}
               >
-                {t('Accueil', 'Home')}
+                {t('nav.home')}
               </Link>
 
               <Link
@@ -169,7 +170,7 @@ export function SiteLayout({ children }: SiteLayoutProps) {
             className="text-lg uppercase tracking-wider text-white hover:text-gray-300 transition-colors"
             onClick={() => setIsMenuOpen(false)}
           >
-            {t('Accueil', 'Home')}
+            {t('nav.home')}
           </Link>
           <Link
             to="/contact"
