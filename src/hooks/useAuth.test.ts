@@ -13,8 +13,8 @@ vi.mock('@/lib/supabase', () => ({
   },
 }));
 
+import { AuthProvider } from '@/context/AuthContext';
 import { useAuth } from './useAuth';
-
 import { supabase } from '@/lib/supabase';
 
 const mockSupabase = supabase as {
@@ -38,11 +38,14 @@ beforeEach(() => {
   });
 });
 
+// Helper: render useAuth inside AuthProvider so a single subscription is used.
+const renderAuth = () => renderHook(() => useAuth(), { wrapper: AuthProvider });
+
 describe('useAuth', () => {
   it('starts in loading state', () => {
     mockSupabase.auth.getSession.mockResolvedValue({ data: { session: null }, error: null });
 
-    const { result } = renderHook(() => useAuth());
+    const { result } = renderAuth();
 
     expect(result.current.isLoading).toBe(true);
     expect(result.current.user).toBeNull();
@@ -52,7 +55,7 @@ describe('useAuth', () => {
   it('resolves to unauthenticated when no session exists', async () => {
     mockSupabase.auth.getSession.mockResolvedValue({ data: { session: null }, error: null });
 
-    const { result } = renderHook(() => useAuth());
+    const { result } = renderAuth();
 
     await waitFor(() => expect(result.current.isLoading).toBe(false));
 
@@ -70,7 +73,7 @@ describe('useAuth', () => {
       error: null,
     });
 
-    const { result } = renderHook(() => useAuth());
+    const { result } = renderAuth();
 
     await waitFor(() => expect(result.current.isLoading).toBe(false));
 
@@ -88,7 +91,7 @@ describe('useAuth', () => {
       return { data: { user: mockUser, session: mockSession }, error: null };
     });
 
-    const { result } = renderHook(() => useAuth());
+    const { result } = renderAuth();
     await waitFor(() => expect(result.current.isLoading).toBe(false));
 
     await act(async () => {
@@ -112,7 +115,7 @@ describe('useAuth', () => {
       error: authError,
     });
 
-    const { result } = renderHook(() => useAuth());
+    const { result } = renderAuth();
     await waitFor(() => expect(result.current.isLoading).toBe(false));
 
     let caughtError: unknown;
@@ -143,7 +146,7 @@ describe('useAuth', () => {
       return { error: null };
     });
 
-    const { result } = renderHook(() => useAuth());
+    const { result } = renderAuth();
     await waitFor(() => expect(result.current.isAuthenticated).toBe(true));
 
     await act(async () => {
@@ -157,7 +160,7 @@ describe('useAuth', () => {
   it('unsubscribes from auth state changes on unmount', async () => {
     mockSupabase.auth.getSession.mockResolvedValue({ data: { session: null }, error: null });
 
-    const { unmount } = renderHook(() => useAuth());
+    const { unmount } = renderAuth();
     await waitFor(() => true);
 
     unmount();
