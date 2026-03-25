@@ -8,6 +8,14 @@ import { createClient } from '@supabase/supabase-js';
 
 import type { Database, PublicTableName } from '@/types';
 
+// When T is a generic type parameter, TypeScript's overload resolution for
+// supabase.from(table) falls back to the `any`-typed overload, making
+// .insert() / .update() / .eq() reject properly-typed arguments.
+// We centralise the single unavoidable cast here; the exported functions'
+// explicit return type annotations act as the authoritative type boundary.
+// eslint-disable-next-line @typescript-eslint/no-explicit-any
+const typedFrom = <T extends PublicTableName>(table: T): any => supabase.from(table);
+
 const supabaseUrl = import.meta.env['VITE_SUPABASE_URL'] as string;
 const supabaseAnonKey = import.meta.env['VITE_SUPABASE_ANON_KEY'] as string;
 
@@ -78,9 +86,8 @@ export async function insertRow<T extends PublicTableName>(
   data: Database['public']['Tables'][T]['Row'] | null;
   error: Error | null;
 }> {
-  const { data: result, error } = await supabase
-    .from(table)
-    .insert(data as never)
+  const { data: result, error } = await typedFrom(table)
+    .insert(data)
     .select()
     .single();
 
@@ -88,7 +95,7 @@ export async function insertRow<T extends PublicTableName>(
     return { data: null, error: new Error(error.message) };
   }
 
-  return { data: result as unknown as Database['public']['Tables'][T]['Row'], error: null };
+  return { data: result, error: null };
 }
 
 /**
@@ -102,10 +109,9 @@ export async function updateRow<T extends PublicTableName>(
   data: Database['public']['Tables'][T]['Row'] | null;
   error: Error | null;
 }> {
-  const { data: result, error } = await supabase
-    .from(table)
-    .update(data as never)
-    .eq('id', id as never)
+  const { data: result, error } = await typedFrom(table)
+    .update(data)
+    .eq('id', id)
     .select()
     .single();
 
@@ -113,7 +119,7 @@ export async function updateRow<T extends PublicTableName>(
     return { data: null, error: new Error(error.message) };
   }
 
-  return { data: result as unknown as Database['public']['Tables'][T]['Row'], error: null };
+  return { data: result, error: null };
 }
 
 /**
@@ -124,10 +130,9 @@ export async function updateRows<T extends PublicTableName>(
   data: Database['public']['Tables'][T]['Update'],
   filter: { column: string; value: unknown }
 ): Promise<{ error: Error | null }> {
-  const { error } = await supabase
-    .from(table)
-    .update(data as never)
-    .eq(filter.column, filter.value as never);
+  const { error } = await typedFrom(table)
+    .update(data)
+    .eq(filter.column as string, filter.value);
 
   if (error) {
     return { error: new Error(error.message) };
