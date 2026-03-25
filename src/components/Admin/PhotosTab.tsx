@@ -1,8 +1,10 @@
 import { PhotoCard } from '@/components/Admin/PhotoCard';
 import { FileUpload } from '@/components/Upload/FileUpload';
+import { useLanguage } from '@/context/LanguageContext';
 import { useAdminPhotos } from '@/hooks/useAdminPhotos';
 
 export function PhotosTab() {
+  const { t } = useLanguage();
   const {
     photos,
     categories,
@@ -31,7 +33,7 @@ export function PhotosTab() {
       )}
 
       <section className="mb-12">
-        <h2 className="font-serif text-xl text-gray-900 mb-4">Upload Photos</h2>
+        <h2 className="font-serif text-xl text-gray-900 mb-4">{t('admin.photos.uploadTitle')}</h2>
         <FileUpload
           onUploadComplete={saveUploadedFiles}
           onError={showError}
@@ -39,7 +41,7 @@ export function PhotosTab() {
       </section>
 
       <section>
-        <h2 className="font-serif text-xl text-gray-900 mb-4">Your Photos ({photos.length})</h2>
+        <h2 className="font-serif text-xl text-gray-900 mb-4">{t('admin.photos.countLabel')} ({photos.length})</h2>
 
         {loadingPhotos && (
           <div className="flex justify-center py-8">
@@ -49,7 +51,7 @@ export function PhotosTab() {
 
         {!loadingPhotos && photos.length === 0 && (
           <p className="text-gray-500 text-center py-8">
-            Aucune photo. Uploadez votre première photo ci-dessus!
+            {t('admin.photos.empty')}
           </p>
         )}
 

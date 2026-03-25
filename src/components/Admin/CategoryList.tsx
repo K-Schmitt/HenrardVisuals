@@ -1,4 +1,5 @@
 import { CategoryItem } from '@/components/Admin/CategoryItem';
+import { useLanguage } from '@/context/LanguageContext';
 import type { Category } from '@/types';
 
 interface CategoryListProps {
@@ -8,13 +9,13 @@ interface CategoryListProps {
 }
 
 export function CategoryList({ categories, onEdit, onDelete }: CategoryListProps) {
+  const { t } = useLanguage();
+
   if (categories.length === 0) {
     return (
       <div className="text-center py-12 bg-gray-50 border border-gray-200 rounded-elegant">
-        <p className="text-gray-500 mb-2">No categories yet</p>
-        <p className="text-gray-400 text-sm">
-          Create your first category to organize your portfolio
-        </p>
+        <p className="text-gray-500 mb-2">{t('admin.categories.empty')}</p>
+        <p className="text-gray-400 text-sm">{t('admin.categories.emptyHint')}</p>
       </div>
     );
   }

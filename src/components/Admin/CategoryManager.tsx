@@ -2,6 +2,7 @@ import { useState, useEffect, useCallback } from 'react';
 
 import { CategoryForm, type CategoryFormData } from '@/components/Admin/CategoryForm';
 import { CategoryList } from '@/components/Admin/CategoryList';
+import { useLanguage } from '@/context/LanguageContext';
 import { supabase, insertRow, updateRow } from '@/lib/supabase';
 import type { Category } from '@/types';
 
@@ -15,6 +16,7 @@ const PlusIcon = () => (
 const EMPTY_FORM: CategoryFormData = { name: '', slug: '', description: '', sort_order: 0 };
 
 export function CategoryManager() {
+  const { t } = useLanguage();
   const [categories, setCategories] = useState<Category[]>([]);
   const [isLoading, setIsLoading] = useState(true);
   const [editingId, setEditingId] = useState<string | null>(null);
@@ -37,11 +39,11 @@ export function CategoryManager() {
       if (error) throw error;
       setCategories(data || []);
     } catch {
-      showMessage('error', 'Failed to load categories');
+      showMessage('error', t('admin.categories.loadError'));
     } finally {
       setIsLoading(false);
     }
-  }, [showMessage]);
+  }, [showMessage, t]);
 
   useEffect(() => {
     fetchCategories();
@@ -72,7 +74,7 @@ export function CategoryManager() {
 
   const handleSave = async () => {
     if (!formData.name.trim()) {
-      showMessage('error', 'Category name is required');
+      showMessage('error', t('admin.categories.nameRequired'));
       return;
     }
     try {
@@ -85,7 +87,7 @@ export function CategoryManager() {
           sort_order: formData.sort_order,
         });
         if (error) throw error;
-        showMessage('success', 'Category created successfully');
+        showMessage('success', t('admin.categories.createSuccess'));
       } else if (editingId) {
         const { error } = await updateRow('categories', editingId, {
           name: formData.name,
@@ -94,24 +96,23 @@ export function CategoryManager() {
           sort_order: formData.sort_order,
         });
         if (error) throw error;
-        showMessage('success', 'Category updated successfully');
+        showMessage('success', t('admin.categories.updateSuccess'));
       }
       cancelEdit();
       fetchCategories();
     } catch {
-      showMessage('error', 'Failed to save category');
+      showMessage('error', t('admin.categories.saveError'));
     }
   };
 
   const handleDelete = async (id: string) => {
-    if (!confirm('Are you sure you want to delete this category?')) return;
     try {
       const { error } = await supabase.from('categories').delete().eq('id', id);
       if (error) throw error;
-      showMessage('success', 'Category deleted successfully');
+      showMessage('success', t('admin.categories.deleteSuccess'));
       fetchCategories();
     } catch {
-      showMessage('error', 'Failed to delete category');
+      showMessage('error', t('admin.categories.deleteError'));
     }
   };
 
@@ -138,14 +139,14 @@ export function CategoryManager() {
       )}
 
       <div className="flex items-center justify-between mb-6">
-        <h2 className="font-serif text-xl text-gray-900">Categories ({categories.length})</h2>
+        <h2 className="font-serif text-xl text-gray-900">{t('admin.categories.title')} ({categories.length})</h2>
         {!isCreating && !editingId && (
           <button
             onClick={startCreate}
             className="flex items-center gap-2 px-4 py-2 bg-black text-white rounded-elegant hover:bg-gray-800 transition-colors"
           >
             <PlusIcon />
-            New Category
+            {t('admin.categories.new')}
           </button>
         )}
       </div>

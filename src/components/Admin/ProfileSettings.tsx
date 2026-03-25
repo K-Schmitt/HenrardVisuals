@@ -1,6 +1,7 @@
 import { useState, useEffect, useCallback } from 'react';
 
 import { DEFAULT_PROFILE_SETTINGS, isProfileSettings } from '@/constants/profileDefaults';
+import { useLanguage } from '@/context/LanguageContext';
 import { typedFrom } from '@/lib/supabase';
 import type { ProfileSettings as ProfileSettingsType } from '@/types';
 
@@ -14,6 +15,7 @@ const SaveIcon = () => (
 );
 
 export function ProfileSettings() {
+  const { t } = useLanguage();
   const [settings, setSettings] = useState<ProfileSettingsType>(DEFAULT_PROFILE_SETTINGS);
   const [isLoading, setIsLoading] = useState(true);
   const [isSaving, setIsSaving] = useState(false);
@@ -36,7 +38,7 @@ export function ProfileSettings() {
       const raw = (data as { value: unknown } | null)?.value;
       if (isProfileSettings(raw)) setSettings(raw);
     } catch {
-      showMessage('error', 'Failed to load settings');
+      showMessage('error', t('admin.profileSettings.loadError'));
     } finally {
       setIsLoading(false);
     }
@@ -55,9 +57,9 @@ export function ProfileSettings() {
       });
 
       if (error) throw error;
-      showMessage('success', 'Settings saved successfully');
+      showMessage('success', t('admin.profileSettings.saveSuccess'));
     } catch {
-      showMessage('error', 'Failed to save settings');
+      showMessage('error', t('admin.profileSettings.saveError'));
     } finally {
       setIsSaving(false);
     }
@@ -95,7 +97,7 @@ export function ProfileSettings() {
       <div className="space-y-8">
         {/* Header Section */}
         <section className="p-6 bg-gray-50 border border-gray-200 rounded-elegant">
-          <h3 className="font-serif text-xl text-gray-900 mb-6">Header Info</h3>
+          <h3 className="font-serif text-xl text-gray-900 mb-6">{t('admin.profileSettings.headerInfo')}</h3>
 
           <div className="space-y-4">
             <div>
@@ -142,7 +144,7 @@ export function ProfileSettings() {
 
         {/* Stats Section */}
         <section className="p-6 bg-gray-50 border border-gray-200 rounded-elegant">
-          <h3 className="font-serif text-xl text-gray-900 mb-6">Model Stats</h3>
+          <h3 className="font-serif text-xl text-gray-900 mb-6">{t('admin.profileSettings.modelStats')}</h3>
 
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
             {settings.stats.map((stat, index) => (
@@ -168,7 +170,7 @@ export function ProfileSettings() {
                     />
                   </div>
                   <div>
-                    <label className="block text-xs text-gray-500 mb-1">Value</label>
+                    <label className="block text-xs text-gray-500 mb-1">{t('admin.profileSettings.value')}</label>
                     <input
                       type="text"
                       value={stat.value}
@@ -177,7 +179,7 @@ export function ProfileSettings() {
                     />
                   </div>
                   <div>
-                    <label className="block text-xs text-gray-500 mb-1">Unit</label>
+                    <label className="block text-xs text-gray-500 mb-1">{t('admin.profileSettings.unit')}</label>
                     <input
                       type="text"
                       value={stat.unit}
@@ -193,7 +195,7 @@ export function ProfileSettings() {
 
         {/* Biography Section */}
         <section className="p-6 bg-gray-50 border border-gray-200 rounded-elegant">
-          <h3 className="font-serif text-xl text-gray-900 mb-6">Biography</h3>
+          <h3 className="font-serif text-xl text-gray-900 mb-6">{t('admin.profileSettings.biography')}</h3>
 
           <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
             <div>
@@ -226,7 +228,7 @@ export function ProfileSettings() {
             className="flex items-center gap-2 px-6 py-3 bg-black text-white rounded-elegant hover:bg-gray-800 transition-colors disabled:opacity-50"
           >
             <SaveIcon />
-            {isSaving ? 'Saving...' : 'Save Changes'}
+            {isSaving ? t('admin.profileSettings.saving') : t('admin.profileSettings.saveChanges')}
           </button>
         </div>
       </div>

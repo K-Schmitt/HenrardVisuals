@@ -1,3 +1,6 @@
+import { useState } from 'react';
+
+import { useLanguage } from '@/context/LanguageContext';
 import type { Category } from '@/types';
 
 const EditIcon = () => (
@@ -21,6 +24,9 @@ interface CategoryItemProps {
 }
 
 export function CategoryItem({ category, onEdit, onDelete }: CategoryItemProps) {
+  const { t } = useLanguage();
+  const [confirmingDelete, setConfirmingDelete] = useState(false);
+
   return (
     <div className="p-4 bg-white border border-gray-200 rounded-elegant hover:border-gray-300 transition-colors">
       <div className="flex items-start justify-between">
@@ -30,23 +36,42 @@ export function CategoryItem({ category, onEdit, onDelete }: CategoryItemProps) 
           {category.description && (
             <p className="text-sm text-gray-600">{category.description}</p>
           )}
-          <p className="text-xs text-gray-400 mt-2">Order: {category.sort_order}</p>
+          <p className="text-xs text-gray-400 mt-2">{t('admin.categories.order')}: {category.sort_order}</p>
         </div>
         <div className="flex gap-2 ml-4">
-          <button
-            onClick={() => onEdit(category)}
-            className="p-2 text-gray-400 hover:text-black transition-colors"
-            title="Edit"
-          >
-            <EditIcon />
-          </button>
-          <button
-            onClick={() => onDelete(category.id)}
-            className="p-2 text-gray-400 hover:text-red-500 transition-colors"
-            title="Delete"
-          >
-            <TrashIcon />
-          </button>
+          {confirmingDelete ? (
+            <>
+              <button
+                onClick={() => { onDelete(category.id); setConfirmingDelete(false); }}
+                className="px-3 py-1 text-sm bg-red-500 text-white rounded hover:bg-red-600 transition-colors"
+              >
+                {t('admin.categories.confirmDelete')}
+              </button>
+              <button
+                onClick={() => setConfirmingDelete(false)}
+                className="px-3 py-1 text-sm bg-gray-200 text-gray-700 rounded hover:bg-gray-300 transition-colors"
+              >
+                {t('admin.categories.cancelDelete')}
+              </button>
+            </>
+          ) : (
+            <>
+              <button
+                onClick={() => onEdit(category)}
+                className="p-2 text-gray-400 hover:text-black transition-colors"
+                title="Edit"
+              >
+                <EditIcon />
+              </button>
+              <button
+                onClick={() => setConfirmingDelete(true)}
+                className="p-2 text-gray-400 hover:text-red-500 transition-colors"
+                title="Delete"
+              >
+                <TrashIcon />
+              </button>
+            </>
+          )}
         </div>
       </div>
     </div>
