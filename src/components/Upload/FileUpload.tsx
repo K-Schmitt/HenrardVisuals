@@ -2,38 +2,36 @@
 
 import { useState, useRef, useCallback } from 'react';
 
-import { supabase } from '@/lib/supabase';
-
-const UPLOAD_FEEDBACK_TIMEOUT_MS = 3_000;
+import { useFileUpload } from '@/hooks/useFileUpload';
+import type { UploadedFile } from '@/types';
 
 interface FileUploadProps {
   onUploadComplete?: (files: UploadedFile[]) => void;
   onError?: (error: string) => void;
   accept?: string;
-  maxSize?: number; // in bytes
+  maxSize?: number;
   multiple?: boolean;
-  bucket?: string; // Supabase bucket name
-}
-
-interface UploadedFile {
-  name: string;
-  path: string;
-  size: number;
-  publicUrl: string;
+  bucket?: string;
 }
 
 export function FileUpload({
   onUploadComplete,
   onError,
   accept = 'image/jpeg,image/png,image/webp',
-  maxSize = 52428800, // 50MB
+  maxSize = 52428800,
   multiple = true,
   bucket = 'photos',
 }: FileUploadProps) {
   const [isDragging, setIsDragging] = useState(false);
-  const [isUploading, setIsUploading] = useState(false);
-  const [uploadProgress, setUploadProgress] = useState<string[]>([]);
   const inputRef = useRef<HTMLInputElement>(null);
+
+  const { isUploading, uploadProgress, processFiles } = useFileUpload({
+    accept,
+    maxSize,
+    bucket,
+    onUploadComplete,
+    onError,
+  });
 
   const handleDragEnter = useCallback((e: React.DragEvent) => {
     e.preventDefault();
@@ -52,131 +50,34 @@ export function FileUpload({
     e.stopPropagation();
   }, []);
 
-  const processFiles = useCallback(async (files: FileList | File[]) => {
-    const fileArray = Array.from(files);
-
-    if (fileArray.length === 0) return;
-
-    const validateFile = (file: File): string | null => {
-      const allowedTypes = accept.split(',').map((t) => t.trim());
-      if (!allowedTypes.some((type) => file.type.match(type.replace('*', '.*')))) {
-        return `Type "${file.type}" non supporté`;
-      }
-      if (file.size > maxSize) {
-        return `Fichier trop volumineux (max ${Math.round(maxSize / 1024 / 1024)}MB)`;
-      }
-      return null;
-    };
-
-    setIsUploading(true);
-    setUploadProgress([]);
-
-    const uploadedFiles: UploadedFile[] = [];
-    const errors: string[] = [];
-
-    for (const file of fileArray) {
-      const validationError = validateFile(file);
-      if (validationError) {
-        errors.push(`${file.name}: ${validationError}`);
-        continue;
-      }
-
-      setUploadProgress((prev) => [...prev, `Uploading ${file.name}...`]);
-
-      try {
-        // Generate unique filename
-        const timestamp = Date.now();
-        const safeName = file.name.replace(/[^a-zA-Z0-9.-]/g, '_');
-        const filePath = `${timestamp}-${safeName}`;
-
-        // Upload to Supabase Storage
-        const { data, error } = await supabase.storage
-          .from(bucket)
-          .upload(filePath, file, {
-            cacheControl: '3600',
-            upsert: false,
-          });
-
-        if (error) {
-          errors.push(`${file.name}: ${error.message}`);
-        } else {
-          // Get public URL
-          const { data: urlData } = supabase.storage
-            .from(bucket)
-            .getPublicUrl(data.path);
-
-          uploadedFiles.push({
-            name: file.name,
-            path: data.path,
-            size: file.size,
-            publicUrl: urlData.publicUrl,
-          });
-          setUploadProgress((prev) => [
-            ...prev.filter((p) => !p.includes(file.name)),
-            `✓ ${file.name} uploaded`,
-          ]);
-        }
-      } catch (err) {
-        errors.push(
-          `${file.name}: Upload failed - ${err instanceof Error ? err.message : 'Network error'}`
-        );
-      }
-    }
-
-    setIsUploading(false);
-
-    if (uploadedFiles.length > 0) {
-      onUploadComplete?.(uploadedFiles);
-    }
-
-    if (errors.length > 0) {
-      onError?.(errors.join('\n'));
-    }
-
-    setTimeout(() => setUploadProgress([]), UPLOAD_FEEDBACK_TIMEOUT_MS);
-  }, [accept, maxSize, bucket, onUploadComplete, onError]);
-
   const handleDrop = useCallback(
     (e: React.DragEvent) => {
       e.preventDefault();
       e.stopPropagation();
       setIsDragging(false);
-
-      const { files } = e.dataTransfer;
-      processFiles(files);
+      processFiles(e.dataTransfer.files);
     },
     [processFiles]
   );
 
-  const handleClick = () => {
-    inputRef.current?.click();
-  };
-
   const handleInputChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-    const { files } = e.target;
-    if (files) {
-      processFiles(files);
-    }
+    if (e.target.files) processFiles(e.target.files);
     e.target.value = '';
   };
 
   return (
     <div
-      onClick={handleClick}
+      onClick={() => inputRef.current?.click()}
       onDragEnter={handleDragEnter}
       onDragLeave={handleDragLeave}
       onDragOver={handleDragOver}
       onDrop={handleDrop}
       className={`
-                relative p-8 border-2 border-dashed rounded-elegant text-center 
-                transition-all duration-300 cursor-pointer
-                ${
-                  isDragging
-                    ? 'border-black bg-gray-50 scale-[1.02]'
-                    : 'border-gray-300 hover:border-black hover:bg-gray-50'
-                }
-                ${isUploading ? 'pointer-events-none opacity-70' : ''}
-            `}
+        relative p-8 border-2 border-dashed rounded-elegant text-center
+        transition-all duration-300 cursor-pointer
+        ${isDragging ? 'border-black bg-gray-50 scale-[1.02]' : 'border-gray-300 hover:border-black hover:bg-gray-50'}
+        ${isUploading ? 'pointer-events-none opacity-70' : ''}
+      `}
     >
       <input
         ref={inputRef}
