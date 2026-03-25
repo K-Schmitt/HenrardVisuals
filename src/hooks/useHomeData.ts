@@ -18,7 +18,14 @@ export function useHomeData() {
   const [error, setError] = useState<string | null>(null);
 
   // Avoid re-fetching static data (hero, categories, settings) on every page/filter change.
+  // Increment staticDataVersion to force a re-fetch (e.g. after admin edits).
   const staticDataLoaded = useRef(false);
+  const [staticDataVersion, setStaticDataVersion] = useState(0);
+
+  const refreshStaticData = useCallback(() => {
+    staticDataLoaded.current = false;
+    setStaticDataVersion((v) => v + 1);
+  }, []);
 
   useEffect(() => {
     const fetchData = async () => {
@@ -68,7 +75,7 @@ export function useHomeData() {
     };
 
     fetchData();
-  }, [activeFilter, currentPage]);
+  }, [activeFilter, currentPage, staticDataVersion]);
 
   // Wrap setActiveFilter to reset pagination on filter change.
   // Validates that the requested filter exists in the loaded categories;
@@ -96,5 +103,6 @@ export function useHomeData() {
     pageSize: PAGE_SIZE,
     isLoading,
     error,
+    refreshStaticData,
   };
 }
