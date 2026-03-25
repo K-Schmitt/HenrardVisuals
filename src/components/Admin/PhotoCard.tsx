@@ -1,3 +1,5 @@
+import { useState } from 'react';
+
 import { getStorageUrl } from '@/lib/supabase';
 import type { Photo, Category } from '@/types';
 
@@ -18,6 +20,17 @@ export function PhotoCard({
   onDelete,
   onUpdateCategory,
 }: PhotoCardProps) {
+  const [confirmingDelete, setConfirmingDelete] = useState(false);
+
+  const handleDeleteClick = () => {
+    if (confirmingDelete) {
+      onDelete(photo);
+      setConfirmingDelete(false);
+    } else {
+      setConfirmingDelete(true);
+    }
+  };
+
   return (
     <div className="relative bg-gray-50 border border-gray-200 rounded-elegant overflow-hidden">
       <div className="relative group">
@@ -43,12 +56,29 @@ export function PhotoCard({
           >
             {photo.is_hero ? 'Remove Hero' : 'Set as Hero'}
           </button>
-          <button
-            onClick={() => onDelete(photo)}
-            className="px-3 py-1 bg-red-500 text-white rounded text-sm hover:bg-red-600"
-          >
-            Delete
-          </button>
+          {confirmingDelete ? (
+            <>
+              <button
+                onClick={handleDeleteClick}
+                className="px-3 py-1 bg-red-600 text-white rounded text-sm hover:bg-red-700 font-semibold"
+              >
+                Confirmer
+              </button>
+              <button
+                onClick={() => setConfirmingDelete(false)}
+                className="px-3 py-1 bg-gray-500 text-white rounded text-sm hover:bg-gray-600"
+              >
+                Annuler
+              </button>
+            </>
+          ) : (
+            <button
+              onClick={handleDeleteClick}
+              className="px-3 py-1 bg-red-500 text-white rounded text-sm hover:bg-red-600"
+            >
+              Delete
+            </button>
+          )}
         </div>
       </div>
 
