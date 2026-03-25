@@ -120,6 +120,10 @@ export interface Database {
         Update: Partial<Omit<SiteSettingsRow, 'updated_at'>>;
       };
     };
+    // Required by Supabase GenericSchema — empty but present so the client's
+    // overload resolution can distinguish Tables from Views and Functions.
+    Views: Record<string, never>;
+    Functions: Record<string, never>;
   };
 }
 

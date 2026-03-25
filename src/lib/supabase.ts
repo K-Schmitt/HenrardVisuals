@@ -8,14 +8,6 @@ import { createClient } from '@supabase/supabase-js';
 
 import type { Database, PublicTableName } from '@/types';
 
-// When T is a generic type parameter, TypeScript's overload resolution for
-// supabase.from(table) falls back to the `any`-typed overload, making
-// .insert() / .update() / .eq() reject properly-typed arguments.
-// We centralise the single unavoidable cast here; the exported functions'
-// explicit return type annotations act as the authoritative type boundary.
-// eslint-disable-next-line @typescript-eslint/no-explicit-any
-const typedFrom = <T extends PublicTableName>(table: T): any => supabase.from(table);
-
 const supabaseUrl = import.meta.env['VITE_SUPABASE_URL'] as string;
 const supabaseAnonKey = import.meta.env['VITE_SUPABASE_ANON_KEY'] as string;
 
@@ -30,6 +22,13 @@ export const supabase = createClient<Database>(supabaseUrl, supabaseAnonKey, {
     detectSessionInUrl: true,
   },
 });
+
+// When T is a generic type parameter, TypeScript's overload resolution for
+// supabase.from(table) falls back to the `any`-typed overload, making
+// .insert() / .update() / .eq() reject properly-typed arguments.
+// We centralise the single unavoidable cast here — callers stay clean.
+// eslint-disable-next-line @typescript-eslint/no-explicit-any
+export const typedFrom = <T extends PublicTableName>(table: T): any => supabase.from(table);
 
 /**
  * Get public URL for a storage file

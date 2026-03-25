@@ -1,13 +1,16 @@
 import { renderHook, act, waitFor } from '@testing-library/react';
 import { describe, it, expect, vi, beforeEach, afterEach } from 'vitest';
 
-vi.mock('@/lib/supabase', () => ({
-  supabase: {
-    from: vi.fn(),
-  },
-  insertRow: vi.fn().mockResolvedValue({ error: null }),
-  updateRow: vi.fn().mockResolvedValue({ error: null }),
-}));
+vi.mock('@/lib/supabase', () => {
+  const mockFromFn = vi.fn();
+  return {
+    supabase: { from: mockFromFn },
+    // typedFrom delegates to supabase.from — keep them in sync in tests
+    typedFrom: vi.fn((table: string) => mockFromFn(table)),
+    insertRow: vi.fn().mockResolvedValue({ error: null }),
+    updateRow: vi.fn().mockResolvedValue({ error: null }),
+  };
+});
 
 import { useAdminPhotos } from './useAdminPhotos';
 import { supabase, insertRow, updateRow } from '@/lib/supabase';
@@ -83,16 +86,14 @@ describe('useAdminPhotos', () => {
     expect(mockUpdateRow).toHaveBeenCalledWith('photos', '1', { is_published: true });
   });
 
-  it('deletePhoto is skipped when confirm returns false', async () => {
-    vi.spyOn(window, 'confirm').mockReturnValue(false);
+  it('deletePhoto calls delete on the DB (confirmation handled by PhotoCard)', async () => {
     const photo = makePhoto('1');
     const deleteEq = vi.fn().mockResolvedValue({ error: null });
-    const deleteChain = { eq: deleteEq };
 
     mockFrom.mockImplementation(() => ({
       select: vi.fn().mockReturnThis(),
       order: vi.fn().mockResolvedValue({ data: [], error: null }),
-      delete: vi.fn().mockReturnValue(deleteChain),
+      delete: vi.fn().mockReturnValue({ eq: deleteEq }),
       update: vi.fn().mockReturnValue({ neq: vi.fn().mockResolvedValue({ error: null }) }),
     }));
 
@@ -103,7 +104,7 @@ describe('useAdminPhotos', () => {
       await result.current.deletePhoto(photo);
     });
 
-    expect(deleteEq).not.toHaveBeenCalled();
+    expect(deleteEq).toHaveBeenCalledWith('id', '1');
   });
 
   it('toggleHero calls updateRow to set is_hero', async () => {

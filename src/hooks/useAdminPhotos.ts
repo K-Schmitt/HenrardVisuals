@@ -1,6 +1,6 @@
 import { useState, useEffect, useCallback } from 'react';
 
-import { supabase, insertRow, updateRow } from '@/lib/supabase';
+import { supabase, typedFrom, insertRow, updateRow } from '@/lib/supabase';
 import type { Photo, Category, UploadedFile } from '@/types';
 
 interface Message {
@@ -16,6 +16,7 @@ export function useAdminPhotos() {
   const [categories, setCategories] = useState<Category[]>([]);
   const [loadingPhotos, setLoadingPhotos] = useState(false);
   const [message, setMessage] = useState<Message | null>(null);
+  const [error, setError] = useState<string | null>(null);
 
   const showMessage = useCallback((msg: Message, timeout = MESSAGE_TIMEOUT_MS) => {
     setMessage(msg);
@@ -24,15 +25,16 @@ export function useAdminPhotos() {
 
   const fetchPhotos = useCallback(async () => {
     setLoadingPhotos(true);
+    setError(null);
     try {
-      const { data, error } = await supabase
+      const { data, error: fetchError } = await supabase
         .from('photos')
         .select('*')
         .order('created_at', { ascending: false });
-      if (error) throw error;
+      if (fetchError) throw fetchError;
       setPhotos(data ?? []);
     } catch (err) {
-      console.error('Error fetching photos:', err);
+      setError(err instanceof Error ? err.message : 'Erreur lors du chargement des photos');
     } finally {
       setLoadingPhotos(false);
     }
@@ -40,14 +42,14 @@ export function useAdminPhotos() {
 
   const fetchCategories = useCallback(async () => {
     try {
-      const { data, error } = await supabase
+      const { data, error: fetchError } = await supabase
         .from('categories')
         .select('*')
         .order('sort_order', { ascending: true });
-      if (error) throw error;
+      if (fetchError) throw fetchError;
       setCategories(data ?? []);
     } catch (err) {
-      console.error('Error fetching categories:', err);
+      setError(err instanceof Error ? err.message : 'Erreur lors du chargement des catégories');
     }
   }, []);
 
@@ -97,22 +99,26 @@ export function useAdminPhotos() {
         if (error) throw error;
         fetchPhotos();
       } catch (err) {
-        console.error('Error updating photo:', err);
+        const msg = err instanceof Error ? err.message : 'Erreur lors de la mise à jour';
+        setError(msg);
+        showMessage({ type: 'error', text: msg });
       }
     },
-    [fetchPhotos]
+    [fetchPhotos, showMessage]
   );
 
   const deletePhoto = useCallback(
+    // Confirmation is handled by the caller (PhotoCard) — this function deletes unconditionally.
     async (photo: Photo) => {
-      if (!confirm('Êtes-vous sûr de vouloir supprimer cette photo?')) return;
       try {
         const { error } = await supabase.from('photos').delete().eq('id', photo.id);
         if (error) throw error;
         fetchPhotos();
         showMessage({ type: 'success', text: 'Photo supprimée' });
       } catch (err) {
-        console.error('Error deleting photo:', err);
+        const msg = err instanceof Error ? err.message : 'Erreur lors de la suppression';
+        setError(msg);
+        showMessage({ type: 'error', text: msg });
       }
     },
     [fetchPhotos, showMessage]
@@ -126,8 +132,9 @@ export function useAdminPhotos() {
         fetchPhotos();
         showMessage({ type: 'success', text: 'Catégorie mise à jour' });
       } catch (err) {
-        console.error('Error updating photo category:', err);
-        showMessage({ type: 'error', text: 'Erreur lors de la mise à jour' });
+        const msg = err instanceof Error ? err.message : 'Erreur lors de la mise à jour';
+        setError(msg);
+        showMessage({ type: 'error', text: msg });
       }
     },
     [fetchPhotos, showMessage]
@@ -136,9 +143,16 @@ export function useAdminPhotos() {
   const toggleHero = useCallback(
     async (photo: Photo) => {
       try {
+        // Step 1 — clear any existing hero photo.
+        // Note: these two operations are sequential, not transactional.
+        // Use the set_hero_photo() DB function (migration 004) for true atomicity.
         if (!photo.is_hero) {
-          await supabase.from('photos').update({ is_hero: false } as never).neq('id', photo.id);
+          const { error: clearError } = await typedFrom('photos')
+            .update({ is_hero: false })
+            .neq('id', photo.id);
+          if (clearError) throw clearError;
         }
+        // Step 2 — toggle hero on the target photo.
         const { error } = await updateRow('photos', photo.id, { is_hero: !photo.is_hero });
         if (error) throw error;
         fetchPhotos();
@@ -147,8 +161,9 @@ export function useAdminPhotos() {
           text: photo.is_hero ? 'Image héros retirée' : 'Image héros définie',
         });
       } catch (err) {
-        console.error('Error updating hero status:', err);
-        showMessage({ type: 'error', text: 'Erreur lors de la mise à jour' });
+        const msg = err instanceof Error ? err.message : 'Erreur lors de la mise à jour';
+        setError(msg);
+        showMessage({ type: 'error', text: msg });
       }
     },
     [fetchPhotos, showMessage]
@@ -159,6 +174,7 @@ export function useAdminPhotos() {
     categories,
     loadingPhotos,
     message,
+    error,
     saveUploadedFiles,
     togglePublish,
     deletePhoto,
