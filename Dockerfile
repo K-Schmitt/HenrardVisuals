@@ -2,15 +2,19 @@
 # HenrardVisuals - Multi-stage Dockerfile
 # =========================================
 
+# Pin pnpm to a specific version for reproducible builds.
+ARG PNPM_VERSION=8.15.9
+
 # ----------------------------------------
 # Stage 1: Development
 # ----------------------------------------
 FROM node:20-alpine AS development
 
+ARG PNPM_VERSION
+
 WORKDIR /app
 
-# Install pnpm
-RUN corepack enable && corepack prepare pnpm@latest --activate
+RUN corepack enable && corepack prepare pnpm@${PNPM_VERSION} --activate
 
 # Copy package files and install deps as root, then hand off ownership
 COPY --chown=node:node package.json pnpm-lock.yaml* ./
@@ -29,10 +33,11 @@ CMD ["pnpm", "dev", "--host", "0.0.0.0"]
 # ----------------------------------------
 FROM node:20-alpine AS builder
 
+ARG PNPM_VERSION
+
 WORKDIR /app
 
-# Install pnpm
-RUN corepack enable && corepack prepare pnpm@latest --activate
+RUN corepack enable && corepack prepare pnpm@${PNPM_VERSION} --activate
 
 COPY --chown=node:node package.json pnpm-lock.yaml* ./
 RUN pnpm install --frozen-lockfile
@@ -58,38 +63,8 @@ FROM nginx:alpine AS production
 # Copy built assets from builder
 COPY --from=builder /app/dist /usr/share/nginx/html
 
-# Inline nginx config: SPA routing, gzip, aggressive asset caching
-RUN echo 'server { \
-    listen 80; \
-    listen [::]:80; \
-    root /usr/share/nginx/html; \
-    index index.html; \
-    \
-    gzip on; \
-    gzip_vary on; \
-    gzip_min_length 1024; \
-    gzip_proxied any; \
-    gzip_comp_level 6; \
-    gzip_types text/plain text/css text/xml application/json application/javascript application/rss+xml application/atom+xml image/svg+xml; \
-    \
-    location ~* \.(js|css|png|jpg|jpeg|gif|ico|svg|woff|woff2|ttf|eot|webp)$ { \
-        expires 1y; \
-        add_header Cache-Control "public, immutable"; \
-        access_log off; \
-    } \
-    \
-    location ~* \.html$ { \
-        expires -1; \
-        add_header Cache-Control "no-store, no-cache, must-revalidate, proxy-revalidate, max-age=0"; \
-        add_header Pragma "no-cache"; \
-    } \
-    \
-    location / { \
-        try_files $uri $uri/ /index.html; \
-        add_header Cache-Control "no-store, no-cache, must-revalidate, proxy-revalidate, max-age=0"; \
-        add_header Pragma "no-cache"; \
-    } \
-}' > /etc/nginx/conf.d/default.conf
+# Replace default nginx config with our SPA config + security headers
+COPY nginx/default.conf /etc/nginx/conf.d/default.conf
 
 RUN rm -f /etc/nginx/nginx.conf.default
 
