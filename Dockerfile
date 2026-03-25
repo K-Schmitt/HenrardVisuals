@@ -16,13 +16,14 @@ WORKDIR /app
 
 RUN corepack enable && corepack prepare pnpm@${PNPM_VERSION} --activate
 
-# Copy package files and install deps as root, then hand off ownership
-COPY --chown=node:node package.json pnpm-lock.yaml* ./
+COPY package.json pnpm-lock.yaml* ./
 RUN pnpm install --frozen-lockfile
 
-COPY --chown=node:node . .
+COPY . .
+# Transfer ownership of the entire working tree so the node user
+# can run the dev server and write its cache files.
+RUN chown -R node:node /app
 
-# Drop to non-root user
 USER node
 
 EXPOSE 5173
@@ -39,18 +40,17 @@ WORKDIR /app
 
 RUN corepack enable && corepack prepare pnpm@${PNPM_VERSION} --activate
 
-COPY --chown=node:node package.json pnpm-lock.yaml* ./
+COPY package.json pnpm-lock.yaml* ./
 RUN pnpm install --frozen-lockfile
 
-COPY --chown=node:node . .
+COPY . .
 
 # Build arguments for Vite environment
 ARG VITE_SUPABASE_URL
 ARG VITE_SUPABASE_ANON_KEY
 
-# Drop to non-root user before building
-USER node
-
+# Build runs as root — the builder stage only produces /app/dist,
+# which is copied into the nginx image. Non-root only matters for runtime.
 RUN pnpm build
 
 # ----------------------------------------
