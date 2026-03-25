@@ -1,6 +1,6 @@
-import { getStorageUrl } from '@/lib/supabase';
 import { OptimizedImage } from '@/components/OptimizedImage';
 import { useLanguage } from '@/context/LanguageContext';
+import { getStorageUrl } from '@/lib/supabase';
 import type { Photo, ProfileSettings } from '@/types';
 
 interface HeroSectionProps {

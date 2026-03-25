@@ -1,52 +1,65 @@
-import { useState, useEffect, useCallback, useMemo } from 'react';
+import { useState, useEffect, useCallback, useRef } from 'react';
+
+import { DEFAULT_PROFILE_SETTINGS } from '@/constants/profileDefaults';
 import { supabase } from '@/lib/supabase';
 import type { Photo, Category, ProfileSettings } from '@/types';
 
-const DEFAULT_PROFILE: ProfileSettings = {
-  subtitle: 'диво дьявола • Life is but a dream',
-  stats: [
-    { value: '188', unit: "6' 2\"", label: 'HEIGHT' },
-    { value: '94', unit: '37"', label: 'CHEST' },
-    { value: '74', unit: '29"', label: 'WAIST' },
-    { value: '92', unit: '36"', label: 'HIPS' },
-    { value: '44', unit: 'EU', label: 'SHOES' },
-  ],
-  attributes: 'Hair: Platinum Blonde | Eyes: Blue',
-  biography:
-    'Blending the stark elegance of Parisian editorial with the raw, chaotic energy of the underground, Tristan embodies a modern duality.',
-};
+export const PAGE_SIZE = 12;
 
 export function useHomeData() {
   const [photos, setPhotos] = useState<Photo[]>([]);
   const [heroPhoto, setHeroPhoto] = useState<Photo | null>(null);
   const [categories, setCategories] = useState<Category[]>([]);
-  const [profileSettings, setProfileSettings] = useState<ProfileSettings>(DEFAULT_PROFILE);
-  const [activeFilter, setActiveFilter] = useState<string>('All');
-  const [selectedPhoto, setSelectedPhoto] = useState<Photo | null>(null);
+  const [profileSettings, setProfileSettings] = useState<ProfileSettings>(DEFAULT_PROFILE_SETTINGS);
+  const [activeFilter, setActiveFilterState] = useState<string>('All');
+  const [currentPage, setCurrentPage] = useState(0);
+  const [totalCount, setTotalCount] = useState(0);
   const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
 
+  // Avoid re-fetching static data (hero, categories, settings) on every page/filter change.
+  const staticDataLoaded = useRef(false);
+
   useEffect(() => {
-    const fetchAllData = async () => {
+    const fetchData = async () => {
+      setIsLoading(true);
       try {
-        const [settingsRes, categoriesRes, photosRes] = await Promise.all([
-          supabase.from('site_settings').select('value').eq('key', 'profile_settings').maybeSingle(),
-          supabase.from('categories').select('*').order('sort_order', { ascending: true }),
-          supabase
-            .from('photos')
-            .select('*')
-            .eq('is_published', true)
-            .order('sort_order', { ascending: true }),
-        ]);
+        if (!staticDataLoaded.current) {
+          const [settingsRes, categoriesRes, heroRes] = await Promise.all([
+            supabase.from('site_settings').select('value').eq('key', 'profile_settings').maybeSingle(),
+            supabase.from('categories').select('*').order('sort_order', { ascending: true }),
+            supabase.from('photos').select('*').eq('is_hero', true).eq('is_published', true).maybeSingle(),
+          ]);
 
-        const settingsData = settingsRes.data as { value: ProfileSettings } | null;
-        if (settingsData?.value) setProfileSettings(settingsData.value);
+          const settingsData = settingsRes.data as { value: ProfileSettings } | null;
+          if (settingsData?.value) setProfileSettings(settingsData.value);
+          setCategories((categoriesRes.data ?? []) as Category[]);
+          setHeroPhoto(heroRes.data as Photo | null);
+          staticDataLoaded.current = true;
+        }
 
-        setCategories((categoriesRes.data ?? []) as Category[]);
+        let photosQuery = supabase
+          .from('photos')
+          .select('*', { count: 'exact' })
+          .eq('is_published', true)
+          .eq('is_hero', false);
 
-        const allPhotos = (photosRes.data ?? []) as Photo[];
-        setHeroPhoto(allPhotos.find((p) => p.is_hero) ?? null);
-        setPhotos(allPhotos.filter((p) => !p.is_hero));
+        if (activeFilter !== 'All') {
+          photosQuery = photosQuery.eq('category', activeFilter);
+        }
+
+        // Offset pagination is appropriate for a portfolio with a small dataset
+        // (< a few thousand rows). For larger datasets, keyset pagination using
+        // a stable cursor (e.g. sort_order + id) would eliminate the N-row scan
+        // overhead and avoid duplicate/skipped rows on concurrent inserts.
+        const safePage = Math.max(0, currentPage);
+        const { data, count, error: photosError } = await photosQuery
+          .order('sort_order', { ascending: true })
+          .range(safePage * PAGE_SIZE, (safePage + 1) * PAGE_SIZE - 1);
+        if (photosError) throw photosError;
+
+        setPhotos((data ?? []) as Photo[]);
+        setTotalCount(count ?? 0);
       } catch (err) {
         setError(err instanceof Error ? err.message : 'Failed to load');
       } finally {
@@ -54,51 +67,33 @@ export function useHomeData() {
       }
     };
 
-    fetchAllData();
-  }, []);
+    fetchData();
+  }, [activeFilter, currentPage]);
 
-  const filteredPhotos = useMemo(
-    () => (activeFilter === 'All' ? photos : photos.filter((p) => p.category === activeFilter)),
-    [photos, activeFilter]
+  // Wrap setActiveFilter to reset pagination on filter change.
+  // Validates that the requested filter exists in the loaded categories;
+  // unknown slugs (e.g. stale bookmarks) fall back to 'All' instead of
+  // producing an empty gallery with no feedback.
+  const setActiveFilter = useCallback(
+    (filter: string) => {
+      const isValid = filter === 'All' || categories.some((c) => c.slug === filter);
+      setCurrentPage(0);
+      setActiveFilterState(isValid ? filter : 'All');
+    },
+    [categories]
   );
 
-  const closeModal = useCallback(() => setSelectedPhoto(null), []);
-
-  const goToPreviousPhoto = useCallback(() => {
-    if (!selectedPhoto) return;
-    const idx = filteredPhotos.findIndex((p) => p.id === selectedPhoto.id);
-    setSelectedPhoto(filteredPhotos[idx > 0 ? idx - 1 : filteredPhotos.length - 1]);
-  }, [selectedPhoto, filteredPhotos]);
-
-  const goToNextPhoto = useCallback(() => {
-    if (!selectedPhoto) return;
-    const idx = filteredPhotos.findIndex((p) => p.id === selectedPhoto.id);
-    setSelectedPhoto(filteredPhotos[idx < filteredPhotos.length - 1 ? idx + 1 : 0]);
-  }, [selectedPhoto, filteredPhotos]);
-
-  useEffect(() => {
-    if (!selectedPhoto) return;
-    const handleKeyDown = (e: KeyboardEvent) => {
-      if (e.key === 'Escape') closeModal();
-      else if (e.key === 'ArrowLeft') goToPreviousPhoto();
-      else if (e.key === 'ArrowRight') goToNextPhoto();
-    };
-    window.addEventListener('keydown', handleKeyDown);
-    return () => window.removeEventListener('keydown', handleKeyDown);
-  }, [selectedPhoto, closeModal, goToPreviousPhoto, goToNextPhoto]);
-
   return {
-    filteredPhotos,
+    photos,
     heroPhoto,
     categories,
     profileSettings,
     activeFilter,
     setActiveFilter,
-    selectedPhoto,
-    setSelectedPhoto,
-    closeModal,
-    goToPreviousPhoto,
-    goToNextPhoto,
+    currentPage,
+    setCurrentPage,
+    totalCount,
+    pageSize: PAGE_SIZE,
     isLoading,
     error,
   };
