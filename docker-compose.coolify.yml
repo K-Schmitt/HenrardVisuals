@@ -3,8 +3,6 @@
 # Frontend uniquement (Supabase externe)
 # =========================================
 
-version: '3.8'
-
 services:
   # ----------------------------------------
   # Frontend (React + Nginx)

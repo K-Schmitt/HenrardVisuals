@@ -16,7 +16,7 @@ WORKDIR /app
 
 RUN corepack enable && corepack prepare pnpm@${PNPM_VERSION} --activate
 
-COPY package.json pnpm-lock.yaml* ./
+COPY package.json pnpm-lock.yaml ./
 RUN pnpm install --frozen-lockfile
 
 COPY . .
@@ -40,7 +40,7 @@ WORKDIR /app
 
 RUN corepack enable && corepack prepare pnpm@${PNPM_VERSION} --activate
 
-COPY package.json pnpm-lock.yaml* ./
+COPY package.json pnpm-lock.yaml ./
 RUN pnpm install --frozen-lockfile
 
 COPY . .
