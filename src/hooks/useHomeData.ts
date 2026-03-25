@@ -1,6 +1,6 @@
 import { useState, useEffect, useCallback, useRef } from 'react';
 
-import { DEFAULT_PROFILE_SETTINGS } from '@/constants/profileDefaults';
+import { DEFAULT_PROFILE_SETTINGS, isProfileSettings } from '@/constants/profileDefaults';
 import { supabase } from '@/lib/supabase';
 import type { Photo, Category, ProfileSettings } from '@/types';
 
@@ -31,8 +31,8 @@ export function useHomeData() {
             supabase.from('photos').select('*').eq('is_hero', true).eq('is_published', true).maybeSingle(),
           ]);
 
-          const settingsData = settingsRes.data as { value: ProfileSettings } | null;
-          if (settingsData?.value) setProfileSettings(settingsData.value);
+          const raw = (settingsRes.data as { value: unknown } | null)?.value;
+          if (isProfileSettings(raw)) setProfileSettings(raw);
           setCategories((categoriesRes.data ?? []) as Category[]);
           setHeroPhoto(heroRes.data as Photo | null);
           staticDataLoaded.current = true;

@@ -1,5 +1,15 @@
 import type { ProfileSettings } from '@/types';
 
+export function isProfileSettings(v: unknown): v is ProfileSettings {
+  return (
+    typeof v === 'object' &&
+    v !== null &&
+    'subtitle' in v &&
+    'stats' in v &&
+    Array.isArray((v as ProfileSettings).stats)
+  );
+}
+
 export const DEFAULT_PROFILE_SETTINGS: ProfileSettings = {
   subtitle: 'диво дьявола • Life is but a dream',
   stats: [
