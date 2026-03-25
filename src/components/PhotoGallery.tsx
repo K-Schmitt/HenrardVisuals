@@ -1,6 +1,6 @@
 import { OptimizedImage } from '@/components/OptimizedImage';
-import { getStorageUrl } from '@/lib/supabase';
 import { useLanguage } from '@/context/LanguageContext';
+import { getStorageUrl } from '@/lib/supabase';
 import type { Photo, Category } from '@/types';
 
 interface PhotoGalleryProps {
@@ -11,6 +11,10 @@ interface PhotoGalleryProps {
   onPhotoClick: (photo: Photo) => void;
   isLoading: boolean;
   error: string | null;
+  currentPage: number;
+  totalCount: number;
+  pageSize: number;
+  onPageChange: (page: number) => void;
 }
 
 export function PhotoGallery({
@@ -21,8 +25,15 @@ export function PhotoGallery({
   onPhotoClick,
   isLoading,
   error,
+  currentPage,
+  totalCount,
+  pageSize,
+  onPageChange,
 }: PhotoGalleryProps) {
   const { t } = useLanguage();
+  const totalPages = Math.ceil(totalCount / pageSize);
+  const hasPrevious = currentPage > 0;
+  const hasNext = currentPage < totalPages - 1;
 
   return (
     <section className="px-8 py-20 lg:px-16">
@@ -38,7 +49,7 @@ export function PhotoGallery({
                 : 'text-gray-500 hover:text-gray-300'
             }`}
           >
-            {t('Tout', 'All')}
+            {t('gallery.all')}
           </button>
           {categories.map((cat) => (
             <button
@@ -69,7 +80,7 @@ export function PhotoGallery({
             onClick={() => window.location.reload()}
             className="px-6 py-2 border border-white hover:bg-white hover:text-black transition-colors"
           >
-            {t('Réessayer', 'Retry')}
+            {t('gallery.retry')}
           </button>
         </div>
       )}
@@ -92,7 +103,30 @@ export function PhotoGallery({
 
       {!isLoading && !error && photos.length === 0 && (
         <div className="text-center py-20">
-          <p className="text-gray-400">{t('Aucune photo trouvée', 'No photos found')}</p>
+          <p className="text-gray-400">{t('gallery.empty')}</p>
+        </div>
+      )}
+      {!isLoading && !error && totalPages > 1 && (
+        <div className="flex justify-center items-center gap-6 mt-16">
+          <button
+            onClick={() => onPageChange(currentPage - 1)}
+            disabled={!hasPrevious}
+            className="px-6 py-2 border border-white text-sm uppercase tracking-wider hover:bg-white hover:text-black transition-colors disabled:opacity-30 disabled:cursor-not-allowed"
+            aria-label="Page précédente"
+          >
+            ←
+          </button>
+          <span className="text-sm text-gray-400 tracking-wider">
+            {currentPage + 1} / {totalPages}
+          </span>
+          <button
+            onClick={() => onPageChange(currentPage + 1)}
+            disabled={!hasNext}
+            className="px-6 py-2 border border-white text-sm uppercase tracking-wider hover:bg-white hover:text-black transition-colors disabled:opacity-30 disabled:cursor-not-allowed"
+            aria-label="Page suivante"
+          >
+            →
+          </button>
         </div>
       )}
     </section>
