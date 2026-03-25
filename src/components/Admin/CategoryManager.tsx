@@ -36,8 +36,7 @@ export function CategoryManager() {
         .order('sort_order', { ascending: true });
       if (error) throw error;
       setCategories(data || []);
-    } catch (err) {
-      console.error('Error fetching categories:', err);
+    } catch {
       showMessage('error', 'Failed to load categories');
     } finally {
       setIsLoading(false);
@@ -99,8 +98,7 @@ export function CategoryManager() {
       }
       cancelEdit();
       fetchCategories();
-    } catch (err) {
-      console.error('Error saving category:', err);
+    } catch {
       showMessage('error', 'Failed to save category');
     }
   };
@@ -112,8 +110,7 @@ export function CategoryManager() {
       if (error) throw error;
       showMessage('success', 'Category deleted successfully');
       fetchCategories();
-    } catch (err) {
-      console.error('Error deleting category:', err);
+    } catch {
       showMessage('error', 'Failed to delete category');
     }
   };

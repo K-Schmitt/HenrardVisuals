@@ -61,6 +61,7 @@ export function useAdminPhotos() {
   const saveUploadedFiles = useCallback(
     async (files: UploadedFile[]) => {
       let saved = 0;
+      const errors: string[] = [];
       for (const file of files) {
         try {
           const { error } = await insertRow('photos', {
@@ -79,14 +80,22 @@ export function useAdminPhotos() {
             metadata: {},
           });
           if (!error) saved++;
+          else errors.push(error.message);
         } catch (err) {
-          console.error('Error saving photo:', err);
+          errors.push(err instanceof Error ? err.message : 'Erreur inconnue');
         }
       }
-      showMessage(
-        { type: 'success', text: `${saved}/${files.length} photo(s) enregistrée(s)!` },
-        UPLOAD_MESSAGE_TIMEOUT_MS
-      );
+      if (errors.length > 0) {
+        showMessage(
+          { type: 'error', text: `${errors.length} erreur(s): ${errors[0]}` },
+          UPLOAD_MESSAGE_TIMEOUT_MS
+        );
+      } else {
+        showMessage(
+          { type: 'success', text: `${saved}/${files.length} photo(s) enregistrée(s)!` },
+          UPLOAD_MESSAGE_TIMEOUT_MS
+        );
+      }
       fetchPhotos();
     },
     [fetchPhotos, showMessage]
@@ -169,6 +178,11 @@ export function useAdminPhotos() {
     [fetchPhotos, showMessage]
   );
 
+  const showError = useCallback(
+    (text: string) => showMessage({ type: 'error', text }),
+    [showMessage]
+  );
+
   return {
     photos,
     categories,
@@ -176,6 +190,7 @@ export function useAdminPhotos() {
     message,
     error,
     saveUploadedFiles,
+    showError,
     togglePublish,
     deletePhoto,
     updatePhotoCategory,

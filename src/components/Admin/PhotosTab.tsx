@@ -9,6 +9,7 @@ export function PhotosTab() {
     loadingPhotos,
     message,
     saveUploadedFiles,
+    showError,
     togglePublish,
     deletePhoto,
     updatePhotoCategory,
@@ -33,7 +34,7 @@ export function PhotosTab() {
         <h2 className="font-serif text-xl text-gray-900 mb-4">Upload Photos</h2>
         <FileUpload
           onUploadComplete={saveUploadedFiles}
-          onError={(err) => console.error('Upload error:', err)}
+          onError={showError}
         />
       </section>
 

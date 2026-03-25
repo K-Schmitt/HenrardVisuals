@@ -1,7 +1,7 @@
 import { useState, useEffect, useCallback } from 'react';
 
-import { DEFAULT_PROFILE_SETTINGS } from '@/constants/profileDefaults';
-import { supabase } from '@/lib/supabase';
+import { DEFAULT_PROFILE_SETTINGS, isProfileSettings } from '@/constants/profileDefaults';
+import { typedFrom } from '@/lib/supabase';
 import type { ProfileSettings as ProfileSettingsType } from '@/types';
 
 // SVG Icon inline
@@ -26,19 +26,16 @@ export function ProfileSettings() {
 
   const fetchSettings = useCallback(async () => {
     try {
-      const { data, error } = await supabase
-        .from('site_settings')
+      const { data, error } = await typedFrom('site_settings')
         .select('value')
         .eq('key', 'profile_settings')
         .single();
 
       if (error && error.code !== 'PGRST116') throw error;
 
-      if (data) {
-        setSettings((data as { value: ProfileSettingsType }).value);
-      }
-    } catch (err) {
-      console.error('Error fetching settings:', err);
+      const raw = (data as { value: unknown } | null)?.value;
+      if (isProfileSettings(raw)) setSettings(raw);
+    } catch {
       showMessage('error', 'Failed to load settings');
     } finally {
       setIsLoading(false);
@@ -52,15 +49,14 @@ export function ProfileSettings() {
   const handleSave = async () => {
     setIsSaving(true);
     try {
-      const { error } = await supabase.from('site_settings').upsert({
+      const { error } = await typedFrom('site_settings').upsert({
         key: 'profile_settings',
         value: settings,
-      } as never);
+      });
 
       if (error) throw error;
       showMessage('success', 'Settings saved successfully');
-    } catch (err) {
-      console.error('Error saving settings:', err);
+    } catch {
       showMessage('error', 'Failed to save settings');
     } finally {
       setIsSaving(false);
