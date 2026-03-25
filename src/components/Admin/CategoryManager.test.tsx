@@ -1,6 +1,6 @@
 import { render, screen, fireEvent, waitFor, act } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
-import { describe, it, expect, vi, beforeEach, afterEach } from 'vitest';
+import { describe, it, expect, vi, beforeEach } from 'vitest';
 
 vi.mock('@/lib/supabase', () => ({
   supabase: {
@@ -11,6 +11,7 @@ vi.mock('@/lib/supabase', () => ({
 }));
 
 import { CategoryManager } from './CategoryManager';
+import { LanguageProvider } from '@/context/LanguageContext';
 import { supabase, insertRow, updateRow } from '@/lib/supabase';
 import type { Category } from '@/types';
 
@@ -31,6 +32,9 @@ function setupCategories(categories: Category[]) {
   }));
 }
 
+const renderManager = () =>
+  render(<LanguageProvider><CategoryManager /></LanguageProvider>);
+
 beforeEach(() => {
   vi.clearAllMocks();
   setupCategories([]);
@@ -38,32 +42,32 @@ beforeEach(() => {
 
 describe('CategoryManager', () => {
   it('renders a loading spinner initially', () => {
-    render(<CategoryManager />);
+    renderManager();
     expect(document.querySelector('.animate-spin')).toBeInTheDocument();
   });
 
   it('renders the category list after loading', async () => {
     setupCategories([makeCategory('1', 'Editorial'), makeCategory('2', 'Runway')]);
-    render(<CategoryManager />);
+    renderManager();
     await waitFor(() => expect(screen.getByText('Editorial')).toBeInTheDocument());
     expect(screen.getByText('Runway')).toBeInTheDocument();
   });
 
   it('shows empty state when there are no categories', async () => {
     setupCategories([]);
-    render(<CategoryManager />);
+    renderManager();
     await waitFor(() => expect(screen.getByText('No categories yet')).toBeInTheDocument());
   });
 
   it('"New Category" button shows the create form', async () => {
-    render(<CategoryManager />);
+    renderManager();
     await waitFor(() => screen.getByText('New Category'));
     fireEvent.click(screen.getByText('New Category'));
     expect(screen.getByText('Create New Category')).toBeInTheDocument();
   });
 
   it('auto-populates slug when name is typed', async () => {
-    render(<CategoryManager />);
+    renderManager();
     await waitFor(() => screen.getByText('New Category'));
     fireEvent.click(screen.getByText('New Category'));
 
@@ -75,7 +79,7 @@ describe('CategoryManager', () => {
   });
 
   it('Save calls insertRow when creating a new category', async () => {
-    render(<CategoryManager />);
+    renderManager();
     await waitFor(() => screen.getByText('New Category'));
     fireEvent.click(screen.getByText('New Category'));
 
@@ -95,7 +99,7 @@ describe('CategoryManager', () => {
 
   it('clicking Edit populates the form with category data', async () => {
     setupCategories([makeCategory('1', 'Runway')]);
-    render(<CategoryManager />);
+    renderManager();
 
     await waitFor(() => screen.getByText('Runway'));
     fireEvent.click(screen.getByTitle('Edit'));
@@ -109,7 +113,7 @@ describe('CategoryManager', () => {
 
   it('Save in edit mode calls updateRow', async () => {
     setupCategories([makeCategory('cat-1', 'Runway')]);
-    render(<CategoryManager />);
+    renderManager();
 
     await waitFor(() => screen.getByText('Runway'));
     fireEvent.click(screen.getByTitle('Edit'));
@@ -124,25 +128,43 @@ describe('CategoryManager', () => {
     );
   });
 
-  it('Delete is skipped when confirm returns false', async () => {
-    vi.spyOn(window, 'confirm').mockReturnValue(false);
+  it('Cancel in two-step delete does not call delete', async () => {
     setupCategories([makeCategory('1', 'Editorial')]);
-    render(<CategoryManager />);
+    renderManager();
 
     await waitFor(() => screen.getByText('Editorial'));
 
-    const deleteBtn = screen.getByTitle('Delete');
-    // Reset call count before the test action
     mockFrom.mockClear();
-    fireEvent.click(deleteBtn);
+    fireEvent.click(screen.getByTitle('Delete'));
 
-    // confirm returned false so no delete should have been attempted
+    // Confirm/Cancel buttons appear; click Cancel
+    expect(screen.getByText('Confirm')).toBeInTheDocument();
+    fireEvent.click(screen.getByText('Cancel'));
+
+    // No delete query should have been made
     expect(mockFrom).not.toHaveBeenCalled();
+    // Trash button should be restored
+    expect(screen.getByTitle('Delete')).toBeInTheDocument();
+  });
+
+  it('Confirm in two-step delete calls supabase delete', async () => {
+    setupCategories([makeCategory('del-1', 'Runway')]);
+    renderManager();
+
+    await waitFor(() => screen.getByText('Runway'));
+
+    fireEvent.click(screen.getByTitle('Delete'));
+    expect(screen.getByText('Confirm')).toBeInTheDocument();
+
+    mockFrom.mockClear();
+    fireEvent.click(screen.getByText('Confirm'));
+
+    await waitFor(() => expect(mockFrom).toHaveBeenCalled());
   });
 
   it('success message disappears after 3 seconds', async () => {
     vi.useFakeTimers({ shouldAdvanceTime: true });
-    render(<CategoryManager />);
+    renderManager();
     await waitFor(() => screen.getByText('New Category'));
     fireEvent.click(screen.getByText('New Category'));
 
