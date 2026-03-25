@@ -36,7 +36,10 @@ export function LanguageProvider({ children }: { children: ReactNode }) {
   // Memoised so consumers only re-render when the language actually changes,
   // not on every render of the provider.
   const t = useCallback(
-    (key: TKey, options?: TOptions) => i18n.t(key, options),
+    // Cast required: i18n.t overloads are too narrow for the union TKey.
+    // Type safety is enforced at the interface level above.
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    (key: TKey, options?: TOptions) => i18n.t(key as any, options as any) as string,
     // language is the only reactive dependency — when it changes, i18n.t
     // will return translations for the new locale on the next render.
     // eslint-disable-next-line react-hooks/exhaustive-deps
