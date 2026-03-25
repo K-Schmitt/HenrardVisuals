@@ -1,13 +1,21 @@
-import { createContext, useContext, useState, type ReactNode } from 'react';
+import { createContext, useCallback, useContext, useState, type ReactNode } from 'react';
 
 import i18n from '@/i18n';
 
+// Activate i18next module augmentation so t() only accepts valid keys.
+import '@/i18n/i18next.d.ts';
+
 type Language = 'fr' | 'en';
+
+// Derive valid key type from the augmented i18n.t signature — callers of
+// useLanguage().t() get compile-time key checking at no extra cost.
+type TKey = Parameters<typeof i18n.t>[0];
+type TOptions = Record<string, unknown>;
 
 interface LanguageContextType {
   language: Language;
   setLanguage: (lang: Language) => void;
-  t: (key: string) => string;
+  t: (key: TKey, options?: TOptions) => string;
 }
 
 const LanguageContext = createContext<LanguageContextType | undefined>(undefined);
@@ -25,8 +33,15 @@ export function LanguageProvider({ children }: { children: ReactNode }) {
     i18n.changeLanguage(lang);
   };
 
-  // Re-create t on every render so consumers re-evaluate translations when language changes.
-  const t = (key: string) => i18n.t(key);
+  // Memoised so consumers only re-render when the language actually changes,
+  // not on every render of the provider.
+  const t = useCallback(
+    (key: TKey, options?: TOptions) => i18n.t(key, options),
+    // language is the only reactive dependency — when it changes, i18n.t
+    // will return translations for the new locale on the next render.
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+    [language]
+  );
 
   return (
     <LanguageContext.Provider value={{ language, setLanguage, t }}>
