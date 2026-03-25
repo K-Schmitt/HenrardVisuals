@@ -1,13 +1,21 @@
 import type { ProfileSettings } from '@/types';
 
 export function isProfileSettings(v: unknown): v is ProfileSettings {
-  return (
-    typeof v === 'object' &&
-    v !== null &&
-    'subtitle' in v &&
-    'stats' in v &&
-    Array.isArray((v as ProfileSettings).stats)
-  );
+  if (typeof v !== 'object' || v === null) return false;
+  const s = v as Record<string, unknown>;
+  if (typeof s['subtitle'] !== 'string') return false;
+  if (typeof s['attributes'] !== 'string') return false;
+  if (typeof s['biography'] !== 'string') return false;
+  if (!Array.isArray(s['stats'])) return false;
+  return (s['stats'] as unknown[]).every((item) => {
+    if (typeof item !== 'object' || item === null) return false;
+    const stat = item as Record<string, unknown>;
+    return (
+      typeof stat['value'] === 'string' &&
+      typeof stat['unit'] === 'string' &&
+      typeof stat['label'] === 'string'
+    );
+  });
 }
 
 export const DEFAULT_PROFILE_SETTINGS: ProfileSettings = {
