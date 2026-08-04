@@ -9,9 +9,11 @@
 -- prêt. Les deux blocs ci-dessous vérifient donc que ces tables
 -- existent avant d'écrire dedans : au tout premier boot ils
 -- s'abstiennent (NOTICE) plutôt que d'échouer et de bloquer les
--- migrations suivantes ; rejoués plus tard contre une stack déjà
--- démarrée (cf. docs/SETUP.md, docs/DEPLOY.md), ils s'appliquent
--- normalement.
+-- migrations suivantes. Une fois la stack complète (storage-api compris)
+-- démarrée, ce fichier ET la section storage de 003_rls_admin_only.sql
+-- doivent être rejoués une fois pour créer le bucket et ses policies —
+-- commande exacte dans README.md, docs/SETUP.md et docs/DEPLOY.md
+-- ("Initialize the database").
 -- =========================================
 
 -- ----------------------------------------
