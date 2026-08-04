@@ -1,5 +1,5 @@
 import { renderHook, act, waitFor } from '@testing-library/react';
-import { describe, it, expect, vi, beforeEach, afterEach } from 'vitest';
+import { describe, it, expect, vi, beforeEach } from 'vitest';
 
 vi.mock('@/lib/supabase', () => {
   const mockFromFn = vi.fn();
@@ -13,6 +13,7 @@ vi.mock('@/lib/supabase', () => {
 });
 
 import { useAdminPhotos } from './useAdminPhotos';
+
 import { supabase, insertRow, updateRow } from '@/lib/supabase';
 import type { Photo, UploadedFile } from '@/types';
 
