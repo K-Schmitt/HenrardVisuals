@@ -8,7 +8,7 @@ ARG PNPM_VERSION=8.15.9
 # ----------------------------------------
 # Stage 1: Development
 # ----------------------------------------
-FROM node:20-alpine AS development
+FROM node:26-alpine AS development
 
 ARG PNPM_VERSION
 
@@ -32,7 +32,7 @@ CMD ["pnpm", "dev", "--host", "0.0.0.0"]
 # ----------------------------------------
 # Stage 2: Builder
 # ----------------------------------------
-FROM node:20-alpine AS builder
+FROM node:26-alpine AS builder
 
 ARG PNPM_VERSION
 
