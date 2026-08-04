@@ -1,5 +1,6 @@
-import { useState, useEffect, useCallback } from 'react';
+import { useState, useEffect, useCallback, useRef } from 'react';
 
+import { useLanguage } from '@/context/LanguageContext';
 import { supabase, typedFrom, updateRow } from '@/lib/supabase';
 import type { Photo, Category, UploadedFile } from '@/types';
 
@@ -17,6 +18,13 @@ export function useAdminPhotos() {
   const [loadingPhotos, setLoadingPhotos] = useState(false);
   const [message, setMessage] = useState<Message | null>(null);
   const [error, setError] = useState<string | null>(null);
+  const { t } = useLanguage();
+
+  // Through a ref for the same reason as CategoryManager: t's identity changes
+  // on every language switch, and these callbacks feed a useEffect that would
+  // then refetch everything on each FR/EN toggle.
+  const tRef = useRef(t);
+  tRef.current = t;
 
   const showMessage = useCallback((msg: Message, timeout = MESSAGE_TIMEOUT_MS) => {
     setMessage(msg);
@@ -34,7 +42,7 @@ export function useAdminPhotos() {
       if (fetchError) throw fetchError;
       setPhotos(data ?? []);
     } catch (err) {
-      setError(err instanceof Error ? err.message : 'Erreur lors du chargement des photos');
+      setError(err instanceof Error ? err.message : tRef.current('admin.photos.loadError'));
     } finally {
       setLoadingPhotos(false);
     }
@@ -49,7 +57,7 @@ export function useAdminPhotos() {
       if (fetchError) throw fetchError;
       setCategories(data ?? []);
     } catch (err) {
-      setError(err instanceof Error ? err.message : 'Erreur lors du chargement des catégories');
+      setError(err instanceof Error ? err.message : tRef.current('admin.photos.categoriesLoadError'));
     }
   }, []);
 
@@ -86,17 +94,29 @@ export function useAdminPhotos() {
         if (error) errors.push(error.message);
         else saved = rows.length;
       } catch (err) {
-        errors.push(err instanceof Error ? err.message : 'Erreur inconnue');
+        errors.push(err instanceof Error ? err.message : tRef.current('admin.photos.unknownError'));
       }
 
       if (errors.length > 0) {
         showMessage(
-          { type: 'error', text: `${errors.length} erreur(s): ${errors[0]}` },
+          {
+            type: 'error',
+            text: tRef.current('admin.photos.saveErrors', {
+              count: errors.length,
+              first: errors[0],
+            }),
+          },
           UPLOAD_MESSAGE_TIMEOUT_MS
         );
       } else {
         showMessage(
-          { type: 'success', text: `${saved}/${files.length} photo(s) enregistrée(s)!` },
+          {
+            type: 'success',
+            text: tRef.current('admin.photos.savedCount', {
+              saved,
+              total: files.length,
+            }),
+          },
           UPLOAD_MESSAGE_TIMEOUT_MS
         );
       }
@@ -112,7 +132,7 @@ export function useAdminPhotos() {
         if (error) throw error;
         fetchPhotos();
       } catch (err) {
-        const msg = err instanceof Error ? err.message : 'Erreur lors de la mise à jour';
+        const msg = err instanceof Error ? err.message : tRef.current('admin.photos.updateError');
         setError(msg);
         showMessage({ type: 'error', text: msg });
       }
@@ -136,9 +156,9 @@ export function useAdminPhotos() {
         const { error } = await supabase.from('photos').delete().eq('id', photo.id);
         if (error) throw error;
         fetchPhotos();
-        showMessage({ type: 'success', text: 'Photo supprimée' });
+        showMessage({ type: 'success', text: tRef.current('admin.photos.deleteSuccess') });
       } catch (err) {
-        const msg = err instanceof Error ? err.message : 'Erreur lors de la suppression';
+        const msg = err instanceof Error ? err.message : tRef.current('admin.photos.deleteError');
         setError(msg);
         showMessage({ type: 'error', text: msg });
       }
@@ -152,9 +172,9 @@ export function useAdminPhotos() {
         const { error } = await updateRow('photos', photoId, { category: categorySlug });
         if (error) throw error;
         fetchPhotos();
-        showMessage({ type: 'success', text: 'Catégorie mise à jour' });
+        showMessage({ type: 'success', text: tRef.current('admin.photos.categoryUpdated') });
       } catch (err) {
-        const msg = err instanceof Error ? err.message : 'Erreur lors de la mise à jour';
+        const msg = err instanceof Error ? err.message : tRef.current('admin.photos.updateError');
         setError(msg);
         showMessage({ type: 'error', text: msg });
       }
@@ -178,10 +198,12 @@ export function useAdminPhotos() {
         fetchPhotos();
         showMessage({
           type: 'success',
-          text: photo.is_hero ? 'Image héros retirée' : 'Image héros définie',
+          text: photo.is_hero
+            ? tRef.current('admin.photos.heroRemoved')
+            : tRef.current('admin.photos.heroSet'),
         });
       } catch (err) {
-        const msg = err instanceof Error ? err.message : 'Erreur lors de la mise à jour';
+        const msg = err instanceof Error ? err.message : tRef.current('admin.photos.updateError');
         setError(msg);
         showMessage({ type: 'error', text: msg });
       }

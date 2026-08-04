@@ -57,6 +57,7 @@ export function Admin() {
           <p className="text-body-md text-gray-500 mt-1">Welcome back, {user?.email}</p>
         </div>
         <button
+            type="button"
           onClick={signOut}
           className="px-4 py-2 bg-gray-100 text-gray-900 rounded-elegant hover:bg-gray-200 transition-colors"
         >
@@ -67,6 +68,7 @@ export function Admin() {
       <nav className="flex gap-4 mb-8 border-b border-gray-200">
         {(['photos', 'categories', 'settings', 'account'] as const).map((tab) => (
           <button
+            type="button"
             key={tab}
             onClick={() => setActiveTab(tab)}
             className={`px-4 py-3 font-medium capitalize transition-colors ${

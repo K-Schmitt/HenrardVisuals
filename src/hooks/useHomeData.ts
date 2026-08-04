@@ -1,6 +1,7 @@
 import { useState, useEffect, useCallback, useRef } from 'react';
 
 import { DEFAULT_PROFILE_SETTINGS, isProfileSettings } from '@/constants/profileDefaults';
+import { useLanguage } from '@/context/LanguageContext';
 import { supabase } from '@/lib/supabase';
 import type { Photo, Category, ProfileSettings } from '@/types';
 
@@ -16,6 +17,12 @@ export function useHomeData() {
   const [totalCount, setTotalCount] = useState(0);
   const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
+  const { t } = useLanguage();
+
+  // Ref: t must not be an effect dependency here or every language switch
+  // refetches the entire gallery.
+  const tRef = useRef(t);
+  tRef.current = t;
 
   // Avoid re-fetching static data (hero, categories, settings) on every page/filter change.
   // Increment staticDataVersion to force a re-fetch (e.g. after admin edits).
@@ -93,7 +100,7 @@ export function useHomeData() {
         setTotalCount(count ?? 0);
       } catch (err) {
         if (cancelled) return;
-        setError(err instanceof Error ? err.message : 'Failed to load');
+        setError(err instanceof Error ? err.message : tRef.current('home.loadError'));
       } finally {
         if (!cancelled) setIsLoading(false);
       }

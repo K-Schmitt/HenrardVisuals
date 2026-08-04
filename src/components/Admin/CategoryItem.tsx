@@ -42,12 +42,14 @@ export function CategoryItem({ category, onEdit, onDelete }: CategoryItemProps) 
           {confirmingDelete ? (
             <>
               <button
+            type="button"
                 onClick={() => { onDelete(category.id); setConfirmingDelete(false); }}
                 className="px-3 py-1 text-sm bg-red-500 text-white rounded hover:bg-red-600 transition-colors"
               >
                 {t('admin.categories.confirmDelete')}
               </button>
               <button
+            type="button"
                 onClick={() => setConfirmingDelete(false)}
                 className="px-3 py-1 text-sm bg-gray-200 text-gray-700 rounded hover:bg-gray-300 transition-colors"
               >
@@ -57,16 +59,18 @@ export function CategoryItem({ category, onEdit, onDelete }: CategoryItemProps) 
           ) : (
             <>
               <button
+            type="button"
                 onClick={() => onEdit(category)}
                 className="p-2 text-gray-400 hover:text-black transition-colors"
-                title="Edit"
+                title={t('admin.categories.edit')}
               >
                 <EditIcon />
               </button>
               <button
+            type="button"
                 onClick={() => setConfirmingDelete(true)}
                 className="p-2 text-gray-400 hover:text-red-500 transition-colors"
-                title="Delete"
+                title={t('admin.categories.delete')}
               >
                 <TrashIcon />
               </button>

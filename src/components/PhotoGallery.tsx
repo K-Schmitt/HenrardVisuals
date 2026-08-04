@@ -86,6 +86,7 @@ export function PhotoGallery({
         <div className="text-center py-20">
           <p className="text-red-400 mb-4">{error}</p>
           <button
+            type="button"
             onClick={() => window.location.reload()}
             className="px-6 py-2 border border-white hover:bg-white hover:text-black transition-colors"
           >
