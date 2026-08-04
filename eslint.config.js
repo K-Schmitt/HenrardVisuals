@@ -34,6 +34,7 @@ export default [
         HTMLTextAreaElement: 'readonly',
         FileList: 'readonly',
         IntersectionObserver: 'readonly',
+        IntersectionObserverEntry: 'readonly',
         MutationObserver: 'readonly',
         Event: 'readonly',
         KeyboardEvent: 'readonly',
