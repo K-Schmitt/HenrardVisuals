@@ -1,4 +1,4 @@
-import { useState, useEffect, useCallback } from 'react';
+import { useState, useEffect, useCallback, useRef } from 'react';
 
 import { CategoryForm, type CategoryFormData } from '@/components/Admin/CategoryForm';
 import { CategoryList } from '@/components/Admin/CategoryList';
@@ -29,6 +29,12 @@ export function CategoryManager() {
     setTimeout(() => setMessage(null), 3_000);
   }, []);
 
+  // t through a ref, not a dependency: its identity changes on every language
+  // switch, and listing it here re-queried the categories table on each FR/EN
+  // toggle. The ref keeps the message text current without that.
+  const tRef = useRef(t);
+  tRef.current = t;
+
   const fetchCategories = useCallback(async () => {
     try {
       setIsLoading(true);
@@ -39,11 +45,11 @@ export function CategoryManager() {
       if (error) throw error;
       setCategories(data || []);
     } catch {
-      showMessage('error', t('admin.categories.loadError'));
+      showMessage('error', tRef.current('admin.categories.loadError'));
     } finally {
       setIsLoading(false);
     }
-  }, [showMessage, t]);
+  }, [showMessage]);
 
   useEffect(() => {
     fetchCategories();

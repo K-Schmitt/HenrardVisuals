@@ -1,6 +1,6 @@
 import { useState, useEffect, useCallback } from 'react';
 
-import { supabase, typedFrom, insertRow, updateRow } from '@/lib/supabase';
+import { supabase, typedFrom, updateRow } from '@/lib/supabase';
 import type { Photo, Category, UploadedFile } from '@/types';
 
 interface Message {
@@ -62,29 +62,33 @@ export function useAdminPhotos() {
     async (files: UploadedFile[]) => {
       let saved = 0;
       const errors: string[] = [];
-      for (const file of files) {
-        try {
-          const { error } = await insertRow('photos', {
-            title: file.name.replace(/\.[^/.]+$/, '').replace(/_/g, ' '),
-            storage_path: file.path,
-            file_size: file.size,
-            is_published: false,
-            is_hero: false,
-            sort_order: 0,
-            description: null,
-            category: null,
-            thumbnail_path: null,
-            width: file.width,
-            height: file.height,
-            mime_type: null,
-            metadata: {},
-          });
-          if (!error) saved++;
-          else errors.push(error.message);
-        } catch (err) {
-          errors.push(err instanceof Error ? err.message : 'Erreur inconnue');
-        }
+
+      // One round trip for the whole batch. The previous version inserted one
+      // row per request, so a 20-photo upload cost 20 sequential round trips.
+      const rows = files.map((file) => ({
+        title: file.name.replace(/\.[^/.]+$/, '').replace(/_/g, ' '),
+        storage_path: file.path,
+        file_size: file.size,
+        is_published: false,
+        is_hero: false,
+        sort_order: 0,
+        description: null,
+        category: null,
+        thumbnail_path: null,
+        width: file.width,
+        height: file.height,
+        mime_type: null,
+        metadata: {},
+      }));
+
+      try {
+        const { error } = await typedFrom('photos').insert(rows);
+        if (error) errors.push(error.message);
+        else saved = rows.length;
+      } catch (err) {
+        errors.push(err instanceof Error ? err.message : 'Erreur inconnue');
       }
+
       if (errors.length > 0) {
         showMessage(
           { type: 'error', text: `${errors.length} erreur(s): ${errors[0]}` },
@@ -120,6 +124,15 @@ export function useAdminPhotos() {
     // Confirmation is handled by the caller (PhotoCard) — this function deletes unconditionally.
     async (photo: Photo) => {
       try {
+        // Object first, row second. The row is what makes the object findable
+        // in the admin panel, so if the storage delete fails the row survives
+        // and the operation can be retried. The reverse ordering left the file
+        // publicly retrievable at its URL forever.
+        const { error: storageError } = await supabase.storage
+          .from('photos')
+          .remove([photo.storage_path]);
+        if (storageError) throw storageError;
+
         const { error } = await supabase.from('photos').delete().eq('id', photo.id);
         if (error) throw error;
         fetchPhotos();
@@ -152,18 +165,16 @@ export function useAdminPhotos() {
   const toggleHero = useCallback(
     async (photo: Photo) => {
       try {
-        // Step 1 — clear any existing hero photo.
-        // Note: these two operations are sequential, not transactional.
-        // Use the set_hero_photo() DB function (migration 004) for true atomicity.
-        if (!photo.is_hero) {
-          const { error: clearError } = await typedFrom('photos')
-            .update({ is_hero: false })
-            .neq('id', photo.id);
-          if (clearError) throw clearError;
+        // set_hero_photo() (migration 004) clears the previous hero and sets
+        // the new one in one statement. The old two-step version could leave
+        // the site with no hero at all if the second write failed.
+        if (photo.is_hero) {
+          const { error } = await updateRow('photos', photo.id, { is_hero: false });
+          if (error) throw error;
+        } else {
+          const { error } = await supabase.rpc('set_hero_photo', { target_id: photo.id });
+          if (error) throw error;
         }
-        // Step 2 — toggle hero on the target photo.
-        const { error } = await updateRow('photos', photo.id, { is_hero: !photo.is_hero });
-        if (error) throw error;
         fetchPhotos();
         showMessage({
           type: 'success',

@@ -1,4 +1,4 @@
-import { useState, useEffect, useCallback } from 'react';
+import { useState, useEffect, useCallback, useRef } from 'react';
 
 import { DEFAULT_PROFILE_SETTINGS, isProfileSettings } from '@/constants/profileDefaults';
 import { useLanguage } from '@/context/LanguageContext';
@@ -26,6 +26,12 @@ export function ProfileSettings() {
     setTimeout(() => setMessage(null), 3_000);
   }, []);
 
+  // Same reason as CategoryManager: t must not be a dependency of a fetch
+  // callback, but reading it out of a stale closure would freeze the error
+  // message in whichever language was active on mount.
+  const tRef = useRef(t);
+  tRef.current = t;
+
   const fetchSettings = useCallback(async () => {
     try {
       const { data, error } = await typedFrom('site_settings')
@@ -38,7 +44,7 @@ export function ProfileSettings() {
       const raw = (data as { value: unknown } | null)?.value;
       if (isProfileSettings(raw)) setSettings(raw);
     } catch {
-      showMessage('error', t('admin.profileSettings.loadError'));
+      showMessage('error', tRef.current('admin.profileSettings.loadError'));
     } finally {
       setIsLoading(false);
     }

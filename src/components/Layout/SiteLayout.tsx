@@ -1,4 +1,4 @@
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useRef } from 'react';
 import { Link, useLocation } from 'react-router-dom';
 
 import { Footer } from '@/components/Layout/Footer';
@@ -39,7 +39,8 @@ export function SiteLayout({ children }: SiteLayoutProps) {
   const { language, setLanguage, t } = useLanguage();
   const [isMenuOpen, setIsMenuOpen] = useState(false);
   const [showNavbar, setShowNavbar] = useState(true);
-  const [lastScrollY, setLastScrollY] = useState(0);
+  const lastScrollY = useRef(0);
+  const ticking = useRef(false);
   const location = useLocation();
 
   useEffect(() => {
@@ -47,22 +48,32 @@ export function SiteLayout({ children }: SiteLayoutProps) {
   }, [location]);
 
   useEffect(() => {
-    const handleScroll = () => {
-      const currentScrollY = window.scrollY;
+    const update = () => {
+      const y = window.scrollY;
 
-      if (currentScrollY < lastScrollY || currentScrollY < 50) {
+      if (y < lastScrollY.current || y < 50) {
         setShowNavbar(true);
-      } else if (currentScrollY > lastScrollY && currentScrollY > 100) {
+      } else if (y > lastScrollY.current && y > 100) {
         setShowNavbar(false);
         setIsMenuOpen(false);
       }
 
-      setLastScrollY(currentScrollY);
+      lastScrollY.current = y;
+      ticking.current = false;
     };
 
-    window.addEventListener('scroll', handleScroll, { passive: true });
-    return () => window.removeEventListener('scroll', handleScroll);
-  }, [lastScrollY]);
+    // Ref, not state: the previous position is bookkeeping, not something the
+    // UI renders. Holding it in state re-rendered the layout on every frame
+    // and re-ran this effect, competing with image decode.
+    const onScroll = () => {
+      if (ticking.current) return;
+      ticking.current = true;
+      window.requestAnimationFrame(update);
+    };
+
+    window.addEventListener('scroll', onScroll, { passive: true });
+    return () => window.removeEventListener('scroll', onScroll);
+  }, []);
 
   return (
     <div className="min-h-screen bg-black text-white">

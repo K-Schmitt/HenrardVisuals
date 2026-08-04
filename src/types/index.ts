@@ -8,7 +8,7 @@ import type { User, Session, AuthError } from '@supabase/supabase-js';
 // Database Types
 // ----------------------------------------
 
-export interface Photo {
+export type Photo = {
   id: string;
   title: string;
   description: string | null;
@@ -37,7 +37,7 @@ export interface PhotoMetadata {
   tags?: string[];
 }
 
-export interface Category {
+export type Category = {
   id: string;
   name: string;
   slug: string;
@@ -47,7 +47,7 @@ export interface Category {
   created_at: string;
 }
 
-export interface SiteSettingsRow {
+export type SiteSettingsRow = {
   key: string;
   value: unknown;
   updated_at: string;
@@ -107,26 +107,40 @@ export interface LoginFormProps {
 export interface Database {
   public: {
     Tables: {
+      // Relationships is required by Supabase's GenericSchema constraint. The
+      // schema declares no foreign keys the client needs to traverse, so the
+      // arrays are empty — but omitting them makes the whole schema fail the
+      // constraint, which silently degrades rpc() and from() to `any`.
       photos: {
         Row: Photo;
         Insert: Omit<Photo, 'id' | 'created_at' | 'updated_at'>;
         Update: Partial<Omit<Photo, 'id' | 'created_at' | 'updated_at'>>;
+        Relationships: [];
       };
       categories: {
         Row: Category;
         Insert: Omit<Category, 'id' | 'created_at'>;
         Update: Partial<Omit<Category, 'id' | 'created_at'>>;
+        Relationships: [];
       };
       site_settings: {
         Row: SiteSettingsRow;
         Insert: Omit<SiteSettingsRow, 'updated_at'>;
         Update: Partial<Omit<SiteSettingsRow, 'updated_at'>>;
+        Relationships: [];
       };
     };
     // Required by Supabase GenericSchema — empty but present so the client's
     // overload resolution can distinguish Tables from Views and Functions.
     Views: Record<string, never>;
-    Functions: Record<string, never>;
+    Functions: {
+      /** Clears the current hero and sets a new one in one statement.
+       *  Defined in supabase/migrations/004; locked down in 005. */
+      set_hero_photo: {
+        Args: { target_id: string };
+        Returns: undefined;
+      };
+    };
   };
 }
 
