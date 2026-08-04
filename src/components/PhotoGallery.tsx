@@ -1,6 +1,6 @@
 import { OptimizedImage } from '@/components/OptimizedImage';
 import { useLanguage } from '@/context/LanguageContext';
-import { getStorageUrl } from '@/lib/supabase';
+import { buildImageUrl, buildImageSrcSet, GALLERY_WIDTHS } from '@/lib/imageUrl';
 import type { Photo, Category } from '@/types';
 
 interface PhotoGalleryProps {
@@ -90,11 +90,17 @@ export function PhotoGallery({
           {photos.map((photo) => (
             <div key={photo.id} className="break-inside-avoid">
               <OptimizedImage
-                src={getStorageUrl(photo.storage_path)}
+                src={buildImageUrl(photo.storage_path, { width: 800 })}
+                srcSet={buildImageSrcSet(photo.storage_path, GALLERY_WIDTHS)}
+                // Mirrors the columns-1 md:columns-2 lg:columns-3 breakpoints
+                // below. If those change, this must change with them.
+                sizes="(min-width: 1024px) 33vw, (min-width: 768px) 50vw, 100vw"
                 alt={photo.title}
+                width={photo.width ?? undefined}
+                height={photo.height ?? undefined}
                 className="w-full h-auto"
                 onClick={() => onPhotoClick(photo)}
-                enableZoom={true}
+                enableZoom
               />
             </div>
           ))}

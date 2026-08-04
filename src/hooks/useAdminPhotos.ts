@@ -74,8 +74,8 @@ export function useAdminPhotos() {
             description: null,
             category: null,
             thumbnail_path: null,
-            width: null,
-            height: null,
+            width: file.width,
+            height: file.height,
             mime_type: null,
             metadata: {},
           });
