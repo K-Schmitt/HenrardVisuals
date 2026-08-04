@@ -1,5 +1,4 @@
-import { renderHook, waitFor } from '@testing-library/react';
-import { act } from '@testing-library/react';
+import { act, renderHook, waitFor } from '@testing-library/react';
 import { describe, it, expect, vi, beforeEach } from 'vitest';
 
 // Thenable + fully chainable mock for Supabase query builders.
@@ -21,8 +20,9 @@ vi.mock('@/lib/supabase', () => ({
 }));
 
 import { useHomeData, PAGE_SIZE } from './useHomeData';
-import { supabase } from '@/lib/supabase';
+
 import { DEFAULT_PROFILE_SETTINGS } from '@/constants/profileDefaults';
+import { supabase } from '@/lib/supabase';
 import type { Photo, Category } from '@/types';
 
 const mockFrom = supabase.from as ReturnType<typeof vi.fn>;
