@@ -1,4 +1,4 @@
-import { getStorageUrl } from '@/lib/supabase';
+import { buildImageUrl } from '@/lib/imageUrl';
 import type { Photo } from '@/types';
 
 interface PhotoLightboxProps {
@@ -54,8 +54,10 @@ export function PhotoLightbox({ photo, index, total, onClose, onPrevious, onNext
         )}
       </div>
 
+      {/* The one place a large image is legitimate — but capped, not the
+          multi-megabyte original. */}
       <img
-        src={getStorageUrl(photo.storage_path)}
+        src={buildImageUrl(photo.storage_path, { width: 1920, quality: 82 })}
         alt={photo.title}
         className="max-w-[90vw] max-h-[90vh] object-contain"
         onClick={(e) => e.stopPropagation()}

@@ -31,8 +31,10 @@ export function useFileUpload({
 
   const validateFile = useCallback(
     (file: File): string | null => {
+      // Exact match only. The previous version compiled the accept entry into
+      // an unanchored RegExp, so "xximage/jpegyy" passed.
       const allowed = accept.split(',').map((t) => t.trim());
-      if (!allowed.some((type) => file.type.match(type.replace('*', '.*')))) {
+      if (!allowed.includes(file.type)) {
         return `Type "${file.type}" non supporté`;
       }
       if (file.size > maxSize) {
@@ -42,6 +44,33 @@ export function useFileUpload({
     },
     [accept, maxSize]
   );
+
+  /** Intrinsic pixel size, read from an object URL. Null if the file will not
+   *  decode — the upload still proceeds, the gallery just uses its fallback
+   *  aspect ratio for that photo. */
+  const readDimensions = (
+    file: File
+  ): Promise<{ width: number | null; height: number | null }> =>
+    new Promise((resolve) => {
+      let url: string;
+      try {
+        url = URL.createObjectURL(file);
+      } catch {
+        // No object-URL support (non-browser host). Not worth failing over.
+        resolve({ width: null, height: null });
+        return;
+      }
+      const img = new Image();
+      img.onload = () => {
+        URL.revokeObjectURL(url);
+        resolve({ width: img.naturalWidth, height: img.naturalHeight });
+      };
+      img.onerror = () => {
+        URL.revokeObjectURL(url);
+        resolve({ width: null, height: null });
+      };
+      img.src = url;
+    });
 
   const processFiles = useCallback(
     async (files: FileList | File[]) => {
@@ -64,9 +93,12 @@ export function useFileUpload({
         setUploadProgress((prev) => [...prev, `Uploading ${file.name}...`]);
 
         try {
-          const timestamp = Date.now();
+          // A UUID prefix, not Date.now(). The bucket is public, so an
+          // object's URL is its only access control; a millisecond timestamp
+          // plus a camera filename like DSC_0001.jpg is brute-forceable,
+          // 128 bits of entropy is not.
           const safeName = file.name.replace(/[^a-zA-Z0-9.-]/g, '_');
-          const filePath = `${timestamp}-${safeName}`;
+          const filePath = `${crypto.randomUUID()}-${safeName}`;
 
           const { data, error } = await supabase.storage.from(bucket).upload(filePath, file, {
             cacheControl: '3600',
@@ -77,7 +109,15 @@ export function useFileUpload({
             errors.push(`${file.name}: ${error.message}`);
           } else {
             const { data: urlData } = supabase.storage.from(bucket).getPublicUrl(data.path);
-            uploaded.push({ name: file.name, path: data.path, size: file.size, publicUrl: urlData.publicUrl });
+            const { width, height } = await readDimensions(file);
+            uploaded.push({
+              name: file.name,
+              path: data.path,
+              size: file.size,
+              publicUrl: urlData.publicUrl,
+              width,
+              height,
+            });
             setUploadProgress((prev) => [
               ...prev.filter((p) => !p.includes(file.name)),
               `✓ ${file.name} uploaded`,

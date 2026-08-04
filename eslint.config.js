@@ -47,6 +47,8 @@ export default [
         navigator: 'readonly',
         confirm: 'readonly',
         URL: 'readonly',
+        Image: 'readonly',
+        crypto: 'readonly',
       },
     },
     plugins: {

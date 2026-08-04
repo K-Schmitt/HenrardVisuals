@@ -1,6 +1,6 @@
 import { OptimizedImage } from '@/components/OptimizedImage';
 import { useLanguage } from '@/context/LanguageContext';
-import { getStorageUrl } from '@/lib/supabase';
+import { buildImageUrl, buildImageSrcSet, HERO_WIDTHS } from '@/lib/imageUrl';
 import type { Photo, ProfileSettings } from '@/types';
 
 interface HeroSectionProps {
@@ -18,10 +18,14 @@ export function HeroSection({ heroPhoto, profileSettings }: HeroSectionProps) {
           <div className="h-full flex items-start justify-center">
             {heroPhoto ? (
               <OptimizedImage
-                src={getStorageUrl(heroPhoto.storage_path)}
+                src={buildImageUrl(heroPhoto.storage_path, { width: 1280 })}
+                srcSet={buildImageSrcSet(heroPhoto.storage_path, HERO_WIDTHS)}
+                sizes="(min-width: 1024px) 50vw, 100vw"
                 alt={heroPhoto.title}
+                width={heroPhoto.width ?? undefined}
+                height={heroPhoto.height ?? undefined}
                 className="w-full h-auto max-h-[calc(100vh-5rem)] object-contain grayscale hover:grayscale-0 transition-all duration-700"
-                priority={true}
+                priority
               />
             ) : (
               <div className="w-full h-64 bg-black flex items-center justify-center">

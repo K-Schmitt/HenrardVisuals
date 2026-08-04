@@ -1,6 +1,6 @@
 import { useState } from 'react';
 
-import { getStorageUrl } from '@/lib/supabase';
+import { buildImageUrl, THUMB_WIDTH } from '@/lib/imageUrl';
 import type { Photo, Category } from '@/types';
 
 interface PhotoCardProps {
@@ -35,8 +35,12 @@ export function PhotoCard({
     <div className="relative bg-gray-50 border border-gray-200 rounded-elegant overflow-hidden">
       <div className="relative group">
         <img
-          src={getStorageUrl(photo.storage_path)}
+          src={buildImageUrl(photo.storage_path, { width: THUMB_WIDTH })}
           alt={photo.title}
+          loading="lazy"
+          decoding="async"
+          width={photo.width ?? undefined}
+          height={photo.height ?? undefined}
           className="w-full h-40 object-cover"
           onError={(e) => {
             (e.target as HTMLImageElement).src =

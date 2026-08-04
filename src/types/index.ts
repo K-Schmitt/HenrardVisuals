@@ -135,6 +135,9 @@ export interface UploadedFile {
   path: string;
   size: number;
   publicUrl: string;
+  /** Intrinsic pixel size, null when the file did not decode. */
+  width: number | null;
+  height: number | null;
 }
 
 /** Union of all public table names — used for type-safe DB helpers */
