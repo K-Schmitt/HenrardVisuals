@@ -1,32 +1,38 @@
 import { test, expect } from '@playwright/test';
 
 /**
- * RLS policy smoke tests.
+ * Surface tests for the unauthenticated admin route.
  *
- * These tests verify that the application surface does not expose write
- * operations to unauthenticated users. They complement — but do not replace —
- * direct Supabase RLS policy tests (which require a local Supabase instance
- * and `supabase test db`).
+ * The admin panel does not redirect — App.tsx defines only /, /contact,
+ * /admin and *, and Admin.tsx renders <Login> in place. The previous version
+ * of this file asserted a redirect to /login, a route that has never existed,
+ * so every case could only fail; with no CI, nothing ever ran it.
  *
- * For true RLS coverage, run:
- *   supabase test db supabase/tests/rls.sql
+ * True policy coverage lives in supabase/tests/rls_test.sql, run by the
+ * `database` CI job.
  */
-test.describe('RLS surface tests (unauthenticated)', () => {
-  test('upload UI is not accessible without auth', async ({ page }) => {
-    // The FileUpload component lives only inside the admin panel
+test.describe('admin surface (unauthenticated)', () => {
+  test('renders the login form in place, without redirecting', async ({ page }) => {
     await page.goto('/admin');
-    // Should redirect to login, never showing the upload area
-    await expect(page).toHaveURL(/\/login/);
+
+    await expect(page.getByTestId('login-form-container')).toBeVisible();
+    await expect(page).toHaveURL(/\/admin$/);
+  });
+
+  test('exposes no upload control', async ({ page }) => {
+    await page.goto('/admin');
     await expect(page.locator('input[type="file"]')).toHaveCount(0);
   });
 
-  test('admin photo management is behind auth', async ({ page }) => {
+  test('exposes no photo or category management controls', async ({ page }) => {
     await page.goto('/admin');
-    await expect(page).toHaveURL(/\/login/);
+
+    await expect(page.getByRole('button', { name: /publish|supprimer|delete/i })).toHaveCount(0);
+    await expect(page.getByRole('tab')).toHaveCount(0);
   });
 
-  test('category management is behind auth', async ({ page }) => {
+  test('is marked noindex', async ({ page }) => {
     await page.goto('/admin');
-    await expect(page).toHaveURL(/\/login/);
+    await expect(page.locator('meta[name="robots"]')).toHaveAttribute('content', /noindex/);
   });
 });
