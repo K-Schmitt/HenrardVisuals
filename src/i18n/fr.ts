@@ -11,6 +11,18 @@ const fr = {
     all: 'Tout',
     retry: 'Réessayer',
     empty: 'Aucune photo trouvée',
+    openPhoto: 'Ouvrir la photo {{title}}',
+    loading: 'Chargement des photos',
+    pagination: 'Pagination de la galerie',
+    previousPage: 'Page précédente',
+    nextPage: 'Page suivante',
+    pagePosition: 'Page {{current}} sur {{total}}',
+  },
+  lightbox: {
+    close: 'Fermer',
+    previous: 'Photo précédente',
+    next: 'Photo suivante',
+    position: 'Photo {{current}} sur {{total}}',
   },
   notFound: {
     message: 'Page non trouvée',

@@ -27,6 +27,7 @@ export default [
         setTimeout: 'readonly',
         clearTimeout: 'readonly',
         React: 'readonly',
+        HTMLButtonElement: 'readonly',
         HTMLDivElement: 'readonly',
         HTMLElement: 'readonly',
         HTMLImageElement: 'readonly',
