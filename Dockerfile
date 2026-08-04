@@ -48,6 +48,7 @@ COPY . .
 # Build arguments for Vite environment
 ARG VITE_SUPABASE_URL
 ARG VITE_SUPABASE_ANON_KEY
+ARG VITE_IMAGE_TRANSFORM=false
 
 # Build runs as root — the builder stage only produces /app/dist,
 # which is copied into the nginx image. Non-root only matters for runtime.

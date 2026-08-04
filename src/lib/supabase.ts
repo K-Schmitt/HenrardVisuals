@@ -39,23 +39,6 @@ export function getStorageUrl(path: string, bucket = 'photos'): string {
 }
 
 /**
- * Get transformed image URL with optional resizing
- */
-export function getImageUrl(
-  path: string,
-  options?: { width?: number; height?: number; quality?: number }
-): string {
-  const { width, height, quality = 80 } = options ?? {};
-  const transform: Record<string, number> = { quality };
-
-  if (width) transform.width = width;
-  if (height) transform.height = height;
-
-  const { data } = supabase.storage.from('photos').getPublicUrl(path, { transform });
-  return data.publicUrl;
-}
-
-/**
  * Upload a file to storage
  */
 export async function uploadFile(
