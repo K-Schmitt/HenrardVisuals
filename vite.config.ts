@@ -20,13 +20,16 @@ export default defineConfig({
             exclude: ['src/**/*.test.{ts,tsx}', 'src/test/**', 'src/types/**', 'src/i18n/**'],
             thresholds: {
                 // Raise as coverage grows; never lower to make a build pass.
-                // Measured: 44.55 / 71.07 / 59.49 / 44.55, rounded down to
-                // the nearest 5. A threshold the suite cannot meet teaches
+                // Measured on vitest 4 (52.88 / 40.13 / 45.86 / 54.56),
+                // rounded down to the nearest 5. The branch figure is far
+                // below the vitest 2 reading of the same suite — v8 coverage
+                // remaps to the AST now and counts branches the old provider
+                // never saw. A threshold the suite cannot meet teaches
                 // everyone to ignore the badge on day one.
-                statements: 40,
-                branches: 70,
-                functions: 55,
-                lines: 40,
+                statements: 50,
+                branches: 40,
+                functions: 45,
+                lines: 50,
             },
         },
     },
@@ -34,7 +37,9 @@ export default defineConfig({
 
     resolve: {
         alias: {
-            '@': resolve(__dirname, './src'),
+            // import.meta.dirname, not __dirname: Vite 8's native config
+            // loader does not provide the CJS global.
+            '@': resolve(import.meta.dirname, './src'),
         },
     },
 
@@ -47,7 +52,9 @@ export default defineConfig({
     build: {
         outDir: 'dist',
         sourcemap: false,
-        minify: 'esbuild',
+        // Vite 8 bundles with rolldown/oxc; naming esbuild here now requires
+        // installing esbuild separately. `true` uses the built-in minifier.
+        minify: true,
         // Optimize chunk splitting
         rollupOptions: {
             output: {

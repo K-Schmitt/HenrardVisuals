@@ -47,6 +47,25 @@ frontend must be rebuilt (`VITE_SUPABASE_ANON_KEY` is baked in at build time).
 
    Expected: `401`.
 
+## Dependency policy
+
+CI gates on production dependencies only, through `pnpm audit:prod`
+(`scripts/audit-prod.mjs`). Any high or critical advisory in a package that
+ships to the browser fails the build unless it is in that script's allowlist,
+where each entry carries a written reason and is re-justified on every bump.
+
+One entry sits there today: **GHSA-qwww-vcr4-c8h2**, a CSRF bypass in React
+Router's RSC mode. It is fixed only in react-router 8, which requires React 19
+as a peer, and it applies to React Server Components — `src/App.tsx` mounts a
+plain `<BrowserRouter>` over four static routes with no server runtime, no
+loaders and no actions.
+
+Development dependencies are audited but not gated. The remaining high
+findings are transitive dependencies of already-current tooling — eslint's
+`minimatch` → `brace-expansion`, jsdom's `undici`, `postcss`, `picomatch` —
+with no newer parent to move to. None of them reach the deployed bundle.
+Dependabot opens weekly PRs so these clear as upstream releases land.
+
 ## Known historical exposure
 
 Commits `1556e511` through `f59755c` contained the public Supabase demo

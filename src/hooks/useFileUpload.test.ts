@@ -21,6 +21,23 @@ const jpeg = () => new File(['x'], 'DSC_0001.jpg', { type: 'image/jpeg' });
 beforeEach(() => {
   upload.mockReset().mockResolvedValue({ data: { path: 'p' }, error: null });
   vi.stubGlobal('crypto', { randomUUID: () => '11111111-2222-3333-4444-555555555555' });
+
+  // jsdom hands out object URLs but never decodes them, so neither onload nor
+  // onerror fires and readDimensions would sit on its timeout. Resolve the
+  // decode immediately with a failure — the upload must proceed regardless,
+  // which is exactly what these cases assert.
+  vi.stubGlobal(
+    'Image',
+    class {
+      onload: (() => void) | null = null;
+      onerror: (() => void) | null = null;
+      naturalWidth = 0;
+      naturalHeight = 0;
+      set src(_value: string) {
+        queueMicrotask(() => this.onerror?.());
+      }
+    }
+  );
 });
 
 describe('useFileUpload', () => {

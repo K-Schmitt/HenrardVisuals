@@ -19,6 +19,8 @@ interface UseFileUploadReturn {
 }
 
 const FEEDBACK_TIMEOUT_MS = 3_000;
+/** Upper bound on waiting for a browser to decode one image for its size. */
+const DECODE_TIMEOUT_MS = 5_000;
 
 export function useFileUpload({
   accept = 'image/jpeg,image/png,image/webp',
@@ -67,15 +69,26 @@ export function useFileUpload({
         resolve({ width: null, height: null });
         return;
       }
+
       const img = new Image();
-      img.onload = () => {
+      let settled = false;
+
+      const finish = (size: { width: number | null; height: number | null }) => {
+        if (settled) return;
+        settled = true;
+        clearTimeout(timer);
         URL.revokeObjectURL(url);
-        resolve({ width: img.naturalWidth, height: img.naturalHeight });
+        resolve(size);
       };
-      img.onerror = () => {
-        URL.revokeObjectURL(url);
-        resolve({ width: null, height: null });
-      };
+
+      // Neither onload nor onerror is guaranteed to fire — a host that hands
+      // out object URLs but never decodes them would otherwise stall the whole
+      // upload queue on one file. Dimensions are an optimisation; the upload
+      // is not.
+      const timer = setTimeout(() => finish({ width: null, height: null }), DECODE_TIMEOUT_MS);
+
+      img.onload = () => finish({ width: img.naturalWidth, height: img.naturalHeight });
+      img.onerror = () => finish({ width: null, height: null });
       img.src = url;
     });
 
