@@ -1,7 +1,11 @@
 /**
- * OptimizedImage Component
- * Lazy-loaded image with intersection observer and zoom effect
- * On mobile: activates color/zoom when image is centered on screen
+ * Lazily-loaded image that reserves its layout box before the bytes arrive.
+ *
+ * The previous version rendered nothing until the observer fired, so every
+ * container was 0 px tall. With a CSS multi-column gallery that stacked all
+ * items at the same y, they all intersected at once and lazy loading never
+ * deferred anything. Reserving space via aspect-ratio fixes the layout shift
+ * and makes the deferral real.
  */
 
 import { useState, useRef, useEffect } from 'react';
@@ -11,103 +15,106 @@ interface OptimizedImageProps {
   alt: string;
   className?: string;
   onClick?: () => void;
-  loading?: 'lazy' | 'eager';
   priority?: boolean;
   enableZoom?: boolean;
+  /** Intrinsic pixel width, used for the reserved aspect ratio. */
+  width?: number;
+  /** Intrinsic pixel height, used for the reserved aspect ratio. */
+  height?: number;
+  /** Pass '' to omit the attribute — see buildImageSrcSet. */
+  srcSet?: string;
+  sizes?: string;
 }
+
+/** Portrait default: this is a model portfolio, most frames are 2:3. */
+const FALLBACK_ASPECT = '2 / 3';
 
 export function OptimizedImage({
   src,
   alt,
   className = '',
   onClick,
-  loading = 'lazy',
   priority = false,
   enableZoom = false,
+  width,
+  height,
+  srcSet,
+  sizes,
 }: OptimizedImageProps) {
   const [isLoaded, setIsLoaded] = useState(false);
   const [isInView, setIsInView] = useState(priority);
-  const [isHovered, setIsHovered] = useState(false);
-  const [isCentered, setIsCentered] = useState(false);
+  const [isActive, setIsActive] = useState(false);
   const containerRef = useRef<HTMLDivElement>(null);
 
-  // Lazy loading observer
   useEffect(() => {
     if (priority || !containerRef.current) return;
 
     const observer = new IntersectionObserver(
       ([entry]) => {
-        if (entry.isIntersecting) {
+        if (entry?.isIntersecting) {
           setIsInView(true);
           observer.disconnect();
         }
       },
-      { rootMargin: '200px', threshold: 0.01 }
+      // 200px was chosen when containers had no height; with a reserved box
+      // it prefetches roughly one viewport ahead, which is the intent.
+      { rootMargin: '300px 0px', threshold: 0 }
     );
 
     observer.observe(containerRef.current);
     return () => observer.disconnect();
   }, [priority]);
 
-  // Center detection for mobile - activates effect when image is near center of viewport
+  // Touch devices have no hover, so the colour/zoom effect keys off the image
+  // being near the centre of the viewport instead. Bail before allocating
+  // anything on pointer devices.
   useEffect(() => {
     if (!enableZoom || !containerRef.current) return;
 
-    // Check if mobile/touch device
-    const isTouchDevice = 'ontouchstart' in window || navigator.maxTouchPoints > 0;
-    if (!isTouchDevice) return;
+    const isTouch = 'ontouchstart' in window || navigator.maxTouchPoints > 0;
+    if (!isTouch) return;
 
     const observer = new IntersectionObserver(
-      ([entry]) => {
-        // Calculate how centered the element is
-        const rect = entry.boundingClientRect;
-        const viewportHeight = window.innerHeight;
-        const elementCenter = rect.top + rect.height / 2;
-        const viewportCenter = viewportHeight / 2;
-        
-        // Consider "centered" if element center is within 20% of viewport center
-        const threshold = viewportHeight * 0.25;
-        const isCenteredNow = Math.abs(elementCenter - viewportCenter) < threshold && entry.isIntersecting;
-        
-        setIsCentered(isCenteredNow);
-      },
-      { 
-        threshold: [0, 0.25, 0.5, 0.75, 1],
-        rootMargin: '-20% 0px -20% 0px'
-      }
+      ([entry]) => setIsActive(Boolean(entry?.isIntersecting)),
+      // A single band across the middle of the viewport — one threshold
+      // instead of five, so this fires twice per item per scroll pass.
+      { rootMargin: '-35% 0px -35% 0px', threshold: 0 }
     );
 
     observer.observe(containerRef.current);
     return () => observer.disconnect();
   }, [enableZoom]);
 
-  const isActive = isHovered || isCentered;
-
-  const imageStyle = {
-    transform: enableZoom && isActive ? 'scale(1.05)' : 'scale(1)',
-    transition: 'transform 0.7s ease-out, opacity 0.3s ease-out, filter 0.5s ease-out',
-    opacity: isLoaded ? 1 : 0,
-    filter: isActive ? 'grayscale(0)' : 'grayscale(1)',
-  };
+  const aspectRatio = width && height ? `${width} / ${height}` : FALLBACK_ASPECT;
 
   return (
     <div
       ref={containerRef}
-      className={`relative overflow-hidden ${onClick ? 'cursor-pointer' : ''}`}
+      className={`relative overflow-hidden bg-neutral-900 ${onClick ? 'cursor-pointer' : ''}`}
+      style={{ aspectRatio }}
+      onMouseEnter={enableZoom ? () => setIsActive(true) : undefined}
+      onMouseLeave={enableZoom ? () => setIsActive(false) : undefined}
       onClick={onClick}
-      onMouseEnter={() => setIsHovered(true)}
-      onMouseLeave={() => setIsHovered(false)}
     >
       {isInView && (
         <img
           src={src}
+          {...(srcSet ? { srcSet } : {})}
+          {...(sizes ? { sizes } : {})}
+          {...(width ? { width } : {})}
+          {...(height ? { height } : {})}
           alt={alt}
-          loading={loading}
-          onLoad={() => setIsLoaded(true)}
+          loading={priority ? 'eager' : 'lazy'}
           decoding="async"
-          style={imageStyle}
-          className={className}
           fetchPriority={priority ? 'high' : 'auto'}
+          onLoad={() => setIsLoaded(true)}
+          className={className}
+          style={{
+            transform: enableZoom && isActive ? 'scale(1.05)' : 'scale(1)',
+            filter: enableZoom && !isActive ? 'grayscale(1)' : 'grayscale(0)',
+            opacity: isLoaded ? 1 : 0,
+            transition: 'transform 0.7s ease-out, opacity 0.3s ease-out, filter 0.5s ease-out',
+          }}
         />
       )}
     </div>

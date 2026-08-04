@@ -1,6 +1,7 @@
 import { useState } from 'react';
 
-import { getStorageUrl } from '@/lib/supabase';
+import { useLanguage } from '@/context/LanguageContext';
+import { buildImageUrl, THUMB_WIDTH } from '@/lib/imageUrl';
 import type { Photo, Category } from '@/types';
 
 interface PhotoCardProps {
@@ -20,6 +21,7 @@ export function PhotoCard({
   onDelete,
   onUpdateCategory,
 }: PhotoCardProps) {
+  const { t } = useLanguage();
   const [confirmingDelete, setConfirmingDelete] = useState(false);
 
   const handleDeleteClick = () => {
@@ -35,48 +37,59 @@ export function PhotoCard({
     <div className="relative bg-gray-50 border border-gray-200 rounded-elegant overflow-hidden">
       <div className="relative group">
         <img
-          src={getStorageUrl(photo.storage_path)}
+          src={buildImageUrl(photo.storage_path, { width: THUMB_WIDTH })}
           alt={photo.title}
+          loading="lazy"
+          decoding="async"
+          width={photo.width ?? undefined}
+          height={photo.height ?? undefined}
           className="w-full h-40 object-cover"
           onError={(e) => {
             (e.target as HTMLImageElement).src =
-              'data:image/svg+xml,<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 100 100"><rect fill="%23333" width="100" height="100"/><text x="50" y="50" text-anchor="middle" dy=".3em" fill="%23666">No Image</text></svg>';
+              'data:image/svg+xml,<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 100 100"><rect fill="%23333" width="100" height="100"/><text x="50" y="50" text-anchor="middle" dy=".3em" fill="%23666">-</text></svg>';
           }}
         />
-        <div className="absolute inset-0 bg-black/60 opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center gap-2">
+        {/* group-focus-within too: without it a keyboard user tabs into five
+            permanently invisible buttons per card. */}
+        <div className="absolute inset-0 bg-black/60 opacity-0 group-hover:opacity-100 group-focus-within:opacity-100 transition-opacity flex items-center justify-center gap-2">
           <button
+            type="button"
             onClick={() => onTogglePublish(photo)}
             className="px-3 py-1 bg-accent-500 text-white rounded text-sm hover:bg-accent-600"
           >
-            {photo.is_published ? 'Unpublish' : 'Publish'}
+            {photo.is_published ? t('admin.photos.unpublish') : t('admin.photos.publish')}
           </button>
           <button
+            type="button"
             onClick={() => onToggleHero(photo)}
             className="px-3 py-1 bg-blue-500 text-white rounded text-sm hover:bg-blue-600"
           >
-            {photo.is_hero ? 'Remove Hero' : 'Set as Hero'}
+            {photo.is_hero ? t('admin.photos.removeHero') : t('admin.photos.setHero')}
           </button>
           {confirmingDelete ? (
             <>
               <button
+            type="button"
                 onClick={handleDeleteClick}
                 className="px-3 py-1 bg-red-600 text-white rounded text-sm hover:bg-red-700 font-semibold"
               >
-                Confirmer
+                {t('admin.photos.confirm')}
               </button>
               <button
+            type="button"
                 onClick={() => setConfirmingDelete(false)}
                 className="px-3 py-1 bg-gray-500 text-white rounded text-sm hover:bg-gray-600"
               >
-                Annuler
+                {t('admin.photos.cancel')}
               </button>
             </>
           ) : (
             <button
+            type="button"
               onClick={handleDeleteClick}
               className="px-3 py-1 bg-red-500 text-white rounded text-sm hover:bg-red-600"
             >
-              Delete
+              {t('admin.photos.delete')}
             </button>
           )}
         </div>
@@ -86,13 +99,16 @@ export function PhotoCard({
         <p className="text-gray-900 text-sm truncate mb-2">{photo.title}</p>
 
         <div className="mb-2">
-          <label className="block text-xs text-gray-500 mb-1">Catégorie</label>
+          <label htmlFor={`photo-${photo.id}-category`} className="block text-xs text-gray-500 mb-1">
+            {t('admin.photos.category')}
+          </label>
           <select
+            id={`photo-${photo.id}-category`}
             value={photo.category ?? ''}
             onChange={(e) => onUpdateCategory(photo.id, e.target.value || null)}
             className="w-full text-xs px-2 py-1.5 bg-white border border-gray-200 rounded text-gray-900 focus:outline-none focus:border-black hover:border-gray-400 transition-colors"
           >
-            <option value="">Sans catégorie</option>
+            <option value="">{t('admin.photos.uncategorised')}</option>
             {categories.map((cat) => (
               <option key={cat.id} value={cat.slug}>
                 {cat.name}
@@ -107,10 +123,10 @@ export function PhotoCard({
               photo.is_published ? 'bg-green-100 text-green-800' : 'bg-yellow-100 text-yellow-800'
             }`}
           >
-            {photo.is_published ? 'Published' : 'Draft'}
+            {photo.is_published ? t('admin.photos.published') : t('admin.photos.draft')}
           </span>
           {photo.is_hero && (
-            <span className="text-xs px-2 py-0.5 rounded bg-blue-100 text-blue-800">Hero</span>
+            <span className="text-xs px-2 py-0.5 rounded bg-blue-100 text-blue-800">{t('admin.photos.hero')}</span>
           )}
           {photo.category && (
             <span className="text-xs px-2 py-0.5 rounded bg-gray-200 text-gray-800">

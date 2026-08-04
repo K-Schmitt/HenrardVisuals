@@ -11,6 +11,7 @@ vi.mock('@/lib/supabase', () => ({
 }));
 
 import { CategoryManager } from './CategoryManager';
+
 import { LanguageProvider } from '@/context/LanguageContext';
 import { supabase, insertRow, updateRow } from '@/lib/supabase';
 import type { Category } from '@/types';

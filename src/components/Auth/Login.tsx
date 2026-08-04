@@ -1,5 +1,6 @@
 import { useState, useCallback } from 'react';
 
+import { useLanguage } from '@/context/LanguageContext';
 import { useAuth } from '@/hooks/useAuth';
 import type { LoginFormProps } from '@/types';
 
@@ -15,6 +16,7 @@ interface FormErrors {
 }
 
 export function Login({ onSuccess, onError }: LoginFormProps) {
+  const { t } = useLanguage();
   const { signIn, isLoading, error: authError } = useAuth();
 
   const [formState, setFormState] = useState<FormState>({
@@ -31,21 +33,21 @@ export function Login({ onSuccess, onError }: LoginFormProps) {
 
     // Email validation
     if (!formState.email) {
-      newErrors.email = 'Email is required';
+      newErrors.email = t('login.emailRequired');
     } else if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(formState.email)) {
-      newErrors.email = 'Please enter a valid email address';
+      newErrors.email = t('login.emailInvalid');
     }
 
     // Password validation
     if (!formState.password) {
-      newErrors.password = 'Password is required';
+      newErrors.password = t('login.passwordRequired');
     } else if (formState.password.length < 8) {
-      newErrors.password = 'Password must be at least 8 characters';
+      newErrors.password = t('login.passwordTooShort');
     }
 
     setErrors(newErrors);
     return Object.keys(newErrors).length === 0;
-  }, [formState]);
+  }, [formState, t]);
 
   // Handle input change
   const handleChange = useCallback(
@@ -81,7 +83,7 @@ export function Login({ onSuccess, onError }: LoginFormProps) {
 
         onSuccess?.();
       } catch (error) {
-        const message = error instanceof Error ? error.message : 'Login failed';
+        const message = error instanceof Error ? error.message : t('login.failed');
         setErrors({ general: message });
 
         if (onError && authError) {
@@ -91,7 +93,7 @@ export function Login({ onSuccess, onError }: LoginFormProps) {
         setIsSubmitting(false);
       }
     },
-    [formState, validateForm, signIn, onSuccess, onError, authError]
+    [formState, validateForm, signIn, onSuccess, onError, authError, t]
   );
 
   const isButtonDisabled = isLoading || isSubmitting;
@@ -100,8 +102,8 @@ export function Login({ onSuccess, onError }: LoginFormProps) {
     <div className="w-full max-w-md mx-auto" data-testid="login-form-container">
       {/* Header */}
       <header className="text-center mb-8">
-        <h2 className="font-display text-display-sm text-primary-50">Welcome Back</h2>
-        <p className="mt-2 text-body-md text-primary-400">Sign in to access the admin panel</p>
+        <h1 className="font-display text-display-sm text-primary-50">{t('login.title')}</h1>
+        <p className="mt-2 text-body-md text-primary-400">{t('login.subtitle')}</p>
       </header>
 
       {/* Form */}
@@ -123,7 +125,7 @@ export function Login({ onSuccess, onError }: LoginFormProps) {
             htmlFor="email"
             className="block text-caption text-primary-400 uppercase tracking-wider mb-2"
           >
-            Email Address
+            {t('login.emailLabel')}
           </label>
           <input
             id="email"
@@ -164,7 +166,7 @@ export function Login({ onSuccess, onError }: LoginFormProps) {
             htmlFor="password"
             className="block text-caption text-primary-400 uppercase tracking-wider mb-2"
           >
-            Password
+            {t('login.passwordLabel')}
           </label>
           <input
             id="password"
@@ -206,7 +208,7 @@ export function Login({ onSuccess, onError }: LoginFormProps) {
           className={`
             w-full py-4 px-6
             bg-accent-500 hover:bg-accent-600
-            text-primary-900 font-medium
+            text-black font-medium
             rounded-elegant
             transition-all duration-300
             focus:outline-none focus:ring-2 focus:ring-accent-500/50 focus:ring-offset-2 focus:ring-offset-surface-darker
@@ -237,10 +239,10 @@ export function Login({ onSuccess, onError }: LoginFormProps) {
                   d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"
                 />
               </svg>
-              Signing in...
+              {t('login.submitting')}
             </span>
           ) : (
-            'Sign In'
+            t('login.submit')
           )}
         </button>
       </form>

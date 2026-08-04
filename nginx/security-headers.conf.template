@@ -1,0 +1,19 @@
+# Included into EVERY location block. nginx discards inherited add_header
+# directives in any block that declares its own, so these cannot live at
+# server level alone — see nginx/default.conf.
+#
+# ${SUPABASE_ORIGIN} is substituted at container start by
+# docker-entrypoint.d/25-security-headers.sh, from VITE_SUPABASE_URL.
+
+add_header X-Content-Type-Options "nosniff"                          always;
+add_header X-Frame-Options        "DENY"                             always;
+add_header Referrer-Policy        "strict-origin-when-cross-origin"  always;
+add_header Permissions-Policy     "camera=(), microphone=(), geolocation=(), interest-cohort=()" always;
+add_header Strict-Transport-Security "max-age=63072000; includeSubDomains" always;
+
+# script-src has no 'unsafe-inline': Vite emits external modules only.
+# style-src keeps it because Tailwind's runtime and React inline styles
+# (OptimizedImage sets style={{…}}) require it.
+# connect-src is pinned to the API origin rather than all of https:.
+# Fonts are self-hosted since the Task 8 change, so 'self' suffices.
+add_header Content-Security-Policy "default-src 'self'; script-src 'self'; style-src 'self' 'unsafe-inline'; img-src 'self' data: blob: ${SUPABASE_ORIGIN}; font-src 'self'; connect-src 'self' ${SUPABASE_ORIGIN}; frame-ancestors 'none'; base-uri 'self'; form-action 'self'; object-src 'none'" always;

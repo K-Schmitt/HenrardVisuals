@@ -1,5 +1,14 @@
 # HenrardVisuals - Caddy Configuration
 # SSL automatique avec Let's Encrypt
+#
+# NOT USED BY ANY COMPOSE FILE. No service definition references it; it exists
+# for the manual-VPS path described in docs/DEPLOY.md, where Caddy is installed
+# on the host. On the Coolify deployment, Coolify's own proxy fronts the stack
+# and none of the header rewriting below happens.
+#
+# Do not read the CORS handling here as an active control. CORS is enforced at
+# Kong (volumes/kong/kong.yml), which is the only place that runs in every
+# deployment.
 
 # Site principal
 henrardvisuals.com, www.henrardvisuals.com {

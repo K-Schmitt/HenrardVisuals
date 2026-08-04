@@ -1,1 +1,35 @@
-volumes/db/data
+# Build context exclusions — anything here never reaches the Docker daemon.
+.git
+.github
+.gitignore
+.dockerignore
+
+# Secrets
+.env
+.env.*
+!.env.example
+*.pem
+*.key
+
+# Dependencies & build output
+node_modules
+dist
+build
+.vite
+.pnpm-store
+
+# Runtime data — uploaded photos and the Postgres data directory
+volumes
+
+# Not needed to build the SPA
+docs
+e2e
+supabase
+playwright.config.ts
+.claude
+*.log
+coverage
+README.md
+LICENSE
+Caddyfile
+docker-compose*.yml

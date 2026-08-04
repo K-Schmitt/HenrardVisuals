@@ -18,6 +18,9 @@ services:
         - VITE_SUPABASE_URL=${VITE_SUPABASE_URL}
         # Clé anon de ton Supabase Coolify
         - VITE_SUPABASE_ANON_KEY=${VITE_SUPABASE_ANON_KEY}
+        # "true" seulement si le service Storage tourne avec
+        # ENABLE_IMAGE_TRANSFORMATION=true et un IMGPROXY_URL.
+        - VITE_IMAGE_TRANSFORM=${VITE_IMAGE_TRANSFORM:-false}
     restart: unless-stopped
     # Coolify gère le reverse proxy, on expose juste le port interne
     expose:
@@ -25,6 +28,7 @@ services:
     environment:
       - VITE_SUPABASE_URL=${VITE_SUPABASE_URL}
       - VITE_SUPABASE_ANON_KEY=${VITE_SUPABASE_ANON_KEY}
+      - VITE_IMAGE_TRANSFORM=${VITE_IMAGE_TRANSFORM:-false}
     healthcheck:
       test: ["CMD", "wget", "-q", "--spider", "http://localhost:80"]
       interval: 30s

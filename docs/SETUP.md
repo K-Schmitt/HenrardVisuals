@@ -39,13 +39,20 @@ docker compose -f docker-compose.dev.yml logs -f app
 
 ### 4. Initialise the database
 
-Open Supabase Studio at **http://localhost:8080**, navigate to the SQL editor, and paste the contents of `supabase/setup-complete.sql`.
+```bash
+# The Compose stack applies supabase/migrations/*.sql automatically on first boot.
+# Against an existing/managed Supabase, apply them in order:
+for f in supabase/migrations/*.sql; do
+  psql "$DATABASE_URL" -v ON_ERROR_STOP=1 -f "$f"
+done
+```
 
-Alternatively via psql:
+The storage bucket and its access policies are skipped on first boot (`storage-api` creates the schema they write to only once Postgres is already healthy). Once the full stack is up, seed them once — the second command's three "already exists" errors are expected, from policies applied during boot. The third re-applies the admin-only storage policies from `005`; it is idempotent (every `CREATE POLICY` is preceded by a matching `DROP POLICY IF EXISTS`) and can be replayed as often as needed:
 
 ```bash
-docker compose -f docker-compose.dev.yml exec db \
-  psql -U postgres -d henrard_db -f /dev/stdin < supabase/setup-complete.sql
+psql "$DATABASE_URL" -v ON_ERROR_STOP=1 -f supabase/migrations/002_storage_bucket.sql
+psql "$DATABASE_URL" -f supabase/migrations/003_rls_admin_only.sql
+psql "$DATABASE_URL" -v ON_ERROR_STOP=1 -f supabase/migrations/005_rls_hardening.sql
 ```
 
 ### 5. Create the admin user

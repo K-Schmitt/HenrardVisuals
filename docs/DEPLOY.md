@@ -74,6 +74,13 @@ API_EXTERNAL_URL=https://api.yourdomain.com
 DISABLE_SIGNUP=true
 ```
 
+`VITE_SUPABASE_URL` is needed twice: at **build** time, so the bundle knows where
+the API is, and at **run** time, because the frontend container derives its
+Content-Security-Policy from it (`nginx/25-security-headers.sh`). Both Compose
+files pass it in both places. A container started without it exits immediately
+with an explanatory message rather than serving a policy that would block every
+API call and image.
+
 ### 3. Deploy
 
 ```bash
@@ -85,10 +92,24 @@ docker compose logs -f   # Watch logs
 ### 4. Initialise database
 
 ```bash
-docker compose exec db \
-  psql -U postgres -d henrard_db \
-  -f /dev/stdin < supabase/setup-complete.sql
+# The Compose stack applies supabase/migrations/*.sql automatically on first boot.
+# Against an existing/managed Supabase, apply them in order:
+for f in supabase/migrations/*.sql; do
+  psql "$DATABASE_URL" -v ON_ERROR_STOP=1 -f "$f"
+done
+```
 
+The storage bucket and its access policies are skipped on first boot (`storage-api` creates the schema they write to only once Postgres is already healthy). Once the full stack is up, seed them once — the second command's three "already exists" errors are expected, from policies applied during boot. The third re-applies the admin-only storage policies from `005`; it is idempotent (every `CREATE POLICY` is preceded by a matching `DROP POLICY IF EXISTS`) and can be replayed as often as needed:
+
+```bash
+psql "$DATABASE_URL" -v ON_ERROR_STOP=1 -f supabase/migrations/002_storage_bucket.sql
+psql "$DATABASE_URL" -f supabase/migrations/003_rls_admin_only.sql
+psql "$DATABASE_URL" -v ON_ERROR_STOP=1 -f supabase/migrations/005_rls_hardening.sql
+```
+
+Then create the admin user:
+
+```bash
 docker compose exec db \
   psql -U postgres -d henrard_db \
   -v ADMIN_EMAIL='admin@yourdomain.com' \

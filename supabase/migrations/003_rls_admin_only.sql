@@ -65,25 +65,38 @@ CREATE POLICY "Admins gèrent les paramètres"
 -- ----------------------------------------
 -- Policies storage — remplacement
 -- ----------------------------------------
+-- storage.objects n'existe que si storage-api a déjà démarré et créé
+-- son schéma, ce qui n'est pas encore le cas au premier boot Postgres
+-- (docker-entrypoint-initdb.d s'exécute avant que ce service ne
+-- démarre). Cf. 002_storage_bucket.sql pour le même garde-fou et pour
+-- la commande de réapplication (README.md, docs/SETUP.md, docs/DEPLOY.md).
 
-DROP POLICY IF EXISTS "Utilisateurs authentifiés peuvent uploader" ON storage.objects;
-DROP POLICY IF EXISTS "Utilisateurs authentifiés peuvent modifier" ON storage.objects;
-DROP POLICY IF EXISTS "Utilisateurs authentifiés peuvent supprimer" ON storage.objects;
+DO $$
+BEGIN
+  IF to_regclass('storage.objects') IS NOT NULL THEN
+    DROP POLICY IF EXISTS "Utilisateurs authentifiés peuvent uploader" ON storage.objects;
+    DROP POLICY IF EXISTS "Utilisateurs authentifiés peuvent modifier" ON storage.objects;
+    DROP POLICY IF EXISTS "Utilisateurs authentifiés peuvent supprimer" ON storage.objects;
 
-CREATE POLICY "Admins peuvent uploader"
-    ON storage.objects FOR INSERT
-    TO authenticated
-    WITH CHECK (bucket_id = 'photos' AND public.is_admin());
+    CREATE POLICY "Admins peuvent uploader"
+        ON storage.objects FOR INSERT
+        TO authenticated
+        WITH CHECK (bucket_id = 'photos' AND public.is_admin());
 
-CREATE POLICY "Admins peuvent modifier"
-    ON storage.objects FOR UPDATE
-    TO authenticated
-    USING (bucket_id = 'photos' AND public.is_admin());
+    CREATE POLICY "Admins peuvent modifier"
+        ON storage.objects FOR UPDATE
+        TO authenticated
+        USING (bucket_id = 'photos' AND public.is_admin());
 
-CREATE POLICY "Admins peuvent supprimer"
-    ON storage.objects FOR DELETE
-    TO authenticated
-    USING (bucket_id = 'photos' AND public.is_admin());
+    CREATE POLICY "Admins peuvent supprimer"
+        ON storage.objects FOR DELETE
+        TO authenticated
+        USING (bucket_id = 'photos' AND public.is_admin());
+  ELSE
+    RAISE NOTICE 'storage.objects absent — storage-api pas encore démarré, policies admin non appliquées (réexécuter ce fichier une fois la stack complète démarrée)';
+  END IF;
+END
+$$;
 
 -- =========================================
 -- Pour promouvoir un utilisateur admin :

@@ -1,5 +1,4 @@
-import { renderHook, waitFor } from '@testing-library/react';
-import { act } from '@testing-library/react';
+import { act, renderHook, waitFor } from '@testing-library/react';
 import { describe, it, expect, vi, beforeEach } from 'vitest';
 
 // Thenable + fully chainable mock for Supabase query builders.
@@ -16,13 +15,19 @@ function createQueryMock(resolvedValue: unknown) {
   return mock;
 }
 
+// The hook reads its fallback error copy through useLanguage.
+vi.mock('@/context/LanguageContext', () => ({
+  useLanguage: () => ({ language: 'en', setLanguage: vi.fn(), t: (key: string) => key }),
+}));
+
 vi.mock('@/lib/supabase', () => ({
   supabase: { from: vi.fn() },
 }));
 
 import { useHomeData, PAGE_SIZE } from './useHomeData';
-import { supabase } from '@/lib/supabase';
+
 import { DEFAULT_PROFILE_SETTINGS } from '@/constants/profileDefaults';
+import { supabase } from '@/lib/supabase';
 import type { Photo, Category } from '@/types';
 
 const mockFrom = supabase.from as ReturnType<typeof vi.fn>;
@@ -130,6 +135,23 @@ describe('useHomeData', () => {
 
     act(() => result.current.setActiveFilter('unknown-slug'));
     expect(result.current.activeFilter).toBe('All');
+  });
+
+  it('clears a previous error when a later fetch succeeds', async () => {
+    // First fetch fails.
+    setupMocks({ photosError: new Error('boom') });
+    const { result } = renderHook(() => useHomeData());
+    await waitFor(() => expect(result.current.error).toBe('boom'));
+
+    // Second fetch succeeds — the error must not persist, or PhotoGallery
+    // keeps the grid hidden until a full page reload.
+    setupMocks({ photos: [makePhoto('1')], photosCount: 1 });
+    act(() => result.current.setCurrentPage(1));
+
+    await waitFor(() => {
+      expect(result.current.isLoading).toBe(false);
+      expect(result.current.error).toBeNull();
+    });
   });
 
   it('loads categories from DB', async () => {

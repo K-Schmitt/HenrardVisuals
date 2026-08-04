@@ -1,6 +1,7 @@
 import { useState, useEffect, useCallback, useRef } from 'react';
 
 import { DEFAULT_PROFILE_SETTINGS, isProfileSettings } from '@/constants/profileDefaults';
+import { useLanguage } from '@/context/LanguageContext';
 import { supabase } from '@/lib/supabase';
 import type { Photo, Category, ProfileSettings } from '@/types';
 
@@ -16,6 +17,12 @@ export function useHomeData() {
   const [totalCount, setTotalCount] = useState(0);
   const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
+  const { t } = useLanguage();
+
+  // Ref: t must not be an effect dependency here or every language switch
+  // refetches the entire gallery.
+  const tRef = useRef(t);
+  tRef.current = t;
 
   // Avoid re-fetching static data (hero, categories, settings) on every page/filter change.
   // Increment staticDataVersion to force a re-fetch (e.g. after admin edits).
@@ -28,15 +35,34 @@ export function useHomeData() {
   }, []);
 
   useEffect(() => {
+    // Rapid filter/page clicks fire overlapping queries; without this flag the
+    // last response to arrive wins regardless of which was requested last.
+    let cancelled = false;
+
     const fetchData = async () => {
       setIsLoading(true);
+      setError(null);
       try {
         if (!staticDataLoaded.current) {
           const [settingsRes, categoriesRes, heroRes] = await Promise.all([
-            supabase.from('site_settings').select('value').eq('key', 'profile_settings').maybeSingle(),
-            supabase.from('categories').select('*').order('sort_order', { ascending: true }),
-            supabase.from('photos').select('*').eq('is_hero', true).eq('is_published', true).maybeSingle(),
+            supabase
+              .from('site_settings')
+              .select('value')
+              .eq('key', 'profile_settings')
+              .maybeSingle(),
+            supabase
+              .from('categories')
+              .select('id, name, slug, sort_order')
+              .order('sort_order', { ascending: true }),
+            supabase
+              .from('photos')
+              .select('id, title, storage_path, width, height')
+              .eq('is_hero', true)
+              .eq('is_published', true)
+              .maybeSingle(),
           ]);
+
+          if (cancelled) return;
 
           const raw = (settingsRes.data as { value: unknown } | null)?.value;
           if (isProfileSettings(raw)) setProfileSettings(raw);
@@ -47,7 +73,10 @@ export function useHomeData() {
 
         let photosQuery = supabase
           .from('photos')
-          .select('*', { count: 'exact' })
+          // Explicit projection: the grid renders id, title, storage_path,
+          // category and the dimensions. Selecting * also pulled the metadata
+          // JSONB, description, file_size, mime_type and both timestamps.
+          .select('id, title, storage_path, category, width, height', { count: 'exact' })
           .eq('is_published', true)
           .eq('is_hero', false);
 
@@ -63,18 +92,24 @@ export function useHomeData() {
         const { data, count, error: photosError } = await photosQuery
           .order('sort_order', { ascending: true })
           .range(safePage * PAGE_SIZE, (safePage + 1) * PAGE_SIZE - 1);
+
+        if (cancelled) return;
         if (photosError) throw photosError;
 
         setPhotos((data ?? []) as Photo[]);
         setTotalCount(count ?? 0);
       } catch (err) {
-        setError(err instanceof Error ? err.message : 'Failed to load');
+        if (cancelled) return;
+        setError(err instanceof Error ? err.message : tRef.current('home.loadError'));
       } finally {
-        setIsLoading(false);
+        if (!cancelled) setIsLoading(false);
       }
     };
 
     fetchData();
+    return () => {
+      cancelled = true;
+    };
   }, [activeFilter, currentPage, staticDataVersion]);
 
   // Wrap setActiveFilter to reset pagination on filter change.

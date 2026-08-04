@@ -8,13 +8,39 @@ export default defineConfig({
         globals: true,
         environment: 'jsdom',
         setupFiles: ['./src/test/setup.ts'],
-        exclude: ['node_modules', 'e2e/**'],
+        // Nested paths matter: a git worktree under .claude/worktrees carries
+        // its own node_modules, and a bare 'node_modules' entry only excludes
+        // the top-level one — vitest would walk in and run dependencies' own
+        // suites.
+        exclude: ['**/node_modules/**', 'e2e/**', '.claude/**'],
+        coverage: {
+            provider: 'v8',
+            reporter: ['text', 'lcov'],
+            include: ['src/**/*.{ts,tsx}'],
+            exclude: ['src/**/*.test.{ts,tsx}', 'src/test/**', 'src/types/**', 'src/i18n/**'],
+            thresholds: {
+                // Raise as coverage grows; never lower to make a build pass.
+                // Measured on vitest 4 (52.53 / 40.00 / 45.30 / 54.22), with
+                // a few points of margin so an added uncovered branch fails
+                // review rather than the build. The branch figure is far below
+                // the vitest 2 reading of the same suite — v8 coverage remaps
+                // to the AST now and counts branches the old provider never
+                // saw. A threshold the suite cannot meet teaches everyone to
+                // ignore the badge on day one.
+                statements: 50,
+                branches: 35,
+                functions: 40,
+                lines: 50,
+            },
+        },
     },
     plugins: [react()],
 
     resolve: {
         alias: {
-            '@': resolve(__dirname, './src'),
+            // import.meta.dirname, not __dirname: Vite 8's native config
+            // loader does not provide the CJS global.
+            '@': resolve(import.meta.dirname, './src'),
         },
     },
 
@@ -27,14 +53,27 @@ export default defineConfig({
     build: {
         outDir: 'dist',
         sourcemap: false,
-        minify: 'esbuild',
+        // Vite 8 bundles with rolldown/oxc; naming esbuild here now requires
+        // installing esbuild separately. `true` uses the built-in minifier.
+        minify: true,
         // Optimize chunk splitting
         rollupOptions: {
             output: {
-                manualChunks: {
-                    vendor: ['react', 'react-dom'],
-                    router: ['react-router-dom'],
-                    supabase: ['@supabase/supabase-js'],
+                // Function form, not object form: the object form matches only
+                // exact module ids, and main.tsx imports 'react-dom/client'
+                // while the code itself lives in react-dom/cjs/*. Nothing
+                // matched, so `vendor` came out at 30 bytes and React was
+                // swept into the router chunk.
+                manualChunks(id) {
+                    if (!id.includes('node_modules')) return undefined;
+                    // Must precede the react test — 'react-router' contains 'react'.
+                    if (id.includes('react-router')) return 'router';
+                    if (/[\\/]node_modules[\\/](react|react-dom|scheduler)[\\/]/.test(id)) {
+                        return 'react-vendor';
+                    }
+                    if (id.includes('@supabase')) return 'supabase';
+                    if (id.includes('i18next')) return 'i18n';
+                    return undefined;
                 },
             },
         },

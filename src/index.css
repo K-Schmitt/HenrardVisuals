@@ -2,7 +2,44 @@
    HenrardVisuals - Global Styles
    ========================================= */
 
-@import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600&family=Playfair+Display:ital,wght@0,400;0,600;1,400&display=swap');
+/* Self-hosted. The previous @import survived minification to the first byte
+   of the built stylesheet, which made it a chained blocking request:
+   HTML -> CSS -> googleapis CSS -> gstatic woff2. */
+@font-face {
+  font-family: 'Inter';
+  font-style: normal;
+  font-weight: 400;
+  font-display: swap;
+  src: url('/fonts/inter-400.woff2') format('woff2');
+}
+@font-face {
+  font-family: 'Inter';
+  font-style: normal;
+  font-weight: 500;
+  font-display: swap;
+  src: url('/fonts/inter-500.woff2') format('woff2');
+}
+@font-face {
+  font-family: 'Inter';
+  font-style: normal;
+  font-weight: 600;
+  font-display: swap;
+  src: url('/fonts/inter-600.woff2') format('woff2');
+}
+@font-face {
+  font-family: 'Playfair Display';
+  font-style: normal;
+  font-weight: 400;
+  font-display: swap;
+  src: url('/fonts/playfair-400.woff2') format('woff2');
+}
+@font-face {
+  font-family: 'Playfair Display';
+  font-style: normal;
+  font-weight: 600;
+  font-display: swap;
+  src: url('/fonts/playfair-600.woff2') format('woff2');
+}
 
 @tailwind base;
 @tailwind components;
@@ -122,5 +159,22 @@
 
   .no-print {
     display: none !important;
+  }
+}
+
+/* ----------------------------------------
+   Reduced Motion
+   ---------------------------------------- */
+@media (prefers-reduced-motion: reduce) {
+  :root {
+    scroll-behavior: auto;
+  }
+
+  *,
+  *::before,
+  *::after {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
   }
 }

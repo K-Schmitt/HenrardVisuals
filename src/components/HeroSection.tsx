@@ -1,6 +1,6 @@
 import { OptimizedImage } from '@/components/OptimizedImage';
 import { useLanguage } from '@/context/LanguageContext';
-import { getStorageUrl } from '@/lib/supabase';
+import { buildImageUrl, buildImageSrcSet, HERO_WIDTHS } from '@/lib/imageUrl';
 import type { Photo, ProfileSettings } from '@/types';
 
 interface HeroSectionProps {
@@ -18,10 +18,14 @@ export function HeroSection({ heroPhoto, profileSettings }: HeroSectionProps) {
           <div className="h-full flex items-start justify-center">
             {heroPhoto ? (
               <OptimizedImage
-                src={getStorageUrl(heroPhoto.storage_path)}
+                src={buildImageUrl(heroPhoto.storage_path, { width: 1280 })}
+                srcSet={buildImageSrcSet(heroPhoto.storage_path, HERO_WIDTHS)}
+                sizes="(min-width: 1024px) 50vw, 100vw"
                 alt={heroPhoto.title}
+                width={heroPhoto.width ?? undefined}
+                height={heroPhoto.height ?? undefined}
                 className="w-full h-auto max-h-[calc(100vh-5rem)] object-contain grayscale hover:grayscale-0 transition-all duration-700"
-                priority={true}
+                priority
               />
             ) : (
               <div className="w-full h-64 bg-black flex items-center justify-center">
@@ -32,11 +36,11 @@ export function HeroSection({ heroPhoto, profileSettings }: HeroSectionProps) {
         </div>
 
         <div className="lg:w-1/2 bg-black px-8 py-12 lg:px-16 lg:py-20 lg:pt-24">
-          <h2 className="font-serif text-6xl lg:text-7xl xl:text-8xl text-center uppercase tracking-tight mb-6">
+          <h1 className="font-serif text-6xl lg:text-7xl xl:text-8xl text-center uppercase tracking-tight mb-6">
             TRISTAN
             <br />
             HENRARD
-          </h2>
+          </h1>
 
           <p className="text-center text-gray-400 text-sm mb-12">
             {language === 'fr'
@@ -49,8 +53,8 @@ export function HeroSection({ heroPhoto, profileSettings }: HeroSectionProps) {
               <div key={i} className="flex items-start gap-8">
                 <div className="text-center">
                   <div className="text-3xl font-light text-white mb-1">{stat.value}</div>
-                  <div className="text-xs text-gray-500 mb-2">{stat.unit}</div>
-                  <div className="text-[10px] text-gray-600 uppercase tracking-widest">
+                  <div className="text-xs text-gray-400 mb-2">{stat.unit}</div>
+                  <div className="text-[10px] text-gray-400 uppercase tracking-widest">
                     {language === 'fr' ? stat.label : stat.label_en ?? stat.label}
                   </div>
                 </div>
