@@ -135,29 +135,29 @@ describe('PhotoGallery', () => {
     const photos = [makePhoto('1')];
     render(<PhotoGallery {...DEFAULT_PROPS} photos={photos} totalCount={1} pageSize={12} />);
 
-    expect(screen.queryByLabelText('Page précédente')).not.toBeInTheDocument();
+    expect(screen.queryByLabelText('gallery.previousPage')).not.toBeInTheDocument();
   });
 
   it('renders pagination when totalCount exceeds pageSize', () => {
     render(
       <PhotoGallery {...DEFAULT_PROPS} totalCount={25} pageSize={12} currentPage={0} />
     );
-    expect(screen.getByLabelText('Page précédente')).toBeInTheDocument();
-    expect(screen.getByLabelText('Page suivante')).toBeInTheDocument();
+    expect(screen.getByLabelText('gallery.previousPage')).toBeInTheDocument();
+    expect(screen.getByLabelText('gallery.nextPage')).toBeInTheDocument();
   });
 
   it('Previous button is disabled on first page', () => {
     render(
       <PhotoGallery {...DEFAULT_PROPS} totalCount={25} pageSize={12} currentPage={0} />
     );
-    expect(screen.getByLabelText('Page précédente')).toBeDisabled();
+    expect(screen.getByLabelText('gallery.previousPage')).toBeDisabled();
   });
 
   it('Next button is disabled on last page', () => {
     render(
       <PhotoGallery {...DEFAULT_PROPS} totalCount={25} pageSize={12} currentPage={2} />
     );
-    expect(screen.getByLabelText('Page suivante')).toBeDisabled();
+    expect(screen.getByLabelText('gallery.nextPage')).toBeDisabled();
   });
 
   it('calls onPageChange with next page index when Next is clicked', () => {
@@ -171,7 +171,7 @@ describe('PhotoGallery', () => {
         onPageChange={onPageChange}
       />
     );
-    fireEvent.click(screen.getByLabelText('Page suivante'));
+    fireEvent.click(screen.getByLabelText('gallery.nextPage'));
     expect(onPageChange).toHaveBeenCalledWith(1);
   });
 
@@ -186,7 +186,7 @@ describe('PhotoGallery', () => {
         onPageChange={onPageChange}
       />
     );
-    fireEvent.click(screen.getByLabelText('Page précédente'));
+    fireEvent.click(screen.getByLabelText('gallery.previousPage'));
     expect(onPageChange).toHaveBeenCalledWith(0);
   });
 });
