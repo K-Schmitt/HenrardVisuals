@@ -13,6 +13,7 @@
     "check": "tsc --noEmit && eslint src --ext .ts,.tsx",
     "test": "vitest run",
     "test:watch": "vitest",
+    "test:coverage": "vitest run --coverage",
     "test:rls": "./supabase/tests/run-rls-tests.sh",
     "e2e": "playwright test",
     "e2e:ui": "playwright test --ui"
@@ -36,6 +37,7 @@
     "@typescript-eslint/eslint-plugin": "^8.49.0",
     "@typescript-eslint/parser": "^8.49.0",
     "@vitejs/plugin-react": "^4.2.1",
+    "@vitest/coverage-v8": "^2.1.9",
     "autoprefixer": "^10.4.16",
     "eslint": "^9.39.2",
     "eslint-config-prettier": "^10.1.8",
@@ -49,5 +51,10 @@
     "typescript": "^5.3.3",
     "vite": "^5.0.10",
     "vitest": "^2.1.9"
+  },
+  "pnpm": {
+    "overrides": {
+      "ws@>=8.0.0 <8.21.0": ">=8.21.0"
+    }
   }
 }

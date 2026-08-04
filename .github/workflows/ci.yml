@@ -1,0 +1,111 @@
+name: ci
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+    branches: [main]
+
+concurrency:
+  group: ci-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  verify:
+    name: typecheck, lint, test, build
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: pnpm/action-setup@v4
+        with:
+          version: 8.15.9
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 20
+          cache: pnpm
+
+      - run: pnpm install --frozen-lockfile
+
+      - name: Type check and lint
+        run: pnpm check
+
+      - name: Unit tests with coverage
+        run: pnpm test:coverage
+
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: coverage
+          path: coverage/
+          retention-days: 7
+
+      - name: Production build
+        run: pnpm build
+        env:
+          # Build-time only; the anon key is public by design and RLS is the
+          # actual access control. These are placeholders, not secrets.
+          VITE_SUPABASE_URL: http://localhost:8000
+          VITE_SUPABASE_ANON_KEY: ci-placeholder
+          VITE_IMAGE_TRANSFORM: 'false'
+
+      # Guards the chunking fix: manualChunks silently produced a 30-byte
+      # vendor chunk once already, with React swept into the router chunk.
+      - name: Fail if any chunk exceeds 200 kB
+        run: |
+          oversized=$(find dist/assets -name '*.js' -size +200k)
+          if [ -n "$oversized" ]; then
+            echo "Chunks over 200 kB:"; echo "$oversized"; ls -la $oversized; exit 1
+          fi
+          echo "All chunks within budget."
+
+  database:
+    name: RLS policy tests
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - name: Run RLS regression tests
+        run: ./supabase/tests/run-rls-tests.sh
+
+  audit:
+    name: dependency audit
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: pnpm/action-setup@v4
+        with:
+          version: 8.15.9
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 20
+          cache: pnpm
+      - run: pnpm install --frozen-lockfile
+      - name: Audit production dependencies
+        run: pnpm audit --prod --audit-level high
+
+  docker:
+    name: docker image builds
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - name: Build production image
+        run: |
+          docker build --target production \
+            --build-arg VITE_SUPABASE_URL=http://localhost:8000 \
+            --build-arg VITE_SUPABASE_ANON_KEY=ci-placeholder \
+            -t henrard:ci .
+
+      # Guards the nginx fix: add_header inheritance is exactly the kind of
+      # configuration that silently regresses when a location block is added.
+      - name: Assert security headers are served
+        run: |
+          docker run -d --name hdr -p 8099:80 \
+            -e VITE_SUPABASE_URL=http://localhost:8000 henrard:ci
+          sleep 3
+          count=$(curl -sI http://localhost:8099/ | grep -icE \
+            'content-security-policy|x-frame-options|x-content-type-options|referrer-policy|permissions-policy|strict-transport-security')
+          docker rm -f hdr
+          if [ "$count" -lt 6 ]; then
+            echo "Expected 6 security headers, found $count"; exit 1
+          fi
