@@ -39,13 +39,12 @@ docker compose -f docker-compose.dev.yml logs -f app
 
 ### 4. Initialise the database
 
-Open Supabase Studio at **http://localhost:8080**, navigate to the SQL editor, and paste the contents of `supabase/setup-complete.sql`.
-
-Alternatively via psql:
-
 ```bash
-docker compose -f docker-compose.dev.yml exec db \
-  psql -U postgres -d henrard_db -f /dev/stdin < supabase/setup-complete.sql
+# The Compose stack applies supabase/migrations/*.sql automatically on first boot.
+# Against an existing/managed Supabase, apply them in order:
+for f in supabase/migrations/*.sql; do
+  psql "$DATABASE_URL" -v ON_ERROR_STOP=1 -f "$f"
+done
 ```
 
 ### 5. Create the admin user

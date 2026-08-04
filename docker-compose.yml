@@ -35,7 +35,7 @@ services:
       POSTGRES_DB: henrard_db
     volumes:
       - ./volumes/db/data:/var/lib/postgresql/data
-      - ./volumes/db/init:/docker-entrypoint-initdb.d
+      - ./supabase/migrations:/docker-entrypoint-initdb.d:ro
     networks:
       - henrard-network
     healthcheck:
