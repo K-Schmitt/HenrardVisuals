@@ -5,6 +5,7 @@
 import { Suspense, lazy } from 'react';
 import { BrowserRouter, Routes, Route } from 'react-router-dom';
 
+import { ErrorBoundary } from '@/components/ErrorBoundary';
 import { SiteLayout } from '@/components/Layout/SiteLayout';
 import { AuthProvider } from '@/context/AuthContext';
 import { LanguageProvider, useLanguage } from '@/context/LanguageContext';
@@ -57,10 +58,12 @@ function AppRoutes() {
 
 export default function App() {
   return (
-    <AuthProvider>
-      <LanguageProvider>
-        <AppRoutes />
-      </LanguageProvider>
-    </AuthProvider>
+    <ErrorBoundary>
+      <AuthProvider>
+        <LanguageProvider>
+          <AppRoutes />
+        </LanguageProvider>
+      </AuthProvider>
+    </ErrorBoundary>
   );
 }

@@ -23,10 +23,13 @@ export const supabase = createClient<Database>(supabaseUrl, supabaseAnonKey, {
   },
 });
 
-// When T is a generic type parameter, TypeScript's overload resolution for
-// supabase.from(table) falls back to the `any`-typed overload, making
-// .insert() / .update() / .eq() reject properly-typed arguments.
-// We centralise the single unavoidable cast here — callers stay clean.
+// The only `any` in src/. supabase-js resolves Insert/Update/Row through
+// conditional types indexed by the table name; with a generic T the compiler
+// cannot prove the conditional collapses to one branch, so `.insert()`,
+// `.update()` and `.eq()` reject arguments that are in fact correct.
+// Re-checked after the Database type was fixed to satisfy GenericSchema —
+// still required. The cast is centralised here so callers stay clean, and the
+// public wrappers below re-impose the real types on their way out.
 // eslint-disable-next-line @typescript-eslint/no-explicit-any
 export const typedFrom = <T extends PublicTableName>(table: T): any => supabase.from(table);
 

@@ -12,6 +12,10 @@
 
 **Live demo:** [henrardvisuals.com](https://henrardvisuals.com)
 
+| Home | Gallery | Admin |
+|---|---|---|
+| ![Home](docs/screenshots/home.jpg) | ![Gallery](docs/screenshots/gallery.jpg) | ![Admin](docs/screenshots/admin.jpg) |
+
 ---
 
 ## Overview
@@ -163,13 +167,19 @@ pnpm build          # Production build
 │   │   ├── Navigation/     # BurgerMenu
 │   │   ├── Upload/         # FileUpload with drag-and-drop
 │   │   └── OptimizedImage  # Lazy-loaded image with Intersection Observer
-│   ├── context/            # LanguageContext (FR/EN)
-│   ├── hooks/              # useAuth
-│   ├── lib/                # Supabase client + typed DB helpers
+│   │   └── ErrorBoundary   # Last-resort render error screen
+│   ├── context/            # AuthContext, LanguageContext (FR/EN)
+│   ├── hooks/              # useAuth, useHomeData, useAdminPhotos,
+│   │                       # useFileUpload, useLightbox, useDocumentMeta
+│   ├── i18n/               # fr.ts / en.ts + a key-parity test
+│   ├── lib/                # Supabase client, typed DB helpers, image URLs
 │   ├── pages/              # Home, Admin, Contact
 │   └── types/              # TypeScript interfaces + Database type
+├── e2e/                    # Playwright specs (no Supabase required)
+├── scripts/                # audit-prod.mjs — advisories with a reviewed allowlist
 ├── supabase/
 │   ├── migrations/         # Schema migrations (versioned SQL, single source of truth)
+│   ├── tests/              # RLS regression suite (pnpm test:rls)
 │   └── create-admin-user.sql  # Admin user seed (uses psql variables)
 ├── docs/
 │   ├── ARCHITECTURE.md
@@ -196,15 +206,21 @@ Copy `.env.example` to `.env` and fill in every value. Run `node generate-keys.c
 | `SERVICE_ROLE_KEY` | Supabase service-role JWT |
 | `VITE_SUPABASE_URL` | Supabase API URL (Kong gateway) |
 | `VITE_SUPABASE_ANON_KEY` | Same as `ANON_KEY` |
+| `AUTHENTICATOR_PASSWORD` | Password for the non-superuser role PostgREST connects as |
 | `DISABLE_SIGNUP` | Set `true` in production |
+| `ENABLE_EMAIL_AUTOCONFIRM` | Leave `false` in production; `true` skips address verification |
+| `VITE_IMAGE_TRANSFORM` | `true` only where Storage runs with imgproxy — see below |
 
 ---
 
 ## Security
 
-- **RLS** — all write operations (photos, categories, site_settings, storage) are gated by `public.is_admin()`, which verifies `app_metadata.role = "admin"` in the JWT
-- **Signup disabled** — set `DISABLE_SIGNUP=true` in production to prevent unauthorized account creation
-- **No hardcoded secrets** — all credentials are injected via environment variables; no fallback defaults in Docker Compose
+- **RLS** — all write operations (photos, categories, site_settings, storage) are gated by `public.is_admin()`, which verifies `app_metadata.role = "admin"` in the JWT, with `FORCE ROW LEVEL SECURITY` on every table
+- **Non-superuser API role** — PostgREST connects as `authenticator`, which owns nothing and can only assume `anon`, `authenticated` or `service_role`. On a superuser connection its `SET LOCAL ROLE` would succeed for *any* role and walk through every policy
+- **Signup disabled** — `DISABLE_SIGNUP` defaults to `true` in `docker-compose.yml`; an unset variable used to read as `false`
+- **Security headers** — CSP, HSTS, `X-Frame-Options`, `X-Content-Type-Options`, `Referrer-Policy` and `Permissions-Policy` are emitted from every nginx location block, and CI fails if a response arrives without all six
+- **Rate limiting** — Kong meters `/auth/v1` at 20 requests per minute per IP
+- **Credentials** — see [SECURITY.md](SECURITY.md) for the rotation runbook, the dependency policy, and a frank account of what leaked in this repository's history
 
 ---
 
@@ -215,6 +231,30 @@ Copy `.env.example` to `.env` and fill in every value. Run `node generate-keys.c
 | [ARCHITECTURE.md](docs/ARCHITECTURE.md) | System architecture & data flow |
 | [SETUP.md](docs/SETUP.md) | Developer setup guide & testing |
 | [DEPLOY.md](docs/DEPLOY.md) | VPS / Coolify deployment guide |
+| [CONTRIBUTING.md](CONTRIBUTING.md) | Local setup, checks to run, commit and migration conventions |
+| [SECURITY.md](SECURITY.md) | Reporting, credential rotation, dependency policy |
+| [OPERATOR-ACTIONS.md](OPERATOR-ACTIONS.md) | Steps that must be run by hand against production |
+
+---
+
+## Known limitations
+
+- **No server-side rendering.** Content is fetched client-side, so crawlers
+  that do not execute JavaScript see an empty shell. `useDocumentMeta` fixes
+  the tab title, the bookmark and the screen-reader announcement, but
+  prerendering `/` and `/contact` is the natural next step.
+- **Draft photos are protected by unguessable URLs, not by access control.**
+  The storage bucket is public so images stay CDN-cacheable; upload paths
+  carry 128 bits of entropy. A private bucket with signed URLs would be
+  stricter, at the cost of that caching.
+- **Image transforms are opt-in.** `VITE_IMAGE_TRANSFORM=true` serves
+  width-capped variants through imgproxy — on this dataset, 1.4 MB drops to
+  19 kB for a gallery tile. Where imgproxy is unavailable the app falls back
+  to the original file: correct, just heavier.
+- **Gzip only.** `nginx:alpine` ships without `ngx_brotli`; adding Brotli
+  would require building a custom nginx image.
+- **Coverage is 50/35/40/50.** The page components are untested; the hooks,
+  contexts and library code are where the suite concentrates.
 
 ---
 
