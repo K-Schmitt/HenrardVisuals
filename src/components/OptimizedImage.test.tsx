@@ -1,4 +1,4 @@
-import { act, render, screen } from '@testing-library/react';
+import { act, fireEvent, render, screen } from '@testing-library/react';
 import { describe, it, expect, beforeEach, vi } from 'vitest';
 
 import { OptimizedImage } from '@/components/OptimizedImage';
@@ -58,6 +58,43 @@ describe('OptimizedImage', () => {
   it('omits srcset entirely when the value is empty', () => {
     render(<OptimizedImage src="/a.jpg" alt="a" priority srcSet="" />);
     expect(screen.getByRole('img')).not.toHaveAttribute('srcset');
+  });
+
+  it('falls back to the original when the transformed variant fails', () => {
+    render(
+      <OptimizedImage
+        src="/a.jpg?width=800"
+        fallbackSrc="/a.jpg"
+        alt="a"
+        priority
+        srcSet="/a.jpg?width=400 400w"
+      />
+    );
+
+    // imgproxy answers 422 for sources above its resolution ceiling, and the
+    // JSON body trips ORB — so the element errors and must retry the original.
+    fireEvent.error(screen.getByRole('img'));
+
+    const img = screen.getByRole('img');
+    expect(img).toHaveAttribute('src', '/a.jpg');
+    expect(img).not.toHaveAttribute('srcset');
+  });
+
+  it('releases the fallback ratio once loaded so masonry can stagger', () => {
+    const { container } = render(<OptimizedImage src="/a.jpg" alt="a" priority />);
+    const box = container.firstElementChild as HTMLElement;
+    expect(box.style.aspectRatio).toBe('2 / 3');
+
+    fireEvent.load(screen.getByRole('img'));
+    expect(box.style.aspectRatio).toBe('');
+  });
+
+  it('keeps a known ratio pinned after load', () => {
+    const { container } = render(
+      <OptimizedImage src="/a.jpg" alt="a" priority width={800} height={1200} />
+    );
+    fireEvent.load(screen.getByRole('img'));
+    expect((container.firstElementChild as HTMLElement).style.aspectRatio).toBe('800 / 1200');
   });
 
   it('applies srcset and sizes when supplied', () => {

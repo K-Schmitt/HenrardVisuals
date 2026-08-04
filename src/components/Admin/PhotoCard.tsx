@@ -45,7 +45,16 @@ export function PhotoCard({
           height={photo.height ?? undefined}
           className="w-full h-40 object-cover"
           onError={(e) => {
-            (e.target as HTMLImageElement).src =
+            // imgproxy refuses sources above IMGPROXY_MAX_SRC_RESOLUTION, so a
+            // failed thumbnail usually means the transform, not the file. Try
+            // the original before falling back to the placeholder.
+            const el = e.currentTarget;
+            if (el.dataset['fallback'] !== 'done') {
+              el.dataset['fallback'] = 'done';
+              el.src = buildImageUrl(photo.storage_path);
+              return;
+            }
+            el.src =
               'data:image/svg+xml,<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 100 100"><rect fill="%23333" width="100" height="100"/><text x="50" y="50" text-anchor="middle" dy=".3em" fill="%23666">-</text></svg>';
           }}
         />

@@ -19,6 +19,7 @@ export function HeroSection({ heroPhoto, profileSettings }: HeroSectionProps) {
             {heroPhoto ? (
               <OptimizedImage
                 src={buildImageUrl(heroPhoto.storage_path, { width: 1280 })}
+                fallbackSrc={buildImageUrl(heroPhoto.storage_path)}
                 srcSet={buildImageSrcSet(heroPhoto.storage_path, HERO_WIDTHS)}
                 sizes="(min-width: 1024px) 50vw, 100vw"
                 alt={heroPhoto.title}
