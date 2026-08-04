@@ -47,11 +47,12 @@ for f in supabase/migrations/*.sql; do
 done
 ```
 
-The storage bucket and its access policies are skipped on first boot (`storage-api` creates the schema they write to only once Postgres is already healthy). Once the full stack is up, seed them once — the second command's three "already exists" errors are expected, from policies applied during boot:
+The storage bucket and its access policies are skipped on first boot (`storage-api` creates the schema they write to only once Postgres is already healthy). Once the full stack is up, seed them once — the second command's three "already exists" errors are expected, from policies applied during boot. The third re-applies the admin-only storage policies from `005`; it is idempotent (every `CREATE POLICY` is preceded by a matching `DROP POLICY IF EXISTS`) and can be replayed as often as needed:
 
 ```bash
 psql "$DATABASE_URL" -v ON_ERROR_STOP=1 -f supabase/migrations/002_storage_bucket.sql
 psql "$DATABASE_URL" -f supabase/migrations/003_rls_admin_only.sql
+psql "$DATABASE_URL" -v ON_ERROR_STOP=1 -f supabase/migrations/005_rls_hardening.sql
 ```
 
 ### 5. Create the admin user

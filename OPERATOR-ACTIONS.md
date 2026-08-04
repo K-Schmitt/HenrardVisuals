@@ -18,3 +18,44 @@ when the code that motivates it merges.
   `SERVICE_ROLE_KEY`, and `VITE_SUPABASE_ANON_KEY` in Coolify, change the
   Postgres role password, rotate the admin password through GoTrue,
   redeploy, and confirm the old anon key is rejected (`401`).
+
+- [ ] **Apply `005_rls_hardening.sql` to the live database** (Task 3: close
+  the anonymous-to-content-admin chain). The migration only reaches a new
+  deployment automatically; an already-initialised database still carries
+  the permissive `FOR ALL ... USING (true)` policies from the old
+  `init.sql`, an `is_admin()` that returns `NULL` for a claimless JWT, and
+  a `set_hero_photo()` that any unauthenticated caller can invoke. The file
+  is idempotent, so it is safe to replay:
+
+  ```bash
+  psql "$DATABASE_URL" -v ON_ERROR_STOP=1 -f supabase/migrations/005_rls_hardening.sql
+  ```
+
+  Run it while the full stack is up, not during a cold boot — its storage
+  section skips itself (with a `NOTICE`) whenever `storage.objects` does
+  not yet exist.
+
+- [ ] **Confirm the hero RPC is closed from outside** (Task 3). After the
+  migration is applied, probe the public API with the anon key:
+
+  ```bash
+  curl -s -o /dev/null -w '%{http_code}\n' \
+    -X POST "$API_EXTERNAL_URL/rest/v1/rpc/set_hero_photo" \
+    -H "apikey: $ANON_KEY" -H 'Content-Type: application/json' \
+    -d '{"target_id":"00000000-0000-0000-0000-000000000000"}'
+  ```
+
+  Expected: `404` (PostgREST hides functions the role cannot execute) or
+  `403`. Before this task it returned `200` and wiped the homepage hero
+  image, repeatably. If it still returns `200`, the migration did not
+  apply — do not treat the item above as done.
+
+- [ ] **Verify the admin panel can still write** (Task 3). `005` drops the
+  permissive policies that were, in practice, the only reason authenticated
+  writes succeeded, and leaves `public.is_admin()` as the sole gate. That
+  predicate reads `auth.jwt()`, which GoTrue installs through its own
+  migration. After applying `005`, sign in to `/admin` and confirm a photo
+  edit, a category change and a hero switch all still succeed. If they fail
+  with `function auth.jwt() does not exist`, GoTrue has not run its
+  migrations against this database and must be started before the admin
+  panel will work.
