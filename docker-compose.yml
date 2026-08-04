@@ -10,11 +10,14 @@ services:
       args:
         - VITE_SUPABASE_URL=https://api.henrardvisuals.com
         - VITE_SUPABASE_ANON_KEY=${ANON_KEY}
+        # This stack runs imgproxy, so .env can safely set this to true.
+        - VITE_IMAGE_TRANSFORM=${VITE_IMAGE_TRANSFORM:-false}
     container_name: henrard-app
     restart: unless-stopped
     environment:
       - VITE_SUPABASE_URL=https://api.henrardvisuals.com
       - VITE_SUPABASE_ANON_KEY=${ANON_KEY}
+      - VITE_IMAGE_TRANSFORM=${VITE_IMAGE_TRANSFORM:-false}
     expose:
       - "80"
     networks:

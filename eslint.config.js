@@ -40,6 +40,7 @@ export default [
         MouseEvent: 'readonly',
         File: 'readonly',
         FormData: 'readonly',
+        URLSearchParams: 'readonly',
         Response: 'readonly',
         RequestInit: 'readonly',
         navigator: 'readonly',
