@@ -5,12 +5,14 @@ import { CategoryManager } from '@/components/Admin/CategoryManager';
 import { PhotosTab } from '@/components/Admin/PhotosTab';
 import { ProfileSettings } from '@/components/Admin/ProfileSettings';
 import { Login } from '@/components/Auth/Login';
+import { useLanguage } from '@/context/LanguageContext';
 import { useAuth } from '@/hooks/useAuth';
 
 type Tab = 'photos' | 'categories' | 'settings' | 'account';
 
 export function Admin() {
-  const { isAuthenticated, user, signOut, isLoading } = useAuth();
+  const { isAuthenticated, isAdmin, user, signOut, isLoading } = useAuth();
+  const { t } = useLanguage();
   const [activeTab, setActiveTab] = useState<Tab>('photos');
 
   if (isLoading) {
@@ -25,6 +27,24 @@ export function Admin() {
     return (
       <div className="min-h-screen flex items-center justify-center px-6 py-12">
         <Login onSuccess={() => {}} />
+      </div>
+    );
+  }
+
+  // UX gating only. RLS (public.is_admin()) is what actually stops a
+  // non-admin from writing; this stops us handing them a panel that looks
+  // functional and fails at every request.
+  if (!isAdmin) {
+    return (
+      <div className="min-h-screen flex flex-col items-center justify-center gap-6 px-6">
+        <p className="text-gray-400">{t('admin.notAuthorised')}</p>
+        <button
+          type="button"
+          onClick={signOut}
+          className="px-4 py-2 border border-white text-sm uppercase tracking-wider hover:bg-white hover:text-black transition-colors"
+        >
+          {t('admin.signOut')}
+        </button>
       </div>
     );
   }

@@ -1,6 +1,13 @@
-import { createContext, useCallback, useContext, useEffect, useState, type ReactNode } from 'react';
-
 import type { AuthError } from '@supabase/supabase-js';
+import {
+  createContext,
+  useCallback,
+  useContext,
+  useEffect,
+  useMemo,
+  useState,
+  type ReactNode,
+} from 'react';
 
 import { supabase } from '@/lib/supabase';
 import type { AuthContextValue, AuthState, LoginCredentials } from '@/types';
@@ -89,13 +96,20 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     [runAuthAction]
   );
 
-  return (
-    <AuthContext.Provider
-      value={{ ...state, signIn, signOut, isAuthenticated: !!state.user }}
-    >
-      {children}
-    </AuthContext.Provider>
-  );
+  // Memoized: the previous object literal was rebuilt on every render, which
+  // invalidated the context for every consumer on each parent re-render.
+  const value = useMemo<AuthContextValue>(() => {
+    const role = (state.user?.app_metadata as { role?: string } | undefined)?.role;
+    return {
+      ...state,
+      signIn,
+      signOut,
+      isAuthenticated: !!state.user,
+      isAdmin: role === 'admin',
+    };
+  }, [state, signIn, signOut]);
+
+  return <AuthContext.Provider value={value}>{children}</AuthContext.Provider>;
 }
 
 export function useAuth(): AuthContextValue {

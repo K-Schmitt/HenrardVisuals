@@ -23,7 +23,11 @@ const fr = {
     responseTime: 'Réponse sous 24-48h',
   },
   admin: {
+    notAuthorised: "Ce compte n'a pas les droits administrateur.",
+    signOut: 'Déconnexion',
     accountSettings: {
+      currentPassword: 'Mot de passe actuel',
+      reauthFailed: 'Mot de passe actuel incorrect.',
       changePassword: 'Changer le mot de passe',
       newPassword: 'Nouveau mot de passe',
       confirmPassword: 'Confirmer le mot de passe',

@@ -90,6 +90,9 @@ export interface AuthContextValue extends AuthState {
   signIn: (credentials: LoginCredentials) => Promise<void>;
   signOut: () => Promise<void>;
   isAuthenticated: boolean;
+  /** True when the session JWT carries app_metadata.role === 'admin'.
+   *  UX gating only — public.is_admin() in RLS is the real control. */
+  isAdmin: boolean;
 }
 
 export interface LoginFormProps {
