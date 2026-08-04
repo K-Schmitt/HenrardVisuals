@@ -85,9 +85,11 @@ docker compose logs -f   # Watch logs
 ### 4. Initialise database
 
 ```bash
-docker compose exec db \
-  psql -U postgres -d henrard_db \
-  -f /dev/stdin < supabase/setup-complete.sql
+# The Compose stack applies supabase/migrations/*.sql automatically on first boot.
+# Against an existing/managed Supabase, apply them in order:
+for f in supabase/migrations/*.sql; do
+  psql "$DATABASE_URL" -v ON_ERROR_STOP=1 -f "$f"
+done
 
 docker compose exec db \
   psql -U postgres -d henrard_db \

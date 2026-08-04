@@ -75,14 +75,12 @@ docker compose logs -f app
 
 ### 3. Initialize the database
 
-Run the setup script in the Supabase SQL editor or via psql:
-
 ```bash
-# Option A — Supabase Studio (http://localhost:8080 → SQL Editor)
-# Paste the contents of supabase/setup-complete.sql and run
-
-# Option B — psql
-psql "$DATABASE_URL" -f supabase/setup-complete.sql
+# The Compose stack applies supabase/migrations/*.sql automatically on first boot.
+# Against an existing/managed Supabase, apply them in order:
+for f in supabase/migrations/*.sql; do
+  psql "$DATABASE_URL" -v ON_ERROR_STOP=1 -f "$f"
+done
 ```
 
 ### 4. Create the admin user
@@ -161,8 +159,7 @@ pnpm build          # Production build
 │   ├── pages/              # Home, Admin, Contact
 │   └── types/              # TypeScript interfaces + Database type
 ├── supabase/
-│   ├── migrations/         # Schema migrations (versioned SQL)
-│   ├── setup-complete.sql  # Full setup script (tables, RLS, storage)
+│   ├── migrations/         # Schema migrations (versioned SQL, single source of truth)
 │   └── create-admin-user.sql  # Admin user seed (uses psql variables)
 ├── docs/
 │   ├── ARCHITECTURE.md
