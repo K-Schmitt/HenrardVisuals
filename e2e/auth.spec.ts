@@ -1,33 +1,47 @@
 import { test, expect } from '@playwright/test';
 
 /**
- * Authentication flow tests.
+ * Authentication flow.
  *
- * These tests verify login page structure and that unauthenticated
- * access to the admin area redirects correctly.
+ * The login form lives at /admin, not at /login — there is no such route.
+ * These tests exercise the form's own validation, which needs no backend;
+ * anything past a successful sign-in requires a seeded Supabase and belongs
+ * to a manual pass, not to CI.
  */
 test.describe('Authentication', () => {
-  test('login page renders email and password fields', async ({ page }) => {
-    await page.goto('/login');
-    await expect(page.getByRole('textbox', { name: /email/i })).toBeVisible();
-    await expect(page.locator('input[type="password"]')).toBeVisible();
-    await expect(page.getByRole('button', { name: /sign in|connexion|login/i })).toBeVisible();
-  });
-
-  test('unauthenticated access to /admin redirects to /login', async ({ page }) => {
+  test('the admin route renders email and password fields', async ({ page }) => {
     await page.goto('/admin');
-    await expect(page).toHaveURL(/\/login/);
+
+    await expect(page.getByRole('textbox', { name: /e-?mail/i })).toBeVisible();
+    await expect(page.locator('input[type="password"]')).toBeVisible();
+    await expect(page.getByRole('button', { name: /sign in|se connecter/i })).toBeVisible();
   });
 
-  test('login form shows error on invalid credentials', async ({ page }) => {
-    await page.goto('/login');
-    await page.getByRole('textbox', { name: /email/i }).fill('wrong@example.com');
-    await page.locator('input[type="password"]').fill('wrongpassword');
-    await page.getByRole('button', { name: /sign in|connexion|login/i }).click();
+  test('submitting an empty form reports both fields', async ({ page }) => {
+    await page.goto('/admin');
+    await page.getByRole('button', { name: /sign in|se connecter/i }).click();
 
-    // Expect an error message to appear (text varies; check for non-empty error region)
+    await expect(page.getByText(/email is required|adresse e-mail est requise/i)).toBeVisible();
+    await expect(page.getByText(/password is required|mot de passe est requis/i)).toBeVisible();
+  });
+
+  test('a malformed address is rejected before any request', async ({ page }) => {
+    await page.goto('/admin');
+    await page.getByRole('textbox', { name: /e-?mail/i }).fill('not-an-email');
+    await page.locator('input[type="password"]').fill('longenoughpassword');
+    await page.getByRole('button', { name: /sign in|se connecter/i }).click();
+
     await expect(
-      page.locator('[role="alert"], .text-red-500, .text-red-600, .text-red-700').first()
-    ).toBeVisible({ timeout: 10_000 });
+      page.getByText(/valid email address|adresse e-mail valide/i)
+    ).toBeVisible();
+  });
+
+  test('a short password is rejected before any request', async ({ page }) => {
+    await page.goto('/admin');
+    await page.getByRole('textbox', { name: /e-?mail/i }).fill('someone@example.com');
+    await page.locator('input[type="password"]').fill('short');
+    await page.getByRole('button', { name: /sign in|se connecter/i }).click();
+
+    await expect(page.getByText(/at least 8 characters|au moins 8 caractères/i)).toBeVisible();
   });
 });

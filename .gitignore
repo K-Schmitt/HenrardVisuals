@@ -103,3 +103,7 @@ uploads/
 # ----------------------------------------
 docs/AUDIT.md
 docs/DEBUG_UPLOAD.md
+
+# Playwright
+playwright-report/
+test-results/
