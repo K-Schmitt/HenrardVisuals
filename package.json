@@ -22,8 +22,8 @@
   "dependencies": {
     "@supabase/supabase-js": "^2.39.0",
     "i18next": "^25.10.9",
-    "react": "^18.2.0",
-    "react-dom": "^18.2.0",
+    "react": "^19.2.8",
+    "react-dom": "^19.2.8",
     "react-i18next": "^16.6.6",
     "react-router-dom": "^7.18.2"
   },
@@ -33,7 +33,7 @@
     "@testing-library/react": "^16.3.2",
     "@testing-library/user-event": "^14.6.1",
     "@types/node": "^20.10.5",
-    "@types/react": "^18.2.45",
+    "@types/react": "^19.2.18",
     "@types/react-dom": "^18.2.18",
     "@typescript-eslint/eslint-plugin": "^8.49.0",
     "@typescript-eslint/parser": "^8.49.0",
