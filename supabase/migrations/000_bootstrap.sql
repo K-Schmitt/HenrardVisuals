@@ -35,3 +35,49 @@ END
 $$;
 
 GRANT USAGE ON SCHEMA public TO anon, authenticated, service_role;
+
+-- =========================================
+-- Base storage tables
+-- =========================================
+-- supabase/storage-api ships `select 1` as its 0001-initialmigration: it
+-- assumes the platform's own Postgres image already provides storage.buckets
+-- and storage.objects, which postgres:15-alpine does not. Its second
+-- migration, 0002-pathtoken-column, then does
+--   alter table storage.objects add column path_tokens ...
+-- which fails with `relation "storage.objects" does not exist`, rolls back,
+-- and takes the service into a permanent crash loop on every cold boot.
+--
+-- These are therefore the pre-0002 shape of the upstream tables. Everything
+-- after that — path_tokens, the size functions, owner_id, versioning — is
+-- added by storage-api's own migrations once it can start. IF NOT EXISTS
+-- throughout, so this is a no-op against a managed Supabase.
+CREATE TABLE IF NOT EXISTS storage.buckets (
+  id         text PRIMARY KEY,
+  name       text NOT NULL,
+  owner      uuid,
+  created_at timestamptz DEFAULT now(),
+  updated_at timestamptz DEFAULT now()
+);
+CREATE UNIQUE INDEX IF NOT EXISTS bname ON storage.buckets (name);
+
+CREATE TABLE IF NOT EXISTS storage.objects (
+  id               uuid PRIMARY KEY DEFAULT gen_random_uuid(),
+  bucket_id        text REFERENCES storage.buckets (id),
+  name             text,
+  owner            uuid,
+  created_at       timestamptz DEFAULT now(),
+  updated_at       timestamptz DEFAULT now(),
+  last_accessed_at timestamptz DEFAULT now(),
+  metadata         jsonb
+);
+CREATE UNIQUE INDEX IF NOT EXISTS bucketid_objname ON storage.objects (bucket_id, name);
+CREATE INDEX IF NOT EXISTS name_prefix_search ON storage.objects (name text_pattern_ops);
+
+ALTER TABLE storage.buckets ENABLE ROW LEVEL SECURITY;
+ALTER TABLE storage.objects ENABLE ROW LEVEL SECURITY;
+
+-- storage-api connects as the superuser for its own bookkeeping, but every
+-- request PostgREST proxies arrives as anon or authenticated.
+GRANT USAGE ON SCHEMA storage TO anon, authenticated, service_role;
+GRANT SELECT ON storage.buckets TO anon, authenticated, service_role;
+GRANT SELECT, INSERT, UPDATE, DELETE ON storage.objects TO anon, authenticated, service_role;
