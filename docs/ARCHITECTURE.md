@@ -170,6 +170,25 @@ erDiagram
 | `henrard-meta` | supabase/postgres-meta | 8080 (internal) | DB introspection |
 | `henrard-imgproxy` | darthsim/imgproxy | 8080 (internal) | Image transforms |
 
+### Image transforms
+
+Storage exposes two paths for the same object:
+
+- `/storage/v1/object/public/<bucket>/<path>` — the original file
+- `/storage/v1/render/image/public/<bucket>/<path>?width=&quality=` — resized
+  through imgproxy
+
+`src/lib/imageUrl.ts` builds the second form, but only when
+`VITE_IMAGE_TRANSFORM` is `true`; otherwise it returns the original untouched.
+The flag exists because the render path requires the Storage service to run
+with `ENABLE_IMAGE_TRANSFORMATION=true` and an `IMGPROXY_URL`, which is not
+guaranteed on a managed Supabase. Measured on this dataset, a gallery tile
+drops from 1,413,981 bytes to 19,099 at `width=400&quality=70`.
+
+`IMGPROXY_LOCAL_FILESYSTEM_ROOT` stays `/`, as upstream Supabase ships it:
+storage-api sends absolute paths, so narrowing the root makes every transform
+resolve to `/var/lib/storage/var/lib/storage/...` and 404.
+
 ---
 
 ## Security Model

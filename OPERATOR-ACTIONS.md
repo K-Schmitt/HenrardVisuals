@@ -12,7 +12,8 @@ when the code that motivates it merges.
   `POSTGRES_PASSWORD`, and a seed admin password — see `SECURITY.md`,
   "Known historical exposure". The deployed `JWT_SECRET` has already been
   confirmed to differ from that leaked demo value, but the seeded admin
-  password (`Admin123!`) may still be in use. Follow `SECURITY.md`'s
+  password may still be in use; it is in those commits, and repeating it here
+  would only spread it further. Follow `SECURITY.md`'s
   "Credential rotation" runbook (steps 1–6) against production: generate a
   new key set, update `POSTGRES_PASSWORD`, `JWT_SECRET`, `ANON_KEY`,
   `SERVICE_ROLE_KEY`, and `VITE_SUPABASE_ANON_KEY` in Coolify, change the
