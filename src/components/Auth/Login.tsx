@@ -100,7 +100,7 @@ export function Login({ onSuccess, onError }: LoginFormProps) {
     <div className="w-full max-w-md mx-auto" data-testid="login-form-container">
       {/* Header */}
       <header className="text-center mb-8">
-        <h2 className="font-display text-display-sm text-primary-50">Welcome Back</h2>
+        <h1 className="font-display text-display-sm text-primary-50">Welcome Back</h1>
         <p className="mt-2 text-body-md text-primary-400">Sign in to access the admin panel</p>
       </header>
 
@@ -206,7 +206,7 @@ export function Login({ onSuccess, onError }: LoginFormProps) {
           className={`
             w-full py-4 px-6
             bg-accent-500 hover:bg-accent-600
-            text-primary-900 font-medium
+            text-black font-medium
             rounded-elegant
             transition-all duration-300
             focus:outline-none focus:ring-2 focus:ring-accent-500/50 focus:ring-offset-2 focus:ring-offset-surface-darker

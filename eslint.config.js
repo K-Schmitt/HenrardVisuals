@@ -37,6 +37,7 @@ export default [
         IntersectionObserver: 'readonly',
         IntersectionObserverEntry: 'readonly',
         MutationObserver: 'readonly',
+        Node: 'readonly',
         Event: 'readonly',
         KeyboardEvent: 'readonly',
         MouseEvent: 'readonly',

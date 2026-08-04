@@ -1,6 +1,10 @@
 const fr = {
   nav: {
     home: 'Accueil',
+    primary: 'Navigation principale',
+    changeLanguage: 'Changer de langue',
+    toggleMenu: 'Ouvrir ou fermer le menu',
+    skipToContent: 'Aller au contenu',
   },
   footer: {
     tagline: "L'essentiel, sans démonstration - l'image au service de l'art.",

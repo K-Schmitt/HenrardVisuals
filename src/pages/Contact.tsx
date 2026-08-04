@@ -83,7 +83,7 @@ function ContactCard({ icon, label, value, href, external = false, delay = '0ms'
 
             {/* Text content */}
             <div className="min-w-0 flex-1">
-              <span className="block text-[10px] sm:text-xs uppercase tracking-[0.15em] sm:tracking-[0.2em] text-white/40 mb-1 sm:mb-2 font-medium">
+              <span className="block text-[10px] sm:text-xs uppercase tracking-[0.15em] sm:tracking-[0.2em] text-white/70 mb-1 sm:mb-2 font-medium">
                 {label}
               </span>
               <span className={`
@@ -98,7 +98,7 @@ function ContactCard({ icon, label, value, href, external = false, delay = '0ms'
 
           {/* Arrow - hidden on very small screens */}
           <div className={`
-            flex-shrink-0 text-white/20 transition-all duration-300
+            flex-shrink-0 text-white/70 transition-all duration-300
             hidden xs:block
             group-hover:text-white/60 group-hover:translate-x-2
           `}>
@@ -131,7 +131,7 @@ export function Contact() {
       <div className="relative z-10 max-w-3xl mx-auto py-8 sm:py-12 md:py-16 lg:py-24">
         {/* Header */}
         <div className="text-center mb-10 sm:mb-14 md:mb-16 lg:mb-20 animate-fade-in">
-          <span className="inline-block text-[10px] sm:text-xs uppercase tracking-[0.2em] sm:tracking-[0.3em] text-white/40 mb-4 sm:mb-6 font-medium">
+          <span className="inline-block text-[10px] sm:text-xs uppercase tracking-[0.2em] sm:tracking-[0.3em] text-white/70 mb-4 sm:mb-6 font-medium">
             {t('contact.tagline')}
           </span>
           
@@ -141,7 +141,7 @@ export function Contact() {
             </span>
           </h1>
 
-          <p className="text-white/50 text-base sm:text-lg lg:text-xl max-w-xs sm:max-w-md lg:max-w-lg mx-auto font-light leading-relaxed px-2">
+          <p className="text-white/70 text-base sm:text-lg lg:text-xl max-w-xs sm:max-w-md lg:max-w-lg mx-auto font-light leading-relaxed px-2">
             {t('contact.description')}
           </p>
         </div>
@@ -177,7 +177,7 @@ export function Contact() {
 
         {/* Footer note */}
         <div className="mt-10 sm:mt-14 md:mt-16 lg:mt-20 text-center animate-fade-in" style={{ animationDelay: '400ms' }}>
-          <p className="text-white/30 text-xs sm:text-sm font-light">
+          <p className="text-white/70 text-xs sm:text-sm font-light">
             {t('contact.responseTime')}
           </p>
         </div>

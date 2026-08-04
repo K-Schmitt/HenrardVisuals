@@ -6,19 +6,25 @@
 interface BurgerMenuProps {
   isOpen: boolean;
   onClick: () => void;
+  /** Accessible name, supplied by the caller so it goes through i18n. */
+  label: string;
+  /** id of the drawer this button opens. */
+  controls: string;
 }
 
-export function BurgerMenu({ isOpen, onClick }: BurgerMenuProps) {
+export function BurgerMenu({ isOpen, onClick, label, controls }: BurgerMenuProps) {
   const barStyle = (animation: string) => ({
     animation: `${animation} 0.6s ease-in-out forwards`,
   });
 
   return (
     <button
+      type="button"
       onClick={onClick}
-      className="relative w-8 h-8 flex items-center justify-center hover:opacity-70 transition-opacity z-50"
-      aria-label="Menu"
+      className="relative w-8 h-8 flex items-center justify-center hover:opacity-70 transition-opacity z-50 focus:outline-none focus:ring-2 focus:ring-white"
+      aria-label={label}
       aria-expanded={isOpen}
+      aria-controls={controls}
     >
       <div className="w-6 h-4 flex flex-col justify-between items-end">
         <span

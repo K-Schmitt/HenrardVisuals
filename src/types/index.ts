@@ -4,6 +4,16 @@
 
 import type { User, Session, AuthError } from '@supabase/supabase-js';
 
+// React 18's JSX types predate the inert attribute. It is the only way to take
+// an off-screen drawer out of the tab order without unmounting it.
+declare module 'react' {
+  // T is part of the interface being augmented, not ours to drop.
+  // eslint-disable-next-line @typescript-eslint/no-unused-vars
+  interface HTMLAttributes<T> {
+    inert?: '' | undefined;
+  }
+}
+
 // ----------------------------------------
 // Database Types
 // ----------------------------------------

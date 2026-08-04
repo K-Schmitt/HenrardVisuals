@@ -23,21 +23,21 @@ export function Footer() {
             >
               HENRARDVISUALS
             </Link>
-            <p className="text-gray-500 text-sm leading-relaxed">
+            <p className="text-gray-400 text-sm leading-relaxed">
               {t('footer.tagline')}
             </p>
           </div>
 
           {/* Navigation */}
           <div className="space-y-4">
-            <h4 className="text-xs uppercase tracking-[0.2em] text-gray-400">Navigation</h4>
+            <h2 className="text-xs uppercase tracking-[0.2em] text-gray-400">Navigation</h2>
             <nav className="flex flex-col gap-3">
-              <Link to="/" className="text-gray-500 hover:text-white transition-colors text-sm">
+              <Link to="/" className="text-gray-400 hover:text-white transition-colors text-sm">
                 {t('nav.home')}
               </Link>
               <Link
                 to="/contact"
-                className="text-gray-500 hover:text-white transition-colors text-sm"
+                className="text-gray-400 hover:text-white transition-colors text-sm"
               >
                 Contact
               </Link>
@@ -46,11 +46,11 @@ export function Footer() {
 
           {/* Contact */}
           <div className="space-y-4">
-            <h4 className="text-xs uppercase tracking-[0.2em] text-gray-400">Contact</h4>
+            <h2 className="text-xs uppercase tracking-[0.2em] text-gray-400">Contact</h2>
             <div className="space-y-3 text-sm">
               <a
                 href="mailto:henrard.tristan@proton.me"
-                className="block text-gray-500 hover:text-white transition-colors"
+                className="block text-gray-400 hover:text-white transition-colors"
               >
                 henrard.tristan@proton.me
               </a>
@@ -59,7 +59,7 @@ export function Footer() {
                   href={SOCIAL_LINKS.instagram}
                   target="_blank"
                   rel="noopener noreferrer"
-                  className="text-gray-500 hover:text-white transition-colors"
+                  className="text-gray-400 hover:text-white transition-colors"
                   aria-label="Instagram"
                 >
                   <InstagramIcon />
@@ -68,7 +68,7 @@ export function Footer() {
                   href={SOCIAL_LINKS.linkedin}
                   target="_blank"
                   rel="noopener noreferrer"
-                  className="text-gray-500 hover:text-white transition-colors"
+                  className="text-gray-400 hover:text-white transition-colors"
                   aria-label="LinkedIn"
                 >
                   <LinkedInIcon />
@@ -81,10 +81,10 @@ export function Footer() {
         {/* Bottom */}
         <div className="border-t border-gray-800 pt-8">
           <div className="flex flex-col md:flex-row justify-between items-center gap-4">
-            <p className="text-gray-600 text-xs">
+            <p className="text-gray-400 text-xs">
               © {currentYear} Tristan Henrard. {t('footer.rights')}
             </p>
-            <p className="text-gray-600 text-xs">
+            <p className="text-gray-400 text-xs">
               {t('footer.createdBy')}{' '}
               <a
                 href="https://slackliniste.com"
