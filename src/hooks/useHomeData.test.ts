@@ -132,6 +132,23 @@ describe('useHomeData', () => {
     expect(result.current.activeFilter).toBe('All');
   });
 
+  it('clears a previous error when a later fetch succeeds', async () => {
+    // First fetch fails.
+    setupMocks({ photosError: new Error('boom') });
+    const { result } = renderHook(() => useHomeData());
+    await waitFor(() => expect(result.current.error).toBe('boom'));
+
+    // Second fetch succeeds — the error must not persist, or PhotoGallery
+    // keeps the grid hidden until a full page reload.
+    setupMocks({ photos: [makePhoto('1')], photosCount: 1 });
+    act(() => result.current.setCurrentPage(1));
+
+    await waitFor(() => {
+      expect(result.current.isLoading).toBe(false);
+      expect(result.current.error).toBeNull();
+    });
+  });
+
   it('loads categories from DB', async () => {
     const categories = [makeCategory('cat1', 'editorial'), makeCategory('cat2', 'runway')];
     setupMocks({ categories });

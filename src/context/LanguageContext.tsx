@@ -1,4 +1,11 @@
-import { createContext, useCallback, useContext, useState, type ReactNode } from 'react';
+import {
+  createContext,
+  useCallback,
+  useContext,
+  useMemo,
+  useState,
+  type ReactNode,
+} from 'react';
 
 import i18n from '@/i18n';
 
@@ -27,11 +34,11 @@ export function LanguageProvider({ children }: { children: ReactNode }) {
     () => (localStorage.getItem(STORAGE_KEY) as Language | null) ?? 'fr'
   );
 
-  const setLanguage = (lang: Language) => {
+  const setLanguage = useCallback((lang: Language) => {
     setLanguageState(lang);
     localStorage.setItem(STORAGE_KEY, lang);
     i18n.changeLanguage(lang);
-  };
+  }, []);
 
   // Memoised so consumers only re-render when the language actually changes,
   // not on every render of the provider.
@@ -46,11 +53,11 @@ export function LanguageProvider({ children }: { children: ReactNode }) {
     [language]
   );
 
-  return (
-    <LanguageContext.Provider value={{ language, setLanguage, t }}>
-      {children}
-    </LanguageContext.Provider>
-  );
+  // Memoised for the same reason as t(): an object literal here invalidates
+  // the context for every consumer on each provider render.
+  const value = useMemo(() => ({ language, setLanguage, t }), [language, setLanguage, t]);
+
+  return <LanguageContext.Provider value={value}>{children}</LanguageContext.Provider>;
 }
 
 export function useLanguage() {
