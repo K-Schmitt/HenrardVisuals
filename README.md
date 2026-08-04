@@ -1,5 +1,7 @@
 # HenrardVisuals
 
+[![ci](https://github.com/K-Schmitt/HenrardVisuals/actions/workflows/ci.yml/badge.svg)](https://github.com/K-Schmitt/HenrardVisuals/actions/workflows/ci.yml)
+
 **Professional photography portfolio** built with React 18, TypeScript, Supabase, and Docker.
 
 [![License: MIT](https://img.shields.io/badge/License-MIT-blue.svg)](LICENSE)

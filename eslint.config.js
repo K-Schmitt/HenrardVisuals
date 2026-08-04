@@ -98,6 +98,8 @@ export default [
     },
   },
   {
-    ignores: ['dist/**', 'node_modules/**', '*.config.js'],
+    // .claude/** holds git worktrees with their own node_modules; without it
+    // an `eslint .` walks into a second copy of the whole project.
+    ignores: ['dist/**', '**/node_modules/**', '.claude/**', 'coverage/**', '*.config.js'],
   },
 ];
