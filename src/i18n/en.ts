@@ -1,6 +1,10 @@
 const en = {
   nav: {
     home: 'Home',
+    primary: 'Main navigation',
+    changeLanguage: 'Change language',
+    toggleMenu: 'Open or close the menu',
+    skipToContent: 'Skip to content',
   },
   footer: {
     tagline: 'The essential, without demonstration - the image at the service of art.',

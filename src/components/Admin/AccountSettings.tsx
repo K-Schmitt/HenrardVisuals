@@ -116,11 +116,13 @@ export function AccountSettings() {
             />
           </div>
           <div>
-            <label className="block text-sm font-medium text-gray-700 mb-1">
+            <label htmlFor="password-new" className="block text-sm font-medium text-gray-700 mb-1">
               {t('admin.accountSettings.newPassword')}
             </label>
             <input
+              id="password-new"
               type="password"
+              autoComplete="new-password"
               value={passwordForm.newPassword}
               onChange={(e) => setPasswordForm((p) => ({ ...p, newPassword: e.target.value }))}
               required
@@ -130,11 +132,13 @@ export function AccountSettings() {
             />
           </div>
           <div>
-            <label className="block text-sm font-medium text-gray-700 mb-1">
+            <label htmlFor="password-confirm" className="block text-sm font-medium text-gray-700 mb-1">
               {t('admin.accountSettings.confirmPassword')}
             </label>
             <input
+              id="password-confirm"
               type="password"
+              autoComplete="new-password"
               value={passwordForm.confirmPassword}
               onChange={(e) => setPasswordForm((p) => ({ ...p, confirmPassword: e.target.value }))}
               required
@@ -188,11 +192,13 @@ export function AccountSettings() {
             />
           </div>
           <div>
-            <label className="block text-sm font-medium text-gray-700 mb-1">
+            <label htmlFor="email-new" className="block text-sm font-medium text-gray-700 mb-1">
               {t('admin.accountSettings.newEmail')}
             </label>
             <input
+              id="email-new"
               type="email"
+              autoComplete="email"
               value={emailForm.newEmail}
               onChange={(e) => setEmailForm((p) => ({ ...p, newEmail: e.target.value }))}
               required

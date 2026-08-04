@@ -36,11 +36,11 @@ export function HeroSection({ heroPhoto, profileSettings }: HeroSectionProps) {
         </div>
 
         <div className="lg:w-1/2 bg-black px-8 py-12 lg:px-16 lg:py-20 lg:pt-24">
-          <h2 className="font-serif text-6xl lg:text-7xl xl:text-8xl text-center uppercase tracking-tight mb-6">
+          <h1 className="font-serif text-6xl lg:text-7xl xl:text-8xl text-center uppercase tracking-tight mb-6">
             TRISTAN
             <br />
             HENRARD
-          </h2>
+          </h1>
 
           <p className="text-center text-gray-400 text-sm mb-12">
             {language === 'fr'
@@ -53,8 +53,8 @@ export function HeroSection({ heroPhoto, profileSettings }: HeroSectionProps) {
               <div key={i} className="flex items-start gap-8">
                 <div className="text-center">
                   <div className="text-3xl font-light text-white mb-1">{stat.value}</div>
-                  <div className="text-xs text-gray-500 mb-2">{stat.unit}</div>
-                  <div className="text-[10px] text-gray-600 uppercase tracking-widest">
+                  <div className="text-xs text-gray-400 mb-2">{stat.unit}</div>
+                  <div className="text-[10px] text-gray-400 uppercase tracking-widest">
                     {language === 'fr' ? stat.label : stat.label_en ?? stat.label}
                   </div>
                 </div>
