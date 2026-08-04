@@ -1,3 +1,5 @@
+import { useLanguage } from '@/context/LanguageContext';
+
 export interface CategoryFormData {
   name: string;
   slug: string;
@@ -36,6 +38,8 @@ interface CategoryFormProps {
 }
 
 export function CategoryForm({ formData, isCreating, onChange, onSave, onCancel }: CategoryFormProps) {
+  const { t } = useLanguage();
+
   const handleNameChange = (name: string) => {
     onChange({ ...formData, name, slug: generateSlug(name) });
   };
@@ -43,42 +47,54 @@ export function CategoryForm({ formData, isCreating, onChange, onSave, onCancel 
   return (
     <div className="mb-6 p-6 bg-gray-50 border border-gray-200 rounded-elegant">
       <h3 className="font-medium text-gray-900 mb-4">
-        {isCreating ? 'Create New Category' : 'Edit Category'}
+        {isCreating ? t('admin.categories.createTitle') : t('admin.categories.editTitle')}
       </h3>
       <div className="space-y-4">
         <div>
-          <label className="block text-sm text-gray-600 mb-2">Name *</label>
+          <label htmlFor="category-name" className="block text-sm text-gray-600 mb-2">
+            {t('admin.categories.name')}
+          </label>
           <input
+            id="category-name"
             type="text"
             value={formData.name}
             onChange={(e) => handleNameChange(e.target.value)}
             className="w-full px-4 py-2 bg-white border border-gray-300 rounded-elegant text-gray-900 focus:outline-none focus:border-black"
-            placeholder="e.g., Editorial, Runway, Polaroids"
+            placeholder={t('admin.categories.namePlaceholder')}
           />
         </div>
         <div>
-          <label className="block text-sm text-gray-600 mb-2">Slug (auto-generated)</label>
+          <label htmlFor="category-slug" className="block text-sm text-gray-600 mb-2">
+            {t('admin.categories.slug')}
+          </label>
           <input
+            id="category-slug"
             type="text"
             value={formData.slug}
             onChange={(e) => onChange({ ...formData, slug: e.target.value })}
             className="w-full px-4 py-2 bg-white border border-gray-300 rounded-elegant text-gray-900 focus:outline-none focus:border-black"
-            placeholder="e.g., editorial"
+            placeholder={t('admin.categories.slugPlaceholder')}
           />
         </div>
         <div>
-          <label className="block text-sm text-gray-600 mb-2">Description</label>
+          <label htmlFor="category-description" className="block text-sm text-gray-600 mb-2">
+            {t('admin.categories.description')}
+          </label>
           <textarea
+            id="category-description"
             value={formData.description}
             onChange={(e) => onChange({ ...formData, description: e.target.value })}
             rows={3}
             className="w-full px-4 py-2 bg-white border border-gray-300 rounded-elegant text-gray-900 focus:outline-none focus:border-black resize-none"
-            placeholder="Optional description"
+            placeholder={t('admin.categories.descriptionPlaceholder')}
           />
         </div>
         <div>
-          <label className="block text-sm text-gray-600 mb-2">Sort Order</label>
+          <label htmlFor="category-sort-order" className="block text-sm text-gray-600 mb-2">
+            {t('admin.categories.sortOrder')}
+          </label>
           <input
+            id="category-sort-order"
             type="number"
             value={formData.sort_order}
             onChange={(e) => onChange({ ...formData, sort_order: parseInt(e.target.value) || 0 })}
@@ -88,18 +104,20 @@ export function CategoryForm({ formData, isCreating, onChange, onSave, onCancel 
         </div>
         <div className="flex gap-3">
           <button
+            type="button"
             onClick={onSave}
             className="flex items-center gap-2 px-4 py-2 bg-black text-white rounded-elegant hover:bg-gray-800 transition-colors"
           >
             <SaveIcon />
-            Save
+            {t('admin.categories.save')}
           </button>
           <button
+            type="button"
             onClick={onCancel}
             className="flex items-center gap-2 px-4 py-2 bg-gray-200 text-gray-800 rounded-elegant hover:bg-gray-300 transition-colors"
           >
             <XIcon />
-            Cancel
+            {t('admin.categories.cancel')}
           </button>
         </div>
       </div>

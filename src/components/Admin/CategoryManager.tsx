@@ -148,6 +148,7 @@ export function CategoryManager() {
         <h2 className="font-serif text-xl text-gray-900">{t('admin.categories.title')} ({categories.length})</h2>
         {!isCreating && !editingId && (
           <button
+            type="button"
             onClick={startCreate}
             className="flex items-center gap-2 px-4 py-2 bg-black text-white rounded-elegant hover:bg-gray-800 transition-colors"
           >

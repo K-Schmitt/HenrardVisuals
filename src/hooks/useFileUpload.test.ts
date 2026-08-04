@@ -4,6 +4,11 @@ import { describe, it, expect, vi, beforeEach } from 'vitest';
 const upload = vi.fn();
 const getPublicUrl = vi.fn(() => ({ data: { publicUrl: 'https://cdn/x' } }));
 
+// The hook reads its fallback error copy through useLanguage.
+vi.mock('@/context/LanguageContext', () => ({
+  useLanguage: () => ({ language: 'en', setLanguage: vi.fn(), t: (key: string) => key }),
+}));
+
 vi.mock('@/lib/supabase', () => ({
   supabase: { storage: { from: () => ({ upload, getPublicUrl }) } },
 }));

@@ -9,6 +9,7 @@ vi.mock('@/hooks/useAuth', () => ({
 
 import { Login } from './Login';
 
+import { LanguageProvider } from '@/context/LanguageContext';
 import { useAuth } from '@/hooks/useAuth';
 
 const mockSignIn = vi.fn();
@@ -29,7 +30,11 @@ beforeEach(() => {
 
 describe('Login', () => {
   it('renders email and password inputs', () => {
-    render(<Login />);
+    render(
+      <LanguageProvider>
+        <Login />
+      </LanguageProvider>
+    );
 
     expect(screen.getByTestId('email-input')).toBeInTheDocument();
     expect(screen.getByTestId('password-input')).toBeInTheDocument();
@@ -37,12 +42,20 @@ describe('Login', () => {
   });
 
   it('renders the welcome header', () => {
-    render(<Login />);
+    render(
+      <LanguageProvider>
+        <Login />
+      </LanguageProvider>
+    );
     expect(screen.getByText('Welcome Back')).toBeInTheDocument();
   });
 
   it('shows validation error when email is empty on submit', async () => {
-    render(<Login />);
+    render(
+      <LanguageProvider>
+        <Login />
+      </LanguageProvider>
+    );
 
     fireEvent.click(screen.getByTestId('submit-button'));
 
@@ -53,7 +66,11 @@ describe('Login', () => {
   });
 
   it('shows validation error for invalid email format', async () => {
-    render(<Login />);
+    render(
+      <LanguageProvider>
+        <Login />
+      </LanguageProvider>
+    );
 
     await userEvent.type(screen.getByTestId('email-input'), 'not-an-email');
     fireEvent.click(screen.getByTestId('submit-button'));
@@ -64,7 +81,11 @@ describe('Login', () => {
   });
 
   it('shows validation error when password is empty', async () => {
-    render(<Login />);
+    render(
+      <LanguageProvider>
+        <Login />
+      </LanguageProvider>
+    );
 
     await userEvent.type(screen.getByTestId('email-input'), 'admin@example.com');
     fireEvent.click(screen.getByTestId('submit-button'));
@@ -75,7 +96,11 @@ describe('Login', () => {
   });
 
   it('shows validation error when password is too short', async () => {
-    render(<Login />);
+    render(
+      <LanguageProvider>
+        <Login />
+      </LanguageProvider>
+    );
 
     await userEvent.type(screen.getByTestId('email-input'), 'admin@example.com');
     await userEvent.type(screen.getByTestId('password-input'), 'short');
@@ -88,7 +113,11 @@ describe('Login', () => {
 
   it('calls signIn with correct credentials on valid submit', async () => {
     mockSignIn.mockResolvedValue(undefined);
-    render(<Login />);
+    render(
+      <LanguageProvider>
+        <Login />
+      </LanguageProvider>
+    );
 
     await userEvent.type(screen.getByTestId('email-input'), 'admin@example.com');
     await userEvent.type(screen.getByTestId('password-input'), 'securepassword');
@@ -105,7 +134,11 @@ describe('Login', () => {
   it('calls onSuccess callback after successful login', async () => {
     mockSignIn.mockResolvedValue(undefined);
     const onSuccess = vi.fn();
-    render(<Login onSuccess={onSuccess} />);
+    render(
+      <LanguageProvider>
+        <Login onSuccess={onSuccess} />
+      </LanguageProvider>
+    );
 
     await userEvent.type(screen.getByTestId('email-input'), 'admin@example.com');
     await userEvent.type(screen.getByTestId('password-input'), 'securepassword');
@@ -118,7 +151,11 @@ describe('Login', () => {
 
   it('displays error message when signIn fails', async () => {
     mockSignIn.mockRejectedValue(new Error('Invalid login credentials'));
-    render(<Login />);
+    render(
+      <LanguageProvider>
+        <Login />
+      </LanguageProvider>
+    );
 
     await userEvent.type(screen.getByTestId('email-input'), 'admin@example.com');
     await userEvent.type(screen.getByTestId('password-input'), 'wrongpassword');
@@ -132,13 +169,21 @@ describe('Login', () => {
 
   it('disables submit button while loading', () => {
     setupMockAuth({ isLoading: true });
-    render(<Login />);
+    render(
+      <LanguageProvider>
+        <Login />
+      </LanguageProvider>
+    );
 
     expect(screen.getByTestId('submit-button')).toBeDisabled();
   });
 
   it('clears field error when user starts typing', async () => {
-    render(<Login />);
+    render(
+      <LanguageProvider>
+        <Login />
+      </LanguageProvider>
+    );
 
     // Trigger email validation error
     fireEvent.click(screen.getByTestId('submit-button'));

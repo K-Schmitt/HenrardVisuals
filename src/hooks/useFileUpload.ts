@@ -1,5 +1,6 @@
-import { useState, useCallback } from 'react';
+import { useState, useCallback, useRef } from 'react';
 
+import { useLanguage } from '@/context/LanguageContext';
 import { supabase } from '@/lib/supabase';
 import type { UploadedFile } from '@/types';
 
@@ -28,6 +29,12 @@ export function useFileUpload({
 }: UseFileUploadOptions): UseFileUploadReturn {
   const [isUploading, setIsUploading] = useState(false);
   const [uploadProgress, setUploadProgress] = useState<string[]>([]);
+  const { t } = useLanguage();
+
+  // Ref, not a dependency: processFiles is handed to a drop zone and should not
+  // change identity every time the language does.
+  const tRef = useRef(t);
+  tRef.current = t;
 
   const validateFile = useCallback(
     (file: File): string | null => {
@@ -35,10 +42,10 @@ export function useFileUpload({
       // an unanchored RegExp, so "xximage/jpegyy" passed.
       const allowed = accept.split(',').map((t) => t.trim());
       if (!allowed.includes(file.type)) {
-        return `Type "${file.type}" non supporté`;
+        return tRef.current('upload.typeUnsupported', { type: file.type });
       }
       if (file.size > maxSize) {
-        return `Fichier trop volumineux (max ${Math.round(maxSize / 1024 / 1024)}MB)`;
+        return tRef.current('upload.tooLarge', { max: Math.round(maxSize / 1024 / 1024) });
       }
       return null;
     },
@@ -90,7 +97,7 @@ export function useFileUpload({
           continue;
         }
 
-        setUploadProgress((prev) => [...prev, `Uploading ${file.name}...`]);
+        setUploadProgress((prev) => [...prev, tRef.current('upload.uploading', { name: file.name })]);
 
         try {
           // A UUID prefix, not Date.now(). The bucket is public, so an
@@ -120,12 +127,12 @@ export function useFileUpload({
             });
             setUploadProgress((prev) => [
               ...prev.filter((p) => !p.includes(file.name)),
-              `✓ ${file.name} uploaded`,
+              tRef.current('upload.uploaded', { name: file.name }),
             ]);
           }
         } catch (err) {
           errors.push(
-            `${file.name}: ${err instanceof Error ? err.message : 'Network error'}`
+            `${file.name}: ${err instanceof Error ? err.message : tRef.current('upload.networkError')}`
           );
         }
       }

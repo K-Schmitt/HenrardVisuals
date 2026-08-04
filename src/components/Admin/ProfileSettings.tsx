@@ -107,8 +107,11 @@ export function ProfileSettings() {
 
           <div className="space-y-4">
             <div>
-              <label className="block text-sm text-gray-600 mb-2">Subtitle (FR)</label>
+              <label htmlFor="profile-subtitle-fr" className="block text-sm text-gray-600 mb-2">
+                {t('admin.profileSettings.subtitleFr')}
+              </label>
               <input
+                id="profile-subtitle-fr"
                 type="text"
                 value={settings.subtitle}
                 onChange={(e) => setSettings({ ...settings, subtitle: e.target.value })}
@@ -116,19 +119,25 @@ export function ProfileSettings() {
               />
             </div>
             <div>
-              <label className="block text-sm text-gray-600 mb-2">Subtitle (EN)</label>
+              <label htmlFor="profile-subtitle-en" className="block text-sm text-gray-600 mb-2">
+                {t('admin.profileSettings.subtitleEn')}
+              </label>
               <input
+                id="profile-subtitle-en"
                 type="text"
                 value={settings.subtitle_en || ''}
                 onChange={(e) => setSettings({ ...settings, subtitle_en: e.target.value })}
                 className="w-full px-4 py-2 bg-white border border-gray-300 rounded-elegant text-gray-900 focus:outline-none focus:border-black"
-                placeholder="English subtitle..."
+                placeholder={t('admin.profileSettings.subtitleEnPlaceholder')}
               />
             </div>
 
             <div>
-              <label className="block text-sm text-gray-600 mb-2">Attributes (FR)</label>
+              <label htmlFor="profile-attributes-fr" className="block text-sm text-gray-600 mb-2">
+                {t('admin.profileSettings.attributesFr')}
+              </label>
               <input
+                id="profile-attributes-fr"
                 type="text"
                 value={settings.attributes}
                 onChange={(e) => setSettings({ ...settings, attributes: e.target.value })}
@@ -136,13 +145,16 @@ export function ProfileSettings() {
               />
             </div>
             <div>
-              <label className="block text-sm text-gray-600 mb-2">Attributes (EN)</label>
+              <label htmlFor="profile-attributes-en" className="block text-sm text-gray-600 mb-2">
+                {t('admin.profileSettings.attributesEn')}
+              </label>
               <input
+                id="profile-attributes-en"
                 type="text"
                 value={settings.attributes_en || ''}
                 onChange={(e) => setSettings({ ...settings, attributes_en: e.target.value })}
                 className="w-full px-4 py-2 bg-white border border-gray-300 rounded-elegant text-gray-900 focus:outline-none focus:border-black"
-                placeholder="English attributes..."
+                placeholder={t('admin.profileSettings.attributesEnPlaceholder')}
               />
             </div>
           </div>
@@ -157,8 +169,11 @@ export function ProfileSettings() {
               <div key={index} className="p-4 bg-white rounded-lg border border-gray-200">
                 <div className="space-y-3">
                   <div>
-                    <label className="block text-xs text-gray-500 mb-1">Label (FR)</label>
+                    <label htmlFor={`stat-${index}-label-fr`} className="block text-xs text-gray-500 mb-1">
+                      {t('admin.profileSettings.labelFr')}
+                    </label>
                     <input
+                      id={`stat-${index}-label-fr`}
                       type="text"
                       value={stat.label}
                       onChange={(e) => updateStat(index, 'label', e.target.value)}
@@ -166,18 +181,24 @@ export function ProfileSettings() {
                     />
                   </div>
                   <div>
-                    <label className="block text-xs text-gray-500 mb-1">Label (EN)</label>
+                    <label htmlFor={`stat-${index}-label-en`} className="block text-xs text-gray-500 mb-1">
+                      {t('admin.profileSettings.labelEn')}
+                    </label>
                     <input
+                      id={`stat-${index}-label-en`}
                       type="text"
                       value={stat.label_en || ''}
                       onChange={(e) => updateStat(index, 'label_en', e.target.value)}
                       className="w-full px-2 py-1 bg-gray-50 border border-gray-300 rounded text-sm text-gray-900"
-                      placeholder="English label"
+                      placeholder={t('admin.profileSettings.labelEnPlaceholder')}
                     />
                   </div>
                   <div>
-                    <label className="block text-xs text-gray-500 mb-1">{t('admin.profileSettings.value')}</label>
+                    <label htmlFor={`stat-${index}-value`} className="block text-xs text-gray-500 mb-1">
+                      {t('admin.profileSettings.value')}
+                    </label>
                     <input
+                      id={`stat-${index}-value`}
                       type="text"
                       value={stat.value}
                       onChange={(e) => updateStat(index, 'value', e.target.value)}
@@ -185,8 +206,11 @@ export function ProfileSettings() {
                     />
                   </div>
                   <div>
-                    <label className="block text-xs text-gray-500 mb-1">{t('admin.profileSettings.unit')}</label>
+                    <label htmlFor={`stat-${index}-unit`} className="block text-xs text-gray-500 mb-1">
+                      {t('admin.profileSettings.unit')}
+                    </label>
                     <input
+                      id={`stat-${index}-unit`}
                       type="text"
                       value={stat.unit}
                       onChange={(e) => updateStat(index, 'unit', e.target.value)}
@@ -205,8 +229,11 @@ export function ProfileSettings() {
 
           <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
             <div>
-              <label className="block text-sm text-gray-600 mb-2">Bio Text (FR)</label>
+              <label htmlFor="profile-bio-fr" className="block text-sm text-gray-600 mb-2">
+                {t('admin.profileSettings.bioFr')}
+              </label>
               <textarea
+                id="profile-bio-fr"
                 value={settings.biography}
                 onChange={(e) => setSettings({ ...settings, biography: e.target.value })}
                 rows={10}
@@ -214,13 +241,16 @@ export function ProfileSettings() {
               />
             </div>
             <div>
-              <label className="block text-sm text-gray-600 mb-2">Bio Text (EN)</label>
+              <label htmlFor="profile-bio-en" className="block text-sm text-gray-600 mb-2">
+                {t('admin.profileSettings.bioEn')}
+              </label>
               <textarea
+                id="profile-bio-en"
                 value={settings.biography_en || ''}
                 onChange={(e) => setSettings({ ...settings, biography_en: e.target.value })}
                 rows={10}
                 className="w-full px-4 py-2 bg-white border border-gray-300 rounded-elegant text-gray-900 focus:outline-none focus:border-black resize-none"
-                placeholder="English biography..."
+                placeholder={t('admin.profileSettings.bioEnPlaceholder')}
               />
             </div>
           </div>
@@ -229,6 +259,7 @@ export function ProfileSettings() {
         {/* Save Button */}
         <div className="flex justify-end pt-4">
           <button
+            type="button"
             onClick={handleSave}
             disabled={isSaving}
             className="flex items-center gap-2 px-6 py-3 bg-black text-white rounded-elegant hover:bg-gray-800 transition-colors disabled:opacity-50"

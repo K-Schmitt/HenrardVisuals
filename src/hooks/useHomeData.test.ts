@@ -15,6 +15,11 @@ function createQueryMock(resolvedValue: unknown) {
   return mock;
 }
 
+// The hook reads its fallback error copy through useLanguage.
+vi.mock('@/context/LanguageContext', () => ({
+  useLanguage: () => ({ language: 'en', setLanguage: vi.fn(), t: (key: string) => key }),
+}));
+
 vi.mock('@/lib/supabase', () => ({
   supabase: { from: vi.fn() },
 }));

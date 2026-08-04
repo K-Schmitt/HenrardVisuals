@@ -3,6 +3,12 @@ import { describe, it, expect, vi, beforeEach } from 'vitest';
 
 const mockRemove = vi.fn();
 
+// The hook now reads its message strings through useLanguage; returning the key
+// keeps the assertions independent of copy.
+vi.mock('@/context/LanguageContext', () => ({
+  useLanguage: () => ({ language: 'en', setLanguage: vi.fn(), t: (key: string) => key }),
+}));
+
 vi.mock('@/lib/supabase', () => {
   const mockFromFn = vi.fn();
   return {
