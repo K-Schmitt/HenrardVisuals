@@ -68,7 +68,8 @@ CREATE POLICY "Admins gèrent les paramètres"
 -- storage.objects n'existe que si storage-api a déjà démarré et créé
 -- son schéma, ce qui n'est pas encore le cas au premier boot Postgres
 -- (docker-entrypoint-initdb.d s'exécute avant que ce service ne
--- démarre). Cf. 002_storage_bucket.sql pour le même garde-fou.
+-- démarre). Cf. 002_storage_bucket.sql pour le même garde-fou et pour
+-- la commande de réapplication (README.md, docs/SETUP.md, docs/DEPLOY.md).
 
 DO $$
 BEGIN
