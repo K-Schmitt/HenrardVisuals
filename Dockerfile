@@ -64,10 +64,16 @@ FROM nginx:alpine AS production
 # Copy built assets from builder
 COPY --from=builder /app/dist /usr/share/nginx/html
 
-# Replace default nginx config with our SPA config + security headers
+# Replace default nginx config with our SPA config + security headers.
+# The headers live outside conf.d: they are a bare add_header list, so nginx
+# would reject them if it auto-loaded them as a server config. The .template
+# is rendered by the entrypoint script below, which injects the API origin.
 COPY nginx/default.conf /etc/nginx/conf.d/default.conf
+COPY nginx/security-headers.conf.template /etc/nginx/security-headers.conf.template
+COPY nginx/25-security-headers.sh /docker-entrypoint.d/25-security-headers.sh
 
-RUN rm -f /etc/nginx/nginx.conf.default
+RUN chmod +x /docker-entrypoint.d/25-security-headers.sh \
+    && rm -f /etc/nginx/nginx.conf.default
 
 EXPOSE 80
 
