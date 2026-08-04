@@ -13,8 +13,9 @@ vi.mock('@/lib/supabase', () => ({
   },
 }));
 
-import { AuthProvider } from '@/context/AuthContext';
 import { useAuth } from './useAuth';
+
+import { AuthProvider } from '@/context/AuthContext';
 import { supabase } from '@/lib/supabase';
 
 const mockSupabase = supabase as {
@@ -155,6 +156,36 @@ describe('useAuth', () => {
 
     expect(result.current.user).toBeNull();
     expect(result.current.isAuthenticated).toBe(false);
+  });
+
+  it('reports isAdmin true only when app_metadata.role is admin', async () => {
+    const mockUser = { id: 'user-1', email: 'admin@example.com', app_metadata: { role: 'admin' } };
+
+    mockSupabase.auth.getSession.mockResolvedValue({
+      data: { session: { user: mockUser, access_token: 'token-abc' } },
+      error: null,
+    });
+
+    const { result } = renderAuth();
+    await waitFor(() => expect(result.current.isLoading).toBe(false));
+
+    expect(result.current.isAuthenticated).toBe(true);
+    expect(result.current.isAdmin).toBe(true);
+  });
+
+  it('reports isAdmin false for an authenticated non-admin', async () => {
+    const mockUser = { id: 'user-2', email: 'viewer@example.com', app_metadata: {} };
+
+    mockSupabase.auth.getSession.mockResolvedValue({
+      data: { session: { user: mockUser, access_token: 'token-abc' } },
+      error: null,
+    });
+
+    const { result } = renderAuth();
+    await waitFor(() => expect(result.current.isLoading).toBe(false));
+
+    expect(result.current.isAuthenticated).toBe(true);
+    expect(result.current.isAdmin).toBe(false);
   });
 
   it('unsubscribes from auth state changes on unmount', async () => {

@@ -1,19 +1,39 @@
-import { useState } from 'react';
+import { useCallback, useState } from 'react';
 
 import { useLanguage } from '@/context/LanguageContext';
+import { useAuth } from '@/hooks/useAuth';
 import { supabase } from '@/lib/supabase';
 
 export function AccountSettings() {
   const { t } = useLanguage();
+  const { user } = useAuth();
   const [passwordForm, setPasswordForm] = useState({
+    currentPassword: '',
     newPassword: '',
     confirmPassword: '',
   });
-  const [emailForm, setEmailForm] = useState({ newEmail: '' });
+  const [emailForm, setEmailForm] = useState({ currentPassword: '', newEmail: '' });
   const [passwordMsg, setPasswordMsg] = useState<{ type: 'success' | 'error'; text: string } | null>(null);
   const [emailMsg, setEmailMsg] = useState<{ type: 'success' | 'error'; text: string } | null>(null);
   const [savingPassword, setSavingPassword] = useState(false);
   const [savingEmail, setSavingEmail] = useState(false);
+
+  // GoTrue only demands the old password when
+  // GOTRUE_SECURITY_UPDATE_PASSWORD_REQUIRE_REAUTHENTICATION is set. Proving
+  // possession of the current password client-side is the other half of that
+  // control: without it, a stolen session token is enough to take over the
+  // account outright by rewriting its email and password.
+  const reauthenticate = useCallback(
+    async (currentPassword: string): Promise<boolean> => {
+      if (!user?.email) return false;
+      const { error } = await supabase.auth.signInWithPassword({
+        email: user.email,
+        password: currentPassword,
+      });
+      return !error;
+    },
+    [user?.email]
+  );
 
   const handlePasswordChange = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -29,10 +49,14 @@ export function AccountSettings() {
     setSavingPassword(true);
     setPasswordMsg(null);
     try {
+      if (!(await reauthenticate(passwordForm.currentPassword))) {
+        setPasswordMsg({ type: 'error', text: t('admin.accountSettings.reauthFailed') });
+        return;
+      }
       const { error } = await supabase.auth.updateUser({ password: passwordForm.newPassword });
       if (error) throw error;
       setPasswordMsg({ type: 'success', text: t('admin.accountSettings.passwordSuccess') });
-      setPasswordForm({ newPassword: '', confirmPassword: '' });
+      setPasswordForm({ currentPassword: '', newPassword: '', confirmPassword: '' });
     } catch (err: unknown) {
       const message = err instanceof Error ? err.message : t('admin.accountSettings.updateError');
       setPasswordMsg({ type: 'error', text: message });
@@ -51,10 +75,14 @@ export function AccountSettings() {
     setSavingEmail(true);
     setEmailMsg(null);
     try {
+      if (!(await reauthenticate(emailForm.currentPassword))) {
+        setEmailMsg({ type: 'error', text: t('admin.accountSettings.reauthFailed') });
+        return;
+      }
       const { error } = await supabase.auth.updateUser({ email: emailForm.newEmail });
       if (error) throw error;
       setEmailMsg({ type: 'success', text: t('admin.accountSettings.emailSuccess') });
-      setEmailForm({ newEmail: '' });
+      setEmailForm({ currentPassword: '', newEmail: '' });
     } catch (err: unknown) {
       const message = err instanceof Error ? err.message : t('admin.accountSettings.updateError');
       setEmailMsg({ type: 'error', text: message });
@@ -69,6 +97,24 @@ export function AccountSettings() {
       <section>
         <h2 className="font-serif text-xl text-gray-900 mb-6">{t('admin.accountSettings.changePassword')}</h2>
         <form onSubmit={handlePasswordChange} className="space-y-4">
+          <div>
+            <label
+              htmlFor="password-current"
+              className="block text-sm font-medium text-gray-700 mb-1"
+            >
+              {t('admin.accountSettings.currentPassword')}
+            </label>
+            <input
+              id="password-current"
+              type="password"
+              autoComplete="current-password"
+              value={passwordForm.currentPassword}
+              onChange={(e) => setPasswordForm((p) => ({ ...p, currentPassword: e.target.value }))}
+              required
+              className="w-full px-4 py-2.5 border border-gray-200 rounded-elegant text-gray-900 focus:outline-none focus:border-black transition-colors"
+              placeholder="••••••••"
+            />
+          </div>
           <div>
             <label className="block text-sm font-medium text-gray-700 mb-1">
               {t('admin.accountSettings.newPassword')}
@@ -127,13 +173,28 @@ export function AccountSettings() {
         <h2 className="font-serif text-xl text-gray-900 mb-6">{t('admin.accountSettings.changeEmail')}</h2>
         <form onSubmit={handleEmailChange} className="space-y-4">
           <div>
+            <label htmlFor="email-current" className="block text-sm font-medium text-gray-700 mb-1">
+              {t('admin.accountSettings.currentPassword')}
+            </label>
+            <input
+              id="email-current"
+              type="password"
+              autoComplete="current-password"
+              value={emailForm.currentPassword}
+              onChange={(e) => setEmailForm((p) => ({ ...p, currentPassword: e.target.value }))}
+              required
+              className="w-full px-4 py-2.5 border border-gray-200 rounded-elegant text-gray-900 focus:outline-none focus:border-black transition-colors"
+              placeholder="••••••••"
+            />
+          </div>
+          <div>
             <label className="block text-sm font-medium text-gray-700 mb-1">
               {t('admin.accountSettings.newEmail')}
             </label>
             <input
               type="email"
               value={emailForm.newEmail}
-              onChange={(e) => setEmailForm({ newEmail: e.target.value })}
+              onChange={(e) => setEmailForm((p) => ({ ...p, newEmail: e.target.value }))}
               required
               className="w-full px-4 py-2.5 border border-gray-200 rounded-elegant text-gray-900 focus:outline-none focus:border-black transition-colors"
               placeholder="nouvelle@adresse.com"

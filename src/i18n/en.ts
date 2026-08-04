@@ -23,7 +23,11 @@ const en = {
     responseTime: 'Response within 24-48h',
   },
   admin: {
+    notAuthorised: 'This account does not have administrator rights.',
+    signOut: 'Sign out',
     accountSettings: {
+      currentPassword: 'Current password',
+      reauthFailed: 'Current password is incorrect.',
       changePassword: 'Change password',
       newPassword: 'New password',
       confirmPassword: 'Confirm password',
