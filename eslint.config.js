@@ -52,6 +52,7 @@ export default [
         URL: 'readonly',
         Image: 'readonly',
         crypto: 'readonly',
+        queueMicrotask: 'readonly',
       },
     },
     plugins: {
