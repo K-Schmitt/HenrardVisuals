@@ -74,6 +74,13 @@ API_EXTERNAL_URL=https://api.yourdomain.com
 DISABLE_SIGNUP=true
 ```
 
+`VITE_SUPABASE_URL` is needed twice: at **build** time, so the bundle knows where
+the API is, and at **run** time, because the frontend container derives its
+Content-Security-Policy from it (`nginx/25-security-headers.sh`). Both Compose
+files pass it in both places. A container started without it exits immediately
+with an explanatory message rather than serving a policy that would block every
+API call and image.
+
 ### 3. Deploy
 
 ```bash

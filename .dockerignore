@@ -25,7 +25,6 @@ volumes
 docs
 e2e
 supabase
-nginx/nginx.conf
 playwright.config.ts
 .claude
 *.log
