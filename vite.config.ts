@@ -31,10 +31,21 @@ export default defineConfig({
         // Optimize chunk splitting
         rollupOptions: {
             output: {
-                manualChunks: {
-                    vendor: ['react', 'react-dom'],
-                    router: ['react-router-dom'],
-                    supabase: ['@supabase/supabase-js'],
+                // Function form, not object form: the object form matches only
+                // exact module ids, and main.tsx imports 'react-dom/client'
+                // while the code itself lives in react-dom/cjs/*. Nothing
+                // matched, so `vendor` came out at 30 bytes and React was
+                // swept into the router chunk.
+                manualChunks(id) {
+                    if (!id.includes('node_modules')) return undefined;
+                    // Must precede the react test — 'react-router' contains 'react'.
+                    if (id.includes('react-router')) return 'router';
+                    if (/[\\/]node_modules[\\/](react|react-dom|scheduler)[\\/]/.test(id)) {
+                        return 'react-vendor';
+                    }
+                    if (id.includes('@supabase')) return 'supabase';
+                    if (id.includes('i18next')) return 'i18n';
+                    return undefined;
                 },
             },
         },
