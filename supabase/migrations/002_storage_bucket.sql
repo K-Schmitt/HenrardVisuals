@@ -19,23 +19,44 @@
 -- ----------------------------------------
 -- Créer le bucket "photos" s'il n'existe pas
 -- ----------------------------------------
+-- 000_bootstrap crée storage.buckets dans sa forme d'origine : les colonnes
+-- public, file_size_limit et allowed_mime_types sont ajoutées plus tard par
+-- les migrations de storage-api (0007, 0012, 0013), donc elles n'existent pas
+-- encore au premier boot. Écrire dedans sans vérifier faisait échouer ce
+-- fichier, et comme l'entrypoint Postgres exécute les .sql avec
+-- ON_ERROR_STOP, l'erreur interrompait toute la suite de l'initialisation :
+-- 003, 004 et 005 ne tournaient jamais.
 DO $$
 BEGIN
-  IF to_regclass('storage.buckets') IS NOT NULL THEN
-    INSERT INTO storage.buckets (id, name, public, file_size_limit, allowed_mime_types)
-    VALUES (
-        'photos',
-        'photos',
-        true,  -- Bucket public pour afficher les images
-        52428800,  -- 50MB max par fichier
-        ARRAY['image/jpeg', 'image/png', 'image/webp', 'image/gif']
-    )
-    ON CONFLICT (id) DO UPDATE SET
-        public = true,
-        file_size_limit = 52428800,
-        allowed_mime_types = ARRAY['image/jpeg', 'image/png', 'image/webp', 'image/gif'];
-  ELSE
+  IF to_regclass('storage.buckets') IS NULL THEN
     RAISE NOTICE 'storage.buckets absent — storage-api pas encore démarré, bucket "photos" non créé (réexécuter ce fichier une fois la stack complète démarrée)';
+    RETURN;
+  END IF;
+
+  INSERT INTO storage.buckets (id, name)
+  VALUES ('photos', 'photos')
+  ON CONFLICT (id) DO NOTHING;
+
+  IF EXISTS (SELECT 1 FROM information_schema.columns
+             WHERE table_schema = 'storage' AND table_name = 'buckets'
+               AND column_name = 'public') THEN
+    UPDATE storage.buckets SET public = true WHERE id = 'photos';
+  ELSE
+    RAISE NOTICE 'storage.buckets.public absent — rejouer ce fichier après le démarrage de storage-api, sinon les images ne seront pas publiques';
+  END IF;
+
+  IF EXISTS (SELECT 1 FROM information_schema.columns
+             WHERE table_schema = 'storage' AND table_name = 'buckets'
+               AND column_name = 'file_size_limit') THEN
+    UPDATE storage.buckets SET file_size_limit = 52428800 WHERE id = 'photos';
+  END IF;
+
+  IF EXISTS (SELECT 1 FROM information_schema.columns
+             WHERE table_schema = 'storage' AND table_name = 'buckets'
+               AND column_name = 'allowed_mime_types') THEN
+    UPDATE storage.buckets
+       SET allowed_mime_types = ARRAY['image/jpeg', 'image/png', 'image/webp', 'image/gif']
+     WHERE id = 'photos';
   END IF;
 END
 $$;
@@ -46,6 +67,14 @@ $$;
 DO $$
 BEGIN
   IF to_regclass('storage.objects') IS NOT NULL THEN
+    -- Rejouable : sans ces DROP, une seconde exécution échoue sur
+    -- "policy already exists" — or ce fichier est fait pour être rejoué une
+    -- fois storage-api démarré.
+    DROP POLICY IF EXISTS "Images publiques accessibles à tous"      ON storage.objects;
+    DROP POLICY IF EXISTS "Utilisateurs authentifiés peuvent uploader"  ON storage.objects;
+    DROP POLICY IF EXISTS "Utilisateurs authentifiés peuvent modifier"  ON storage.objects;
+    DROP POLICY IF EXISTS "Utilisateurs authentifiés peuvent supprimer" ON storage.objects;
+
     -- Lecture publique des images
     CREATE POLICY "Images publiques accessibles à tous"
     ON storage.objects FOR SELECT

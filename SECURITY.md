@@ -23,6 +23,12 @@ frontend must be rebuilt (`VITE_SUPABASE_ANON_KEY` is baked in at build time).
 
        ALTER ROLE postgres WITH PASSWORD '<new POSTGRES_PASSWORD>';
 
+   `AUTHENTICATOR_PASSWORD` is independent of `JWT_SECRET` and can be rotated
+   on its own, but it must be changed in both places at once — the database
+   and `PGRST_DB_URI` — or PostgREST stops serving:
+
+       ALTER ROLE authenticator WITH PASSWORD '<new AUTHENTICATOR_PASSWORD>';
+
 4. Rotate the admin account password through GoTrue, not raw SQL:
 
        curl -X POST "$API_EXTERNAL_URL/auth/v1/admin/users/<user-id>" \

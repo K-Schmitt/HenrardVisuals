@@ -248,6 +248,33 @@ CREATE INDEX IF NOT EXISTS idx_photos_public_gallery
   ON public.photos (sort_order, id)
   WHERE is_published = true AND is_hero = false;
 
+-- ----------------------------------------
+-- 9. Dedicated PostgREST authenticator
+-- ----------------------------------------
+-- PostgREST performs SET LOCAL ROLE from the JWT's role claim. Connecting as a
+-- superuser lets that succeed for any role, including service_role (BYPASSRLS)
+-- and postgres itself — which walks straight through every policy above,
+-- FORCE ROW LEVEL SECURITY included. This role owns nothing and can only
+-- become the three intended roles. NOINHERIT means it holds none of their
+-- privileges until it explicitly switches.
+--
+-- No password is set here: this file is replayed by hand and by the test
+-- harness, and neither should be able to overwrite a live credential. The
+-- password is set separately by 006_authenticator_password.sh on first boot,
+-- or by hand:
+--   ALTER ROLE authenticator WITH PASSWORD '<value of AUTHENTICATOR_PASSWORD>';
+DO $$
+BEGIN
+  IF NOT EXISTS (SELECT FROM pg_roles WHERE rolname = 'authenticator') THEN
+    CREATE ROLE authenticator LOGIN NOINHERIT;
+  END IF;
+END $$;
+
+GRANT anon, authenticated, service_role TO authenticator;
+
+-- Section 5's comment about FORCE closing the owner-bypass path only holds
+-- once PGRST_DB_URI actually points at this role. Both compose files do.
+
 -- =========================================
 -- END OF RLS HARDENING
 -- =========================================

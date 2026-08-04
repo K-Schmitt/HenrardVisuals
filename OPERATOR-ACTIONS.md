@@ -50,6 +50,41 @@ when the code that motivates it merges.
   image, repeatably. If it still returns `200`, the migration did not
   apply — do not treat the item above as done.
 
+- [ ] **Close public signup on the live GoTrue** (Task 11). Read from the
+  Coolify environment on 2026-08-04, the deployed app had
+  `DISABLE_SIGNUP=false`, `ENABLE_EMAIL_SIGNUP=true` **and**
+  `ENABLE_EMAIL_AUTOCONFIRM=true` at the same time: anyone can register a
+  confirmed account right now. After Tasks 3 and 4 such an account can write
+  nothing and sees the not-authorised screen, but it should not be able to
+  register at all. Set `DISABLE_SIGNUP=true` and
+  `ENABLE_EMAIL_AUTOCONFIRM=false` in Coolify and redeploy, then confirm:
+
+  ```bash
+  curl -s -o /dev/null -w '%{http_code}\n' -X POST "$API_EXTERNAL_URL/auth/v1/signup" \
+    -H "apikey: $ANON_KEY" -H 'Content-Type: application/json' \
+    -d '{"email":"probe@example.com","password":"probe-probe-probe"}'
+  ```
+
+  Expected: `422` (`signup_disabled`). While in that screen, delete the
+  second, empty copy of `SERVICE_ROLE_KEY`, `VITE_SUPABASE_URL`, `JWT_SECRET`
+  and `ANON_KEY` — the app's variable list carries two of each, and only the
+  populated one is doing anything.
+
+- [ ] **Repoint PostgREST at the `authenticator` role** (Task 11). Both
+  compose files now connect PostgREST as `authenticator` rather than the
+  `postgres` superuser, because PostgREST runs `SET LOCAL ROLE` from the
+  JWT's `role` claim and a superuser connection lets that succeed for any
+  role, `service_role` (BYPASSRLS) included. `005` creates the role;
+  `AUTHENTICATOR_PASSWORD` must be set and the role given that password:
+
+  ```sql
+  ALTER ROLE authenticator WITH LOGIN PASSWORD '<AUTHENTICATOR_PASSWORD>';
+  ```
+
+  On the Coolify-managed Supabase the PostgREST connection string may not be
+  editable. If it is not, this control cannot be applied there — record that
+  rather than assuming it is closed.
+
 - [ ] **Verify the admin panel can still write** (Task 3). `005` drops the
   permissive policies that were, in practice, the only reason authenticated
   writes succeeded, and leaves `public.is_admin()` as the sole gate. That

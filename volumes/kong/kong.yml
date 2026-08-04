@@ -9,6 +9,12 @@ _transform: true
 # ----------------------------------------
 # Services
 # ----------------------------------------
+# CORS origins are listed explicitly on all three routes. They previously read
+# origins: ["*"] together with credentials: true — a combination the Fetch spec
+# forbids, and which Kong resolves by reflecting whatever Origin the request
+# carried, i.e. credentialed cross-origin access from any site.
+# http://localhost:5173 is listed for the dev stack; drop it from a
+# production-only deployment if you prefer a tighter list.
 services:
   # Auth Service (GoTrue)
   - name: auth-v1
@@ -22,7 +28,9 @@ services:
       - name: cors
         config:
           origins:
-            - "*"
+            - "https://henrardvisuals.com"
+            - "https://www.henrardvisuals.com"
+            - "http://localhost:5173"
           methods:
             - GET
             - POST
@@ -43,6 +51,17 @@ services:
             - X-Supabase-Api-Version
           credentials: true
           max_age: 3600
+      # Nothing else in the stack meters the password grant: GoTrue v2.132.3
+      # throttles mail sending, not /token, and nginx's limit_req_zone was in a
+      # file no image ever loaded. Brute force against a known admin address
+      # was unbounded.
+      - name: rate-limiting
+        config:
+          minute: 20
+          policy: local
+          limit_by: ip
+          fault_tolerant: true
+          hide_client_headers: false
 
   # REST API (PostgREST)
   - name: rest-v1
@@ -56,7 +75,9 @@ services:
       - name: cors
         config:
           origins:
-            - "*"
+            - "https://henrardvisuals.com"
+            - "https://www.henrardvisuals.com"
+            - "http://localhost:5173"
           methods:
             - GET
             - POST
@@ -93,7 +114,9 @@ services:
       - name: cors
         config:
           origins:
-            - "*"
+            - "https://henrardvisuals.com"
+            - "https://www.henrardvisuals.com"
+            - "http://localhost:5173"
           methods:
             - GET
             - POST
