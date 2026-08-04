@@ -74,7 +74,7 @@ console.log(`ANON_KEY=${anonKey}`);
 console.log(`SERVICE_ROLE_KEY=${serviceKey}`);
 console.log(`SITE_URL=https://henrardvisuals.com`);
 console.log(`API_EXTERNAL_URL=https://api.henrardvisuals.com`);
-console.log(`DISABLE_SIGNUP=false`);
+console.log(`DISABLE_SIGNUP=true`);
 
 console.log('\n\nBuild Arguments (service app uniquement):');
 console.log('------------------------------------------');
