@@ -24,6 +24,8 @@ interface OptimizedImageProps {
   /** Pass '' to omit the attribute — see buildImageSrcSet. */
   srcSet?: string;
   sizes?: string;
+  /** Untransformed URL, used when the resized variant cannot be produced. */
+  fallbackSrc?: string;
 }
 
 /** Portrait default: this is a model portfolio, most frames are 2:3. */
@@ -40,10 +42,12 @@ export function OptimizedImage({
   height,
   srcSet,
   sizes,
+  fallbackSrc,
 }: OptimizedImageProps) {
   const [isLoaded, setIsLoaded] = useState(false);
   const [isInView, setIsInView] = useState(priority);
   const [isActive, setIsActive] = useState(false);
+  const [useFallback, setUseFallback] = useState(false);
   const containerRef = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
@@ -85,21 +89,39 @@ export function OptimizedImage({
     return () => observer.disconnect();
   }, [enableZoom]);
 
-  const aspectRatio = width && height ? `${width} / ${height}` : FALLBACK_ASPECT;
+  const hasIntrinsicSize = Boolean(width && height);
+
+  // A guessed ratio must not outlive the image. The gallery is a CSS
+  // multi-column masonry: if every tile keeps the same fallback ratio after
+  // loading, all tiles end up the same height and the stagger disappears.
+  // Reserve the box while it matters — for lazy loading and to avoid the
+  // initial shift — then hand layout back to the image's real proportions.
+  const reservedAspect = hasIntrinsicSize
+    ? `${width} / ${height}`
+    : isLoaded
+      ? undefined
+      : FALLBACK_ASPECT;
+
+  // The transformed variant can legitimately 404/422 — imgproxy refuses any
+  // source above IMGPROXY_MAX_SRC_RESOLUTION (16.8 MP by default), and the
+  // JSON error body is blocked by ORB rather than rendered. Serving the
+  // original is heavier but correct; a missing photo is not an option.
+  const activeSrc = useFallback && fallbackSrc ? fallbackSrc : src;
+  const activeSrcSet = useFallback ? undefined : srcSet;
 
   return (
     <div
       ref={containerRef}
       className={`relative overflow-hidden bg-neutral-900 ${onClick ? 'cursor-pointer' : ''}`}
-      style={{ aspectRatio }}
+      style={{ aspectRatio: reservedAspect }}
       onMouseEnter={enableZoom ? () => setIsActive(true) : undefined}
       onMouseLeave={enableZoom ? () => setIsActive(false) : undefined}
       onClick={onClick}
     >
       {isInView && (
         <img
-          src={src}
-          {...(srcSet ? { srcSet } : {})}
+          src={activeSrc}
+          {...(activeSrcSet ? { srcSet: activeSrcSet } : {})}
           {...(sizes ? { sizes } : {})}
           {...(width ? { width } : {})}
           {...(height ? { height } : {})}
@@ -108,6 +130,9 @@ export function OptimizedImage({
           decoding="async"
           fetchPriority={priority ? 'high' : 'auto'}
           onLoad={() => setIsLoaded(true)}
+          onError={() => {
+            if (fallbackSrc && !useFallback) setUseFallback(true);
+          }}
           className={className}
           style={{
             transform: enableZoom && isActive ? 'scale(1.05)' : 'scale(1)',

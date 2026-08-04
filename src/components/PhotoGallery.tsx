@@ -113,6 +113,7 @@ export function PhotoGallery({
               >
                 <OptimizedImage
                   src={buildImageUrl(photo.storage_path, { width: 800 })}
+                  fallbackSrc={buildImageUrl(photo.storage_path)}
                   srcSet={buildImageSrcSet(photo.storage_path, GALLERY_WIDTHS)}
                   // Mirrors the columns-1 md:columns-2 lg:columns-3 breakpoints
                   // above. If those change, this must change with them.

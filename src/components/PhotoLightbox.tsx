@@ -157,6 +157,14 @@ export function PhotoLightbox({
         src={buildImageUrl(photo.storage_path, { width: 1920, quality: 82 })}
         alt={photo.title}
         className="relative max-w-[90vw] max-h-[90vh] object-contain"
+        onError={(e) => {
+          // Same ceiling as the gallery: fall back to the original rather than
+          // leave the lightbox empty.
+          const el = e.currentTarget;
+          if (el.dataset['fallback'] === 'done') return;
+          el.dataset['fallback'] = 'done';
+          el.src = buildImageUrl(photo.storage_path);
+        }}
       />
 
       {/* text-gray-500 measured 4.34:1 on black, under the 4.5:1 AA floor. */}
