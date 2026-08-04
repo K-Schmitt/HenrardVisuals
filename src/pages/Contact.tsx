@@ -1,6 +1,7 @@
 import { useState } from 'react';
 
 import { useLanguage } from '@/context/LanguageContext';
+import { useDocumentMeta } from '@/hooks/useDocumentMeta';
 
 // Icônes SVG inline pour éviter les dépendances
 const MailIcon = ({ className = "w-5 h-5 sm:w-6 sm:h-6" }) => (
@@ -119,6 +120,7 @@ function ContactCard({ icon, label, value, href, external = false, delay = '0ms'
 
 export function Contact() {
   const { t } = useLanguage();
+  useDocumentMeta({ title: t('meta.contact.title'), description: t('meta.contact.description') });
 
   return (
     <div className="min-h-screen bg-black text-white pt-20 sm:pt-24 px-4 sm:px-6 md:px-8 lg:px-16 overflow-hidden">

@@ -49,6 +49,21 @@ const en = {
   home: {
     loadError: 'Failed to load',
   },
+  meta: {
+    home: {
+      title: 'Tristan Henrard — Model Portfolio | HenrardVisuals',
+      description:
+        'Portfolio of Tristan Henrard, editorial and fashion model based in France. Measurements, biography and selected work.',
+    },
+    contact: {
+      title: 'Contact — Tristan Henrard | HenrardVisuals',
+      description: 'Get in touch for bookings, collaborations and photographic projects.',
+    },
+    admin: {
+      title: 'Administration | HenrardVisuals',
+      description: 'Private administration area.',
+    },
+  },
   login: {
     title: 'Welcome Back',
     subtitle: 'Sign in to access the admin panel',

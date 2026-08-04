@@ -7,12 +7,21 @@ import { ProfileSettings } from '@/components/Admin/ProfileSettings';
 import { Login } from '@/components/Auth/Login';
 import { useLanguage } from '@/context/LanguageContext';
 import { useAuth } from '@/hooks/useAuth';
+import { useDocumentMeta } from '@/hooks/useDocumentMeta';
 
 type Tab = 'photos' | 'categories' | 'settings' | 'account';
 
 export function Admin() {
   const { isAuthenticated, isAdmin, user, signOut, isLoading } = useAuth();
   const { t } = useLanguage();
+
+  // noindex: an admin panel has no business in a search index, and robots.txt
+  // alone does not stop a page that was linked from somewhere else.
+  useDocumentMeta({
+    title: t('meta.admin.title'),
+    description: t('meta.admin.description'),
+    noindex: true,
+  });
   const [activeTab, setActiveTab] = useState<Tab>('photos');
 
   if (isLoading) {
