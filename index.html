@@ -52,12 +52,14 @@
   <meta name="twitter:description" content="Male model portfolio" />
   <meta name="twitter:image" content="https://henrardvisuals.com/favicon.jpg" />
 
-  <!-- Fonts -->
-  <link rel="preconnect" href="https://fonts.googleapis.com" />
-  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
-  <link
-    href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,300;0,400;0,500;0,600;1,400&family=Inter:wght@300;400;500;600&family=Playfair+Display:ital,wght@0,400;0,500;0,600;1,400&display=swap"
-    rel="stylesheet" />
+  <!-- Supabase serves both the API and every image — connect early.
+       Substituted from VITE_SUPABASE_URL at build time. -->
+  <link rel="preconnect" href="%VITE_SUPABASE_URL%" crossorigin />
+  <link rel="dns-prefetch" href="%VITE_SUPABASE_URL%" />
+
+  <!-- Self-hosted; preload only what renders above the fold. -->
+  <link rel="preload" href="/fonts/playfair-600.woff2" as="font" type="font/woff2" crossorigin />
+  <link rel="preload" href="/fonts/inter-400.woff2" as="font" type="font/woff2" crossorigin />
 
   <!-- Theme Color -->
   <meta name="theme-color" content="#171717" />
