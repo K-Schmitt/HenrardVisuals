@@ -21,8 +21,15 @@ const RENDER_SEGMENT = '/storage/v1/render/image/public/';
 
 const DEFAULT_QUALITY = 70;
 
-/** Rendered widths for a masonry column. Covers 1x and 2x up to a 3-col grid. */
-export const GALLERY_WIDTHS = [400, 600, 800, 1200] as const;
+/** The lightbox is the one view where the photo itself is the subject, so it
+ *  trades bytes for fidelity: measured 386 kB at width=1200 against 210 kB at
+ *  quality 82, still a quarter of the untransformed original. */
+export const LIGHTBOX_QUALITY = 90;
+
+/** Rendered widths for a masonry column. Covers 1x and 2x up to a 3-col grid;
+ *  1600 is for wide displays at 2x, where 33vw asks for roughly 1700 px and
+ *  capping at 1200 would visibly soften the tile. */
+export const GALLERY_WIDTHS = [400, 600, 800, 1200, 1600] as const;
 
 /** The hero occupies half the viewport on desktop, all of it on mobile. */
 export const HERO_WIDTHS = [640, 960, 1280, 1920] as const;
