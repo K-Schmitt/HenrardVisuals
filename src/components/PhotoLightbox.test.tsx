@@ -8,6 +8,7 @@ import i18n from '@/i18n';
 
 vi.mock('@/lib/imageUrl', () => ({
   buildImageUrl: (p: string) => `https://cdn.example.com/${p}`,
+  LIGHTBOX_QUALITY: 90,
 }));
 
 const photo = {

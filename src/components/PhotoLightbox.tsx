@@ -1,7 +1,7 @@
 import { useEffect, useRef } from 'react';
 
 import { useLanguage } from '@/context/LanguageContext';
-import { buildImageUrl } from '@/lib/imageUrl';
+import { buildImageUrl, LIGHTBOX_QUALITY } from '@/lib/imageUrl';
 import type { Photo } from '@/types';
 
 interface PhotoLightboxProps {
@@ -154,7 +154,7 @@ export function PhotoLightbox({
       </div>
 
       <img
-        src={buildImageUrl(photo.storage_path, { width: 1920, quality: 82 })}
+        src={buildImageUrl(photo.storage_path, { width: 1920, quality: LIGHTBOX_QUALITY })}
         alt={photo.title}
         className="relative max-w-[90vw] max-h-[90vh] object-contain"
         onError={(e) => {

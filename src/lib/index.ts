@@ -14,4 +14,5 @@ export {
   GALLERY_WIDTHS,
   HERO_WIDTHS,
   THUMB_WIDTH,
+  LIGHTBOX_QUALITY,
 } from './imageUrl';
