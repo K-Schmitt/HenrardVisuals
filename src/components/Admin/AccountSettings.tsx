@@ -163,7 +163,7 @@ export function AccountSettings() {
           <button
             type="submit"
             disabled={savingPassword}
-            className="px-6 py-2.5 bg-black text-white rounded-elegant hover:bg-gray-800 transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
+            className="px-6 py-2.5 bg-ink text-bone rounded-elegant hover:bg-gray-800 transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
           >
             {savingPassword ? t('admin.accountSettings.saving') : t('admin.accountSettings.updatePassword')}
           </button>
@@ -222,7 +222,7 @@ export function AccountSettings() {
           <button
             type="submit"
             disabled={savingEmail}
-            className="px-6 py-2.5 bg-black text-white rounded-elegant hover:bg-gray-800 transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
+            className="px-6 py-2.5 bg-ink text-bone rounded-elegant hover:bg-gray-800 transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
           >
             {savingEmail ? t('admin.accountSettings.saving') : t('admin.accountSettings.updateEmail')}
           </button>

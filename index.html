@@ -11,13 +11,13 @@
     html,
     body,
     #root {
-      background-color: #000000 !important;
+      background-color: #0A0A0A !important;
       margin: 0;
       padding: 0;
     }
 
     body {
-      color: #ffffff;
+      color: #F2F0EC;
       min-height: 100vh;
     }
 
@@ -27,7 +27,7 @@
       display: block;
       width: 100vw;
       height: 100vh;
-      background-color: #000000;
+      background-color: #0A0A0A;
     }
   </style>
 
@@ -65,12 +65,14 @@
   <link rel="preconnect" href="%VITE_SUPABASE_URL%" crossorigin />
   <link rel="dns-prefetch" href="%VITE_SUPABASE_URL%" />
 
-  <!-- Self-hosted; preload only what renders above the fold. -->
-  <link rel="preload" href="/fonts/playfair-600.woff2" as="font" type="font/woff2" crossorigin />
-  <link rel="preload" href="/fonts/inter-400.woff2" as="font" type="font/woff2" crossorigin />
+  <!-- Self-hosted; preload only what renders above the fold. The hero name is
+       Bodoni and everything around it is Archivo, so both are on the critical
+       path. The italic and Cyrillic faces are not — they load on demand. -->
+  <link rel="preload" href="/fonts/bodoni-400.woff2" as="font" type="font/woff2" crossorigin />
+  <link rel="preload" href="/fonts/archivo-var.woff2" as="font" type="font/woff2" crossorigin />
 
   <!-- Theme Color: matches the actual page background. -->
-  <meta name="theme-color" content="#000000" />
+  <meta name="theme-color" content="#0A0A0A" />
 
   <script type="application/ld+json">
     {
@@ -88,7 +90,7 @@
   </script>
 </head>
 
-<body class="bg-surface-950 text-primary-50 antialiased">
+<body class="bg-ink text-bone antialiased">
   <div id="root"></div>
   <script type="module" src="/src/main.tsx"></script>
 </body>

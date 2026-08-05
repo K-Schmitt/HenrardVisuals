@@ -32,10 +32,17 @@ export type Photo = {
   is_published: boolean;
   is_hero: boolean;
   sort_order: number;
+  /** Shown in the frame caption next to the year. Migration 007. */
+  shot_location: string | null;
+  /** Shown in the frame caption next to the location. Migration 007. */
+  shot_year: number | null;
+  /** Credited in the lightbox. Migration 007. */
+  photographer: string | null;
   metadata: PhotoMetadata;
   created_at: string;
   updated_at: string;
 }
+
 
 export interface PhotoMetadata {
   camera?: string;

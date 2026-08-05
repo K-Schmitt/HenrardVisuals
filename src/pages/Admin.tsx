@@ -27,7 +27,7 @@ export function Admin() {
   if (isLoading) {
     return (
       <div className="min-h-screen flex items-center justify-center">
-        <div className="animate-spin h-8 w-8 border-2 border-accent-500 border-t-transparent rounded-full" />
+        <div className="animate-spin h-8 w-8 border-2 border-vermillon border-t-transparent rounded-full" />
       </div>
     );
   }
@@ -45,12 +45,12 @@ export function Admin() {
   // functional and fails at every request.
   if (!isAdmin) {
     return (
-      <div className="min-h-screen flex flex-col items-center justify-center gap-6 px-6">
-        <p className="text-gray-400">{t('admin.notAuthorised')}</p>
+      <div className="min-h-screen flex flex-col items-center justify-center gap-8 px-6">
+        <p className="text-bone-muted">{t('admin.notAuthorised')}</p>
         <button
           type="button"
           onClick={signOut}
-          className="px-4 py-2 border border-white text-sm uppercase tracking-wider hover:bg-white hover:text-black transition-colors"
+          className="micro-caps border-b border-bone-faint pb-2 text-bone transition-colors duration-300 hover:border-vermillon"
         >
           {t('admin.signOut')}
         </button>
@@ -59,31 +59,33 @@ export function Admin() {
   }
 
   return (
-    <div className="min-h-screen px-6 lg:px-12 pt-32 pb-12 bg-white text-black">
-      <header className="flex items-center justify-between mb-8">
+    <div className="min-h-screen px-6 lg:px-12 pt-32 pb-12 bg-white text-ink">
+      <header className="flex items-end justify-between mb-8">
         <div>
           <h1 className="font-display text-display-sm text-gray-900">Admin Panel</h1>
-          <p className="text-body-md text-gray-500 mt-1">Welcome back, {user?.email}</p>
+          <p className="mt-1 text-[10px] uppercase tracking-[0.16em] text-gray-500">
+            Welcome back, {user?.email}
+          </p>
         </div>
         <button
-            type="button"
+          type="button"
           onClick={signOut}
-          className="px-4 py-2 bg-gray-100 text-gray-900 rounded-elegant hover:bg-gray-200 transition-colors"
+          className="border-b border-gray-300 pb-1.5 text-[10px] uppercase tracking-[0.16em] text-gray-900 transition-colors hover:border-vermillon"
         >
           Sign Out
         </button>
       </header>
 
-      <nav className="flex gap-4 mb-8 border-b border-gray-200">
+      <nav className="flex gap-7 mb-8 border-b border-gray-200">
         {(['photos', 'categories', 'settings', 'account'] as const).map((tab) => (
           <button
             type="button"
             key={tab}
             onClick={() => setActiveTab(tab)}
-            className={`px-4 py-3 font-medium capitalize transition-colors ${
+            className={`border-b-2 pb-3 text-[11px] uppercase tracking-[0.2em] transition-colors ${
               activeTab === tab
-                ? 'text-black border-b-2 border-black'
-                : 'text-gray-500 hover:text-gray-900'
+                ? 'border-vermillon text-gray-900'
+                : 'border-transparent text-gray-500 hover:text-gray-900'
             }`}
           >
             {tab}

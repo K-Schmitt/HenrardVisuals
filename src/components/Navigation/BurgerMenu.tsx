@@ -1,7 +1,13 @@
 /**
  * BurgerMenu Component
- * Animated hamburger menu icon
+ *
+ * Two rules of unequal length, as the book sets them. Opening squares them up
+ * and crosses them. Driven by transitions rather than keyframes so the global
+ * prefers-reduced-motion rule can flatten it, and so the closed state is a
+ * resting state rather than the tail of an animation that ran on mount.
  */
+
+import { forwardRef } from 'react';
 
 interface BurgerMenuProps {
   isOpen: boolean;
@@ -12,55 +18,32 @@ interface BurgerMenuProps {
   controls: string;
 }
 
-export function BurgerMenu({ isOpen, onClick, label, controls }: BurgerMenuProps) {
-  const barStyle = (animation: string) => ({
-    animation: `${animation} 0.6s ease-in-out forwards`,
-  });
+export const BurgerMenu = forwardRef<HTMLButtonElement, BurgerMenuProps>(function BurgerMenu(
+  { isOpen, onClick, label, controls },
+  ref
+) {
+  const bar = 'block h-px bg-bone transition-all duration-500 ease-book';
 
   return (
     <button
+      ref={ref}
       type="button"
       onClick={onClick}
-      className="relative w-8 h-8 flex items-center justify-center hover:opacity-70 transition-opacity z-50 focus:outline-none focus:ring-2 focus:ring-white"
+      className="relative z-[60] flex h-6 w-7 flex-col justify-center gap-1.5"
       aria-label={label}
       aria-expanded={isOpen}
       aria-controls={controls}
     >
-      <div className="w-6 h-4 flex flex-col justify-between items-end">
-        <span
-          className="block w-6 h-0.5 bg-white rounded-full"
-          style={barStyle(isOpen ? 'burgerTopClose' : 'burgerTopOpen')}
-        />
-        <span
-          className="block w-6 h-0.5 bg-white rounded-full"
-          style={barStyle(isOpen ? 'burgerBottomClose' : 'burgerBottomOpen')}
-        />
-      </div>
-
-      <style>{`
-        @keyframes burgerTopClose {
-          0% { transform: translateY(0) rotate(0); }
-          50% { transform: translateY(7.5px) rotate(0); }
-          100% { transform: translateY(7.5px) rotate(45deg); }
-        }
-        @keyframes burgerBottomClose {
-          0% { transform: translateY(0) rotate(0); }
-          50% { transform: translateY(-7.5px) rotate(0); }
-          100% { transform: translateY(-7.5px) rotate(-45deg); }
-        }
-        @keyframes burgerTopOpen {
-          0% { transform: translateY(7.5px) rotate(45deg); }
-          50% { transform: translateY(7.5px) rotate(0); }
-          100% { transform: translateY(0) rotate(0); }
-        }
-        @keyframes burgerBottomOpen {
-          0% { transform: translateY(-7.5px) rotate(-45deg); }
-          50% { transform: translateY(-7.5px) rotate(0); }
-          100% { transform: translateY(0) rotate(0); }
-        }
-      `}</style>
+      <span
+        aria-hidden="true"
+        className={`${bar} ${isOpen ? 'w-7 translate-y-[3.5px] rotate-45' : 'w-7'}`}
+      />
+      <span
+        aria-hidden="true"
+        className={`${bar} ${isOpen ? 'w-7 -translate-y-[3.5px] -rotate-45' : 'w-[18px]'}`}
+      />
     </button>
   );
-}
+});
 
 export default BurgerMenu;

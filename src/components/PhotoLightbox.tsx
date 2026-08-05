@@ -15,6 +15,8 @@ interface PhotoLightboxProps {
 
 const TITLE_ID = 'lightbox-title';
 
+const frameNumber = (n: number) => String(n).padStart(2, '0');
+
 export function PhotoLightbox({
   photo,
   index,
@@ -63,6 +65,8 @@ export function PhotoLightbox({
     }
   };
 
+  const place = [photo.shot_location, photo.shot_year].filter(Boolean).join(', ');
+
   return (
     <div
       ref={dialogRef}
@@ -70,7 +74,9 @@ export function PhotoLightbox({
       aria-modal="true"
       aria-labelledby={TITLE_ID}
       onKeyDown={handleKeyDown}
-      className="fixed inset-0 z-50 bg-black/95 flex items-center justify-center"
+      // A shade below the page ground, so the sheet reads as a plate laid on
+      // the book rather than a panel floating over it.
+      className="fixed inset-0 z-50 flex items-center justify-center bg-[#060606]"
     >
       {/* Click-outside-to-close, for the mouse only. It is hidden from
           assistive technology and out of the tab order on purpose: exposing it
@@ -85,24 +91,30 @@ export function PhotoLightbox({
         className="absolute inset-0 cursor-default"
       />
 
+      <div className="pointer-events-none absolute left-6 top-6 z-10">
+        <span className="micro-caps text-bone">
+          {frameNumber(index + 1)} <span className="text-bone-muted">/ {frameNumber(total)}</span>
+        </span>
+      </div>
+
       <button
         ref={closeRef}
         type="button"
         aria-label={t('lightbox.close')}
         onClick={onClose}
-        className="fixed top-6 right-6 z-10 p-3 text-gray-300 hover:text-white focus:outline-none focus:ring-2 focus:ring-white"
+        className="absolute right-5 top-5 z-10 p-3 text-bone-muted transition-colors duration-300 hover:text-bone"
       >
         <svg
           aria-hidden="true"
-          width="32"
-          height="32"
-          viewBox="0 0 24 24"
+          width="16"
+          height="16"
+          viewBox="0 0 16 16"
           fill="none"
           stroke="currentColor"
-          strokeWidth="2"
+          strokeWidth="1"
         >
-          <line x1="18" y1="6" x2="6" y2="18" />
-          <line x1="6" y1="6" x2="18" y2="18" />
+          <line x1="1" y1="1" x2="15" y2="15" />
+          <line x1="15" y1="1" x2="1" y2="15" />
         </svg>
       </button>
 
@@ -110,53 +122,30 @@ export function PhotoLightbox({
         type="button"
         aria-label={t('lightbox.previous')}
         onClick={onPrevious}
-        className="fixed left-4 top-1/2 -translate-y-1/2 z-10 p-3 text-gray-300 hover:text-white focus:outline-none focus:ring-2 focus:ring-white"
+        className="absolute left-3 top-1/2 z-10 -translate-y-1/2 p-4 text-bone-muted transition-colors duration-300 hover:text-bone"
       >
-        <svg
+        <span
           aria-hidden="true"
-          width="40"
-          height="40"
-          viewBox="0 0 24 24"
-          fill="none"
-          stroke="currentColor"
-          strokeWidth="1.5"
-        >
-          <polyline points="15 18 9 12 15 6" />
-        </svg>
+          className="block h-3 w-3 rotate-45 border-b border-l border-current"
+        />
       </button>
 
       <button
         type="button"
         aria-label={t('lightbox.next')}
         onClick={onNext}
-        className="fixed right-4 top-1/2 -translate-y-1/2 z-10 p-3 text-gray-300 hover:text-white focus:outline-none focus:ring-2 focus:ring-white"
+        className="absolute right-3 top-1/2 z-10 -translate-y-1/2 p-4 text-bone-muted transition-colors duration-300 hover:text-bone"
       >
-        <svg
+        <span
           aria-hidden="true"
-          width="40"
-          height="40"
-          viewBox="0 0 24 24"
-          fill="none"
-          stroke="currentColor"
-          strokeWidth="1.5"
-        >
-          <polyline points="9 18 15 12 9 6" />
-        </svg>
+          className="block h-3 w-3 rotate-45 border-r border-t border-current"
+        />
       </button>
-
-      <div className="fixed top-6 left-6 z-10">
-        <h2 id={TITLE_ID} className="font-serif text-2xl text-white">
-          {photo.title}
-        </h2>
-        {photo.category && (
-          <p className="text-sm text-gray-400 mt-1 uppercase tracking-wider">{photo.category}</p>
-        )}
-      </div>
 
       <img
         src={buildImageUrl(photo.storage_path, { width: 1920, quality: LIGHTBOX_QUALITY })}
         alt={photo.title}
-        className="relative max-w-[90vw] max-h-[90vh] object-contain"
+        className="relative max-h-[78vh] max-w-[86vw] object-contain lg:max-h-[80vh]"
         onError={(e) => {
           // Same ceiling as the gallery: fall back to the original rather than
           // leave the lightbox empty.
@@ -167,8 +156,23 @@ export function PhotoLightbox({
         }}
       />
 
-      {/* text-gray-500 measured 4.34:1 on black, under the 4.5:1 AA floor. */}
-      <p className="fixed bottom-6 right-6 z-10 text-gray-400 text-sm" aria-live="polite">
+      <div className="pointer-events-none absolute inset-x-5 bottom-5 z-10 flex items-end justify-between gap-6 lg:inset-x-6 lg:bottom-6">
+        <div className="caption-caps leading-[2] text-bone-muted">
+          {/* The title is the accessible name of the dialog; the plate line
+              beneath it is the credit. */}
+          <h2 id={TITLE_ID} className="caption-caps text-bone">
+            {photo.title}
+            {place ? ` — ${place}` : ''}
+          </h2>
+          {photo.photographer && <span>{t('lightbox.credit', { name: photo.photographer })}</span>}
+        </div>
+
+        <span className="caption-caps hidden text-right text-bone-muted lg:block">
+          {t('lightbox.hint')}
+        </span>
+      </div>
+
+      <p className="sr-only" aria-live="polite">
         {t('lightbox.position', { current: index + 1, total })}
       </p>
     </div>

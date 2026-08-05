@@ -16,11 +16,23 @@ interface OptimizedImageProps {
   className?: string;
   onClick?: () => void;
   priority?: boolean;
-  enableZoom?: boolean;
+  /**
+   * Black and white at rest, colour under the pointer — the book's one
+   * recurring photographic gesture. On touch, where there is no pointer, the
+   * reveal keys off the frame reaching the middle of the viewport instead.
+   */
+  reveal?: boolean;
   /** Intrinsic pixel width, used for the reserved aspect ratio. */
   width?: number;
   /** Intrinsic pixel height, used for the reserved aspect ratio. */
   height?: number;
+  /**
+   * A frame ratio the layout imposes, e.g. '4 / 5'. Unlike the intrinsic
+   * ratio this is never released after load: the composed rows only hold
+   * their bottom alignment because every frame in a row keeps its declared
+   * shape. Pair it with object-cover.
+   */
+  aspect?: string;
   /** Pass '' to omit the attribute — see buildImageSrcSet. */
   srcSet?: string;
   sizes?: string;
@@ -37,9 +49,10 @@ export function OptimizedImage({
   className = '',
   onClick,
   priority = false,
-  enableZoom = false,
+  reveal = false,
   width,
   height,
+  aspect,
   srcSet,
   sizes,
   fallbackSrc,
@@ -69,11 +82,11 @@ export function OptimizedImage({
     return () => observer.disconnect();
   }, [priority]);
 
-  // Touch devices have no hover, so the colour/zoom effect keys off the image
-  // being near the centre of the viewport instead. Bail before allocating
-  // anything on pointer devices.
+  // Touch devices have no hover, so the colour effect keys off the image being
+  // near the centre of the viewport instead. Bail before allocating anything
+  // on pointer devices.
   useEffect(() => {
-    if (!enableZoom || !containerRef.current) return;
+    if (!reveal || !containerRef.current) return;
 
     const isTouch = 'ontouchstart' in window || navigator.maxTouchPoints > 0;
     if (!isTouch) return;
@@ -87,20 +100,16 @@ export function OptimizedImage({
 
     observer.observe(containerRef.current);
     return () => observer.disconnect();
-  }, [enableZoom]);
+  }, [reveal]);
 
   const hasIntrinsicSize = Boolean(width && height);
 
-  // A guessed ratio must not outlive the image. The gallery is a CSS
-  // multi-column masonry: if every tile keeps the same fallback ratio after
-  // loading, all tiles end up the same height and the stagger disappears.
-  // Reserve the box while it matters — for lazy loading and to avoid the
-  // initial shift — then hand layout back to the image's real proportions.
-  const reservedAspect = hasIntrinsicSize
-    ? `${width} / ${height}`
-    : isLoaded
-      ? undefined
-      : FALLBACK_ASPECT;
+  // A guessed ratio must not outlive the image. Where no frame ratio is
+  // imposed, reserve the box while it matters — for lazy loading and to avoid
+  // the initial shift — then hand layout back to the image's real proportions.
+  const reservedAspect =
+    aspect ??
+    (hasIntrinsicSize ? `${width} / ${height}` : isLoaded ? undefined : FALLBACK_ASPECT);
 
   // The transformed variant can legitimately 404/422 — imgproxy refuses any
   // source above IMGPROXY_MAX_SRC_RESOLUTION (16.8 MP by default), and the
@@ -109,13 +118,21 @@ export function OptimizedImage({
   const activeSrc = useFallback && fallbackSrc ? fallbackSrc : src;
   const activeSrcSet = useFallback ? undefined : srcSet;
 
+  // The treatment lives in CSS (see index.css) rather than an inline filter.
+  // Inline styles outrank class names, so the old version's unconditional
+  // `filter: grayscale(0)` silently cancelled every grayscale utility a caller
+  // passed in — the hero was never black and white.
+  const treatment = reveal
+    ? `photo-treatment ${isActive ? 'photo-treatment--active' : ''}`
+    : '';
+
   return (
     <div
       ref={containerRef}
-      className={`relative overflow-hidden bg-neutral-900 ${onClick ? 'cursor-pointer' : ''}`}
+      className={`relative overflow-hidden bg-frame ${onClick ? 'cursor-pointer' : ''}`}
       style={{ aspectRatio: reservedAspect }}
-      onMouseEnter={enableZoom ? () => setIsActive(true) : undefined}
-      onMouseLeave={enableZoom ? () => setIsActive(false) : undefined}
+      onMouseEnter={reveal ? () => setIsActive(true) : undefined}
+      onMouseLeave={reveal ? () => setIsActive(false) : undefined}
       onClick={onClick}
     >
       {isInView && (
@@ -133,12 +150,10 @@ export function OptimizedImage({
           onError={() => {
             if (fallbackSrc && !useFallback) setUseFallback(true);
           }}
-          className={className}
+          className={`${treatment} ${className}`}
           style={{
-            transform: enableZoom && isActive ? 'scale(1.05)' : 'scale(1)',
-            filter: enableZoom && !isActive ? 'grayscale(1)' : 'grayscale(0)',
             opacity: isLoaded ? 1 : 0,
-            transition: 'transform 0.7s ease-out, opacity 0.3s ease-out, filter 0.5s ease-out',
+            transition: 'opacity 0.3s ease-out',
           }}
         />
       )}
