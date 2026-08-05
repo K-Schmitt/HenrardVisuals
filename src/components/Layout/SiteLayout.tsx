@@ -4,12 +4,7 @@ import { Link, useLocation } from 'react-router-dom';
 import { Footer } from '@/components/Layout/Footer';
 import { BurgerMenu } from '@/components/Navigation/BurgerMenu';
 import { useLanguage } from '@/context/LanguageContext';
-
-const SOCIAL_LINKS = {
-  instagram: 'https://www.instagram.com/dyavol_litso',
-  linkedin: 'https://www.linkedin.com/in/tristan-henrard-2688a6198/',
-  email: 'henrard.tristan@proton.me',
-};
+import { useSiteContent } from '@/context/SiteContentContext';
 
 interface SiteLayoutProps {
   children: React.ReactNode;
@@ -17,6 +12,7 @@ interface SiteLayoutProps {
 
 export function SiteLayout({ children }: SiteLayoutProps) {
   const { language, setLanguage, t } = useLanguage();
+  const { contact } = useSiteContent();
   const [isMenuOpen, setIsMenuOpen] = useState(false);
   const [showNavbar, setShowNavbar] = useState(true);
   const overlayRef = useRef<HTMLDivElement>(null);
@@ -218,7 +214,7 @@ export function SiteLayout({ children }: SiteLayoutProps) {
             {languageToggle('overlay')}
             <div className="flex flex-wrap items-baseline gap-5 text-[9px] uppercase tracking-caption text-bone-muted">
               <a
-                href={SOCIAL_LINKS.instagram}
+                href={contact.instagram}
                 target="_blank"
                 rel="noopener noreferrer"
                 className="hover:text-bone"
@@ -226,15 +222,15 @@ export function SiteLayout({ children }: SiteLayoutProps) {
                 Instagram
               </a>
               <a
-                href={SOCIAL_LINKS.linkedin}
+                href={contact.linkedin}
                 target="_blank"
                 rel="noopener noreferrer"
                 className="hover:text-bone"
               >
                 LinkedIn
               </a>
-              <a href={`mailto:${SOCIAL_LINKS.email}`} className="text-bone/75 hover:text-bone">
-                {SOCIAL_LINKS.email}
+              <a href={`mailto:${contact.email}`} className="text-bone/75 hover:text-bone">
+                {contact.email}
               </a>
             </div>
           </div>

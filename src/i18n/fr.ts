@@ -11,15 +11,11 @@ const fr = {
     closeMenu: 'Fermer le menu',
   },
   footer: {
-    tagline: "L'essentiel, sans démonstration - l'image au service de l'art.",
-    signature: "L'essentiel, sans démonstration",
     rights: 'Tous droits réservés.',
     createdBy: 'Site créé par',
   },
   hero: {
     scroll: 'Défiler',
-    availability: "Paris — disponible à l'international",
-    specsTitle: 'Fiche technique',
   },
   gallery: {
     all: 'Tout',
@@ -50,16 +46,6 @@ const fr = {
   notFound: {
     message: 'Page non trouvée',
     back: "Retour à l'accueil →",
-  },
-  contact: {
-    tagline: 'Travaillons ensemble',
-    description:
-      "Pour toute demande de collaboration, projet photographique ou booking, n'hésitez pas à me contacter.",
-    responseTime: 'Réponse sous 24-48h',
-    // The newline is deliberate — the block is set on two lines, and where it
-    // breaks is a translator's call, not a width accident.
-    lead: 'Pour un casting,\nun essayage, un book.',
-    base: 'Paris, FR',
   },
   upload: {
     typeUnsupported: 'Type « {{type}} » non supporté',
@@ -143,6 +129,35 @@ const fr = {
       bioFr: 'Biographie (FR)',
       bioEn: 'Biographie (EN)',
       bioEnPlaceholder: 'Biographie en anglais…',
+    },
+    siteContent: {
+      copyTitle: 'Textes du site',
+      copyHint:
+        "Laisser un champ anglais vide reprend le français. Vider le français rétablit le texte d'origine.",
+      contactTitle: 'Coordonnées',
+      contactHint: 'Utilisées dans le pied de page, le menu et les deux blocs contact.',
+      email: 'Adresse e-mail',
+      emailPlaceholder: 'prenom.nom@exemple.com',
+      emailInvalid: 'Adresse e-mail invalide',
+      instagram: 'Instagram (URL)',
+      linkedin: 'LinkedIn (URL)',
+      urlInvalid: 'URL invalide (elle doit commencer par https://)',
+      fr: 'Français',
+      en: 'Anglais',
+      save: 'Enregistrer',
+      saving: 'Enregistrement…',
+      saveSuccess: 'Contenu enregistré',
+      saveError: 'Erreur lors de la sauvegarde',
+      loadError: 'Erreur lors du chargement',
+      heroAvailability: 'Accueil — disponibilité',
+      heroSpecsTitle: 'Accueil — titre de la fiche technique',
+      contactLead: 'Contact — accroche',
+      contactBase: 'Contact — ville',
+      contactTagline: 'Page contact — surtitre',
+      contactDescription: 'Page contact — description',
+      contactResponseTime: 'Page contact — délai de réponse',
+      footerSignature: 'Pied de page — signature',
+      footerTagline: 'Pied de page — phrase longue',
     },
     categories: {
       title: 'Catégories',

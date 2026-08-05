@@ -1,9 +1,11 @@
 import { ContactSection } from '@/components/Layout/ContactSection';
 import { useLanguage } from '@/context/LanguageContext';
+import { useSiteContent } from '@/context/SiteContentContext';
 import { useDocumentMeta } from '@/hooks/useDocumentMeta';
 
 export function Contact() {
   const { t } = useLanguage();
+  const { text } = useSiteContent();
   useDocumentMeta({ title: t('meta.contact.title'), description: t('meta.contact.description') });
 
   return (
@@ -13,14 +15,14 @@ export function Contact() {
       <ContactSection headingLevel={1} />
 
       <div className="mt-16 grid grid-cols-1 gap-10 px-5 lg:mt-24 lg:grid-cols-[340fr_1fr] lg:gap-14 lg:px-10">
-        <div className="micro-caps text-vermillon">{t('contact.tagline')}</div>
+        <div className="micro-caps text-vermillon">{text('contactTagline')}</div>
         <div>
           <p className="max-w-[46ch] text-[14.5px] leading-[1.75] text-bone-muted lg:text-base">
-            {t('contact.description')}
+            {text('contactDescription')}
           </p>
           <div className="mt-8 flex items-center gap-3 border-t border-bone-faint pt-5">
             <span className="block h-[5px] w-[5px] bg-vermillon" />
-            <span className="micro-caps text-bone-muted">{t('contact.responseTime')}</span>
+            <span className="micro-caps text-bone-muted">{text('contactResponseTime')}</span>
           </div>
         </div>
       </div>

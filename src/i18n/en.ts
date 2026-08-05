@@ -11,15 +11,11 @@ const en = {
     closeMenu: 'Close the menu',
   },
   footer: {
-    tagline: 'The essential, without demonstration - the image at the service of art.',
-    signature: 'The essential, without demonstration',
     rights: 'All rights reserved.',
     createdBy: 'Website created by',
   },
   hero: {
     scroll: 'Scroll',
-    availability: 'Paris — available internationally',
-    specsTitle: 'Measurements',
   },
   gallery: {
     all: 'All',
@@ -47,15 +43,6 @@ const en = {
   notFound: {
     message: 'Page not found',
     back: 'Go back home →',
-  },
-  contact: {
-    tagline: "Let's work together",
-    description:
-      'For any collaboration request, photography project, or booking inquiry, feel free to reach out.',
-    responseTime: 'Response within 24-48h',
-    // See the French file: the line break is part of the copy.
-    lead: 'For a casting, a fitting,\na book.',
-    base: 'Paris, FR',
   },
   // The English copy here is asserted verbatim by Login.test.tsx.
   upload: {
@@ -140,6 +127,35 @@ const en = {
       bioFr: 'Bio Text (FR)',
       bioEn: 'Bio Text (EN)',
       bioEnPlaceholder: 'English biography…',
+    },
+    siteContent: {
+      copyTitle: 'Site copy',
+      copyHint:
+        'Leaving an English field empty falls back to French. Clearing the French field restores the shipped text.',
+      contactTitle: 'Contact details',
+      contactHint: 'Used in the footer, the menu and both contact blocks.',
+      email: 'Email address',
+      emailPlaceholder: 'first.last@example.com',
+      emailInvalid: 'Invalid email address',
+      instagram: 'Instagram (URL)',
+      linkedin: 'LinkedIn (URL)',
+      urlInvalid: 'Invalid URL (it must start with https://)',
+      fr: 'French',
+      en: 'English',
+      save: 'Save',
+      saving: 'Saving…',
+      saveSuccess: 'Content saved',
+      saveError: 'Failed to save',
+      loadError: 'Failed to load',
+      heroAvailability: 'Home — availability',
+      heroSpecsTitle: 'Home — measurements heading',
+      contactLead: 'Contact — lead',
+      contactBase: 'Contact — city',
+      contactTagline: 'Contact page — eyebrow',
+      contactDescription: 'Contact page — description',
+      contactResponseTime: 'Contact page — response time',
+      footerSignature: 'Footer — signature',
+      footerTagline: 'Footer — long line',
     },
     categories: {
       title: 'Categories',

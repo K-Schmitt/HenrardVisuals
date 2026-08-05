@@ -80,6 +80,44 @@ export interface ProfileSettings {
   biography_en?: string;
 }
 
+/**
+ * A phrase the operator owns, in both locales. `en` is optional and falls back
+ * to `fr` when blank, so filling only the French half is a valid state rather
+ * than a half-translated site.
+ */
+export interface LocalisedText {
+  fr: string;
+  en?: string;
+}
+
+/**
+ * Editorial copy, editable from the admin panel. Deliberately excludes
+ * interface chrome — button labels, filter names, empty states and accessible
+ * names stay in `src/i18n`, where an empty value cannot silently strip a
+ * control of its name.
+ */
+export interface SiteCopy {
+  heroAvailability: LocalisedText;
+  heroSpecsTitle: LocalisedText;
+  contactLead: LocalisedText;
+  contactBase: LocalisedText;
+  contactTagline: LocalisedText;
+  contactDescription: LocalisedText;
+  contactResponseTime: LocalisedText;
+  footerSignature: LocalisedText;
+  footerTagline: LocalisedText;
+}
+
+export type SiteCopyField = keyof SiteCopy;
+
+/** Where to reach the model. Stored across the `contact_email` and
+ *  `social_links` rows that migration 001 already created. */
+export interface ContactDetails {
+  email: string;
+  instagram: string;
+  linkedin: string;
+}
+
 export interface ProfileStat {
   value: string;
   unit: string;
