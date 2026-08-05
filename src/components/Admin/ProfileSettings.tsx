@@ -166,7 +166,7 @@ export function ProfileSettings() {
 
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
             {settings.stats.map((stat, index) => (
-              <div key={index} className="p-4 bg-white rounded-lg border border-gray-200">
+              <div key={index} className="p-4 bg-white border border-gray-200">
                 <div className="space-y-3">
                   <div>
                     <label htmlFor={`stat-${index}-label-fr`} className="block text-xs text-gray-500 mb-1">
@@ -262,7 +262,7 @@ export function ProfileSettings() {
             type="button"
             onClick={handleSave}
             disabled={isSaving}
-            className="flex items-center gap-2 px-6 py-3 bg-black text-white rounded-elegant hover:bg-gray-800 transition-colors disabled:opacity-50"
+            className="flex items-center gap-2 px-6 py-3 bg-ink text-bone rounded-elegant hover:bg-gray-800 transition-colors disabled:opacity-50"
           >
             <SaveIcon />
             {isSaving ? t('admin.profileSettings.saving') : t('admin.profileSettings.saveChanges')}

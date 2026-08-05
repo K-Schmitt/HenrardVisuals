@@ -73,10 +73,14 @@ export function useHomeData() {
 
         let photosQuery = supabase
           .from('photos')
-          // Explicit projection: the grid renders id, title, storage_path,
-          // category and the dimensions. Selecting * also pulled the metadata
-          // JSONB, description, file_size, mime_type and both timestamps.
-          .select('id, title, storage_path, category, width, height', { count: 'exact' })
+          // Explicit projection. Selecting * also pulled the metadata JSONB,
+          // file_size, mime_type and both timestamps, none of which reach the
+          // page. description carries the pull quote the centre row sets, and
+          // the shot_* columns and photographer are the caption and credit.
+          .select(
+            'id, title, description, storage_path, category, width, height, shot_location, shot_year, photographer',
+            { count: 'exact' }
+          )
           .eq('is_published', true)
           .eq('is_hero', false);
 

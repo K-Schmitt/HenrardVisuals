@@ -1,4 +1,5 @@
 import { HeroSection } from '@/components/HeroSection';
+import { ContactSection } from '@/components/Layout/ContactSection';
 import { PhotoGallery } from '@/components/PhotoGallery';
 import { PhotoLightbox } from '@/components/PhotoLightbox';
 import { useLanguage } from '@/context/LanguageContext';
@@ -31,7 +32,7 @@ export function Home() {
   const selectedIndex = selectedPhoto ? photos.findIndex((p) => p.id === selectedPhoto.id) : -1;
 
   return (
-    <div className="min-h-screen bg-black text-white">
+    <div className="min-h-screen bg-ink text-bone">
       <HeroSection heroPhoto={heroPhoto} profileSettings={profileSettings} />
 
       <PhotoGallery
@@ -47,6 +48,8 @@ export function Home() {
         pageSize={pageSize}
         onPageChange={setCurrentPage}
       />
+
+      <ContactSection index="05" />
 
       {selectedPhoto && (
         <PhotoLightbox

@@ -15,6 +15,7 @@ export function PhotosTab() {
     togglePublish,
     deletePhoto,
     updatePhotoCategory,
+    updatePhotoCredits,
     toggleHero,
   } = useAdminPhotos();
 
@@ -66,6 +67,7 @@ export function PhotosTab() {
                 onToggleHero={toggleHero}
                 onDelete={deletePhoto}
                 onUpdateCategory={updatePhotoCategory}
+                onUpdateCredits={updatePhotoCredits}
               />
             ))}
           </div>

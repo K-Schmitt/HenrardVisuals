@@ -31,11 +31,11 @@ export class ErrorBoundary extends Component<Props, State> {
     if (!this.state.hasError) return this.props.children;
 
     return (
-      <div className="min-h-screen flex flex-col items-center justify-center gap-6 bg-black px-6 text-center">
-        <h1 className="font-serif text-4xl text-white">Something went wrong</h1>
+      <div className="min-h-screen flex flex-col items-center justify-center gap-8 bg-ink px-6 text-center">
+        <h1 className="font-serif text-4xl text-bone">Something went wrong</h1>
         <a
           href="/"
-          className="border border-white px-6 py-2 text-sm uppercase tracking-wider text-white hover:bg-white hover:text-black transition-colors"
+          className="micro-caps border-b border-bone-faint pb-2 text-bone transition-colors duration-300 hover:border-vermillon"
         >
           Back to the portfolio
         </a>

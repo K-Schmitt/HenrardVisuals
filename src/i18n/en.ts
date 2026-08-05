@@ -1,15 +1,25 @@
 const en = {
   nav: {
     home: 'Home',
+    portfolio: 'Portfolio',
+    specs: 'Measurements',
+    contact: 'Contact',
     primary: 'Main navigation',
     changeLanguage: 'Change language',
     toggleMenu: 'Open or close the menu',
     skipToContent: 'Skip to content',
+    closeMenu: 'Close the menu',
   },
   footer: {
     tagline: 'The essential, without demonstration - the image at the service of art.',
+    signature: 'The essential, without demonstration',
     rights: 'All rights reserved.',
     createdBy: 'Website created by',
+  },
+  hero: {
+    scroll: 'Scroll',
+    availability: 'Paris — available internationally',
+    specsTitle: 'Measurements',
   },
   gallery: {
     all: 'All',
@@ -21,12 +31,17 @@ const en = {
     previousPage: 'Previous page',
     nextPage: 'Next page',
     pagePosition: 'Page {{current}} of {{total}}',
+    seriesOne: '{{count}} series',
+    seriesMany: '{{count}} series',
+    frameCount: '{{current}} / {{total}}',
   },
   lightbox: {
     close: 'Close',
     previous: 'Previous photo',
     next: 'Next photo',
     position: 'Photo {{current}} of {{total}}',
+    hint: '← → navigate · Esc to close',
+    credit: 'Ph. {{name}}',
   },
   notFound: {
     message: 'Page not found',
@@ -37,6 +52,9 @@ const en = {
     description:
       'For any collaboration request, photography project, or booking inquiry, feel free to reach out.',
     responseTime: 'Response within 24-48h',
+    // See the French file: the line break is part of the copy.
+    lead: 'For a casting, a fitting,\na book.',
+    base: 'Paris, FR',
   },
   // The English copy here is asserted verbatim by Login.test.tsx.
   upload: {
@@ -178,6 +196,18 @@ const en = {
       category: 'Category',
       uncategorised: 'Uncategorised',
       hero: 'Hero',
+      credits: 'Credits',
+      shotLocation: 'Location',
+      shotLocationPlaceholder: 'e.g. Paris',
+      shotYear: 'Year',
+      shotYearPlaceholder: 'e.g. 2026',
+      shotYearInvalid: 'Invalid year (1900-2200)',
+      photographer: 'Photographer',
+      photographerPlaceholder: 'e.g. Studio Aydogan',
+      pullQuote: 'Layout pull quote',
+      pullQuotePlaceholder: 'Sentence shown beside the full-width frame',
+      saveCredits: 'Save credits',
+      creditsUpdated: 'Credits updated',
     },
   },
 } as const;

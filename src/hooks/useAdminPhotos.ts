@@ -9,6 +9,12 @@ interface Message {
   text: string;
 }
 
+/** The editable half of a photo's caption block. */
+export type PhotoCredits = Pick<
+  Photo,
+  'description' | 'shot_location' | 'shot_year' | 'photographer'
+>;
+
 const MESSAGE_TIMEOUT_MS = 3_000;
 const UPLOAD_MESSAGE_TIMEOUT_MS = 5_000;
 
@@ -86,6 +92,11 @@ export function useAdminPhotos() {
         width: file.width,
         height: file.height,
         mime_type: null,
+        // Caption and credit are filled in from the panel after upload; the
+        // gallery omits whichever half is still missing.
+        shot_location: null,
+        shot_year: null,
+        photographer: null,
         metadata: {},
       }));
 
@@ -182,6 +193,27 @@ export function useAdminPhotos() {
     [fetchPhotos, showMessage]
   );
 
+  /**
+   * The caption line ("01 — ÉDITORIAL / PARIS, 2025"), the lightbox credit and
+   * the pull quote the centre row sets. Sent as one update so a half-filled
+   * caption is never persisted.
+   */
+  const updatePhotoCredits = useCallback(
+    async (photoId: string, credits: PhotoCredits) => {
+      try {
+        const { error } = await updateRow('photos', photoId, credits);
+        if (error) throw error;
+        fetchPhotos();
+        showMessage({ type: 'success', text: tRef.current('admin.photos.creditsUpdated') });
+      } catch (err) {
+        const msg = err instanceof Error ? err.message : tRef.current('admin.photos.updateError');
+        setError(msg);
+        showMessage({ type: 'error', text: msg });
+      }
+    },
+    [fetchPhotos, showMessage]
+  );
+
   const toggleHero = useCallback(
     async (photo: Photo) => {
       try {
@@ -227,6 +259,7 @@ export function useAdminPhotos() {
     togglePublish,
     deletePhoto,
     updatePhotoCategory,
+    updatePhotoCredits,
     toggleHero,
   };
 }

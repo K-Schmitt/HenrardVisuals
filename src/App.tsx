@@ -17,8 +17,8 @@ const Admin = lazy(() => import('@/pages/Admin'));
 
 function PageLoader() {
   return (
-    <div className="min-h-screen flex items-center justify-center bg-black">
-      <div className="animate-spin h-8 w-8 border-2 border-white border-t-transparent rounded-full" />
+    <div className="min-h-screen flex items-center justify-center bg-ink">
+      <div className="animate-spin h-8 w-8 border-2 border-bone border-t-transparent rounded-full" />
     </div>
   );
 }
@@ -29,9 +29,12 @@ function NotFound() {
   return (
     <div className="min-h-screen flex items-center justify-center px-6">
       <div className="text-center">
-        <h1 className="font-serif text-6xl text-white mb-4">404</h1>
-        <p className="text-gray-400">{t('notFound.message')}</p>
-        <a href="/" className="inline-block mt-6 text-white hover:text-gray-300">
+        <h1 className="font-display text-[clamp(4rem,12vw,9rem)] leading-none mb-6">404</h1>
+        <p className="micro-caps text-bone-muted">{t('notFound.message')}</p>
+        <a
+          href="/"
+          className="micro-caps inline-block mt-8 border-b border-bone-faint pb-2 text-bone transition-colors duration-300 hover:border-vermillon"
+        >
           {t('notFound.back')}
         </a>
       </div>

@@ -150,7 +150,7 @@ export function CategoryManager() {
           <button
             type="button"
             onClick={startCreate}
-            className="flex items-center gap-2 px-4 py-2 bg-black text-white rounded-elegant hover:bg-gray-800 transition-colors"
+            className="flex items-center gap-2 px-4 py-2 bg-ink text-bone rounded-elegant hover:bg-gray-800 transition-colors"
           >
             <PlusIcon />
             {t('admin.categories.new')}

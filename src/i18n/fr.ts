@@ -1,15 +1,25 @@
 const fr = {
   nav: {
     home: 'Accueil',
+    portfolio: 'Portfolio',
+    specs: 'Fiche technique',
+    contact: 'Contact',
     primary: 'Navigation principale',
     changeLanguage: 'Changer de langue',
     toggleMenu: 'Ouvrir ou fermer le menu',
     skipToContent: 'Aller au contenu',
+    closeMenu: 'Fermer le menu',
   },
   footer: {
     tagline: "L'essentiel, sans démonstration - l'image au service de l'art.",
+    signature: "L'essentiel, sans démonstration",
     rights: 'Tous droits réservés.',
     createdBy: 'Site créé par',
+  },
+  hero: {
+    scroll: 'Défiler',
+    availability: "Paris — disponible à l'international",
+    specsTitle: 'Fiche technique',
   },
   gallery: {
     all: 'Tout',
@@ -21,12 +31,20 @@ const fr = {
     previousPage: 'Page précédente',
     nextPage: 'Page suivante',
     pagePosition: 'Page {{current}} sur {{total}}',
+    // Two flat keys rather than i18next's _one/_other suffixes: the t() wrapper
+    // is typed off the resource object, and the suffixed form is not a key the
+    // augmentation exposes.
+    seriesOne: '{{count}} série',
+    seriesMany: '{{count}} séries',
+    frameCount: '{{current}} / {{total}}',
   },
   lightbox: {
     close: 'Fermer',
     previous: 'Photo précédente',
     next: 'Photo suivante',
     position: 'Photo {{current}} sur {{total}}',
+    hint: '← → naviguer · Échap fermer',
+    credit: 'Ph. {{name}}',
   },
   notFound: {
     message: 'Page non trouvée',
@@ -37,6 +55,10 @@ const fr = {
     description:
       "Pour toute demande de collaboration, projet photographique ou booking, n'hésitez pas à me contacter.",
     responseTime: 'Réponse sous 24-48h',
+    // The newline is deliberate — the block is set on two lines, and where it
+    // breaks is a translator's call, not a width accident.
+    lead: 'Pour un casting,\nun essayage, un book.',
+    base: 'Paris, FR',
   },
   upload: {
     typeUnsupported: 'Type « {{type}} » non supporté',
@@ -177,6 +199,18 @@ const fr = {
       category: 'Catégorie',
       uncategorised: 'Sans catégorie',
       hero: 'Héros',
+      credits: 'Crédits',
+      shotLocation: 'Lieu',
+      shotLocationPlaceholder: 'ex. Paris',
+      shotYear: 'Année',
+      shotYearPlaceholder: 'ex. 2026',
+      shotYearInvalid: 'Année invalide (1900-2200)',
+      photographer: 'Photographe',
+      photographerPlaceholder: 'ex. Studio Aydogan',
+      pullQuote: 'Citation de mise en page',
+      pullQuotePlaceholder: 'Phrase affichée à côté du cadre en pleine largeur',
+      saveCredits: 'Enregistrer les crédits',
+      creditsUpdated: 'Crédits mis à jour',
     },
   },
 } as const;

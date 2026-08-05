@@ -44,7 +44,7 @@ export function CategoryItem({ category, onEdit, onDelete }: CategoryItemProps) 
               <button
             type="button"
                 onClick={() => { onDelete(category.id); setConfirmingDelete(false); }}
-                className="px-3 py-1 text-sm bg-red-500 text-white rounded hover:bg-red-600 transition-colors"
+                className="px-3 py-1 text-sm bg-red-600 text-white hover:bg-red-700 transition-colors"
               >
                 {t('admin.categories.confirmDelete')}
               </button>
