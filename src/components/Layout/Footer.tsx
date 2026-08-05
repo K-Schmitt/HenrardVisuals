@@ -1,4 +1,5 @@
 import { useLanguage } from '@/context/LanguageContext';
+import { useSiteContent } from '@/context/SiteContentContext';
 
 /**
  * The colophon bar. Navigation used to live here as well; in the book it sits
@@ -6,6 +7,7 @@ import { useLanguage } from '@/context/LanguageContext';
  */
 export function Footer() {
   const { t } = useLanguage();
+  const { text } = useSiteContent();
   const currentYear = new Date().getFullYear();
 
   return (
@@ -14,7 +16,7 @@ export function Footer() {
         <span>
           © {currentYear} Tristan Henrard. {t('footer.rights')}
         </span>
-        <span className="hidden lg:inline">{t('footer.signature')}</span>
+        <span className="hidden lg:inline">{text('footerSignature')}</span>
         <span>
           {t('footer.createdBy')}{' '}
           <a

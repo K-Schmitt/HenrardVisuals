@@ -1,5 +1,6 @@
 import { OptimizedImage } from '@/components/OptimizedImage';
 import { useLanguage } from '@/context/LanguageContext';
+import { useSiteContent } from '@/context/SiteContentContext';
 import { buildImageUrl, buildImageSrcSet, HERO_WIDTHS } from '@/lib/imageUrl';
 import type { Photo, ProfileSettings, ProfileStat } from '@/types';
 
@@ -45,6 +46,7 @@ function Stat({ stat, isFrench }: { stat: ProfileStat; isFrench: boolean }) {
 
 export function HeroSection({ heroPhoto, profileSettings }: HeroSectionProps) {
   const { language, t } = useLanguage();
+  const { text } = useSiteContent();
   const isFrench = language === 'fr';
 
   const subtitle = isFrench
@@ -143,7 +145,7 @@ export function HeroSection({ heroPhoto, profileSettings }: HeroSectionProps) {
 
           <div className="mt-8 flex items-center gap-3">
             <span className="block h-[5px] w-[5px] bg-vermillon" />
-            <span className="micro-caps text-bone-muted">{t('hero.availability')}</span>
+            <span className="micro-caps text-bone-muted">{text('heroAvailability')}</span>
           </div>
         </div>
 
@@ -159,7 +161,7 @@ export function HeroSection({ heroPhoto, profileSettings }: HeroSectionProps) {
       {/* Mobile specification sheet — the desktop's ruled row does not survive
           a 390 px viewport, so the same data becomes a plain list. */}
       <div className="px-5 pt-9 lg:hidden">
-        <h2 className="micro-caps mb-4 text-vermillon">{t('hero.specsTitle')}</h2>
+        <h2 className="micro-caps mb-4 text-vermillon">{text('heroSpecsTitle')}</h2>
         <dl>
           {profileSettings.stats.map((stat, i) => (
             <div
@@ -188,7 +190,7 @@ export function HeroSection({ heroPhoto, profileSettings }: HeroSectionProps) {
         <p className="mt-8 whitespace-pre-line text-sm leading-[1.8] text-bone-muted">{biography}</p>
         <div className="mt-8 flex items-center gap-3">
           <span className="block h-[5px] w-[5px] bg-vermillon" />
-          <span className="micro-caps text-bone-muted">{t('hero.availability')}</span>
+          <span className="micro-caps text-bone-muted">{text('heroAvailability')}</span>
         </div>
       </div>
     </section>

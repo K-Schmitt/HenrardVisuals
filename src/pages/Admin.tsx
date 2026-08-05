@@ -4,12 +4,13 @@ import { AccountSettings } from '@/components/Admin/AccountSettings';
 import { CategoryManager } from '@/components/Admin/CategoryManager';
 import { PhotosTab } from '@/components/Admin/PhotosTab';
 import { ProfileSettings } from '@/components/Admin/ProfileSettings';
+import { SiteContentSettings } from '@/components/Admin/SiteContentSettings';
 import { Login } from '@/components/Auth/Login';
 import { useLanguage } from '@/context/LanguageContext';
 import { useAuth } from '@/hooks/useAuth';
 import { useDocumentMeta } from '@/hooks/useDocumentMeta';
 
-type Tab = 'photos' | 'categories' | 'settings' | 'account';
+type Tab = 'photos' | 'categories' | 'settings' | 'content' | 'account';
 
 export function Admin() {
   const { isAuthenticated, isAdmin, user, signOut, isLoading } = useAuth();
@@ -77,7 +78,7 @@ export function Admin() {
       </header>
 
       <nav className="flex gap-7 mb-8 border-b border-gray-200">
-        {(['photos', 'categories', 'settings', 'account'] as const).map((tab) => (
+        {(['photos', 'categories', 'settings', 'content', 'account'] as const).map((tab) => (
           <button
             type="button"
             key={tab}
@@ -96,6 +97,7 @@ export function Admin() {
       {activeTab === 'photos' && <PhotosTab />}
       {activeTab === 'categories' && <CategoryManager />}
       {activeTab === 'settings' && <ProfileSettings />}
+      {activeTab === 'content' && <SiteContentSettings />}
       {activeTab === 'account' && <AccountSettings />}
     </div>
   );

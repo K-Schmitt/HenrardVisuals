@@ -1,10 +1,5 @@
 import { useLanguage } from '@/context/LanguageContext';
-
-const SOCIAL_LINKS = {
-  instagram: 'https://www.instagram.com/dyavol_litso',
-  linkedin: 'https://www.linkedin.com/in/tristan-henrard-2688a6198/',
-  email: 'henrard.tristan@proton.me',
-};
+import { useSiteContent } from '@/context/SiteContentContext';
 
 interface ContactSectionProps {
   /**
@@ -18,6 +13,7 @@ interface ContactSectionProps {
 
 export function ContactSection({ headingLevel = 2, index }: ContactSectionProps) {
   const { t } = useLanguage();
+  const { contact, text } = useSiteContent();
   const Heading = headingLevel === 1 ? 'h1' : 'h2';
 
   return (
@@ -30,20 +26,20 @@ export function ContactSection({ headingLevel = 2, index }: ContactSectionProps)
       <div className="mt-10 flex flex-col justify-between gap-10 lg:mt-14 lg:flex-row lg:items-end">
         <div>
           <Heading className="whitespace-pre-line font-display text-[clamp(2rem,5.4vw,4rem)] leading-[1.02] tracking-[-0.01em] text-bone/75">
-            {t('contact.lead')}
+            {text('contactLead')}
           </Heading>
 
           <a
-            href={`mailto:${SOCIAL_LINKS.email}`}
+            href={`mailto:${contact.email}`}
             className="mt-8 inline-block border-b border-bone-faint pb-2.5 font-display text-[clamp(1.5rem,4.6vw,4.75rem)] leading-none tracking-[-0.02em] text-bone transition-colors duration-500 hover:border-vermillon hover:text-vermillon lg:mt-10"
           >
-            {SOCIAL_LINKS.email}
+            {contact.email}
           </a>
         </div>
 
         <div className="flex flex-row gap-6 lg:flex-col lg:items-end lg:gap-4 lg:pb-6">
           <a
-            href={SOCIAL_LINKS.instagram}
+            href={contact.instagram}
             target="_blank"
             rel="noopener noreferrer"
             className="micro-caps text-bone-muted transition-colors duration-300 hover:text-bone"
@@ -51,14 +47,14 @@ export function ContactSection({ headingLevel = 2, index }: ContactSectionProps)
             Instagram ↗
           </a>
           <a
-            href={SOCIAL_LINKS.linkedin}
+            href={contact.linkedin}
             target="_blank"
             rel="noopener noreferrer"
             className="micro-caps text-bone-muted transition-colors duration-300 hover:text-bone"
           >
             LinkedIn ↗
           </a>
-          <span className="micro-caps text-bone-muted">{t('contact.base')}</span>
+          <span className="micro-caps text-bone-muted">{text('contactBase')}</span>
         </div>
       </div>
     </section>

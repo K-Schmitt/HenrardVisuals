@@ -9,6 +9,7 @@ import { ErrorBoundary } from '@/components/ErrorBoundary';
 import { SiteLayout } from '@/components/Layout/SiteLayout';
 import { AuthProvider } from '@/context/AuthContext';
 import { LanguageProvider, useLanguage } from '@/context/LanguageContext';
+import { SiteContentProvider } from '@/context/SiteContentContext';
 
 // Lazy load pages
 const Home = lazy(() => import('@/pages/Home'));
@@ -64,7 +65,10 @@ export default function App() {
     <ErrorBoundary>
       <AuthProvider>
         <LanguageProvider>
-          <AppRoutes />
+          {/* Below LanguageProvider: it resolves copy for the active locale. */}
+          <SiteContentProvider>
+            <AppRoutes />
+          </SiteContentProvider>
         </LanguageProvider>
       </AuthProvider>
     </ErrorBoundary>
