@@ -45,6 +45,7 @@ const fr = {
     position: 'Photo {{current}} sur {{total}}',
     hint: '← → naviguer · Échap fermer',
     credit: 'Ph. {{name}}',
+    loading: 'Chargement de la photo',
   },
   notFound: {
     message: 'Page non trouvée',
