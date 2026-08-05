@@ -148,8 +148,14 @@
       transform 700ms cubic-bezier(0.16, 1, 0.3, 1);
   }
 
+  /* The design doc's inline style reads
+     `sepia(.5) saturate(2.4) hue-rotate(-12deg)`, but its own token panel
+     describes the transition as "N&B -> couleur". The filter stack was built
+     against mock assets; on a real colour photograph it lays an orange cast
+     over skin tones. The token panel is the intent, so hover simply drops the
+     filter and returns the photograph as shot. */
   .photo-treatment--active {
-    filter: sepia(0.5) saturate(2.4) hue-rotate(-12deg) contrast(1.02);
+    filter: none;
     transform: scale(1.02);
   }
 }

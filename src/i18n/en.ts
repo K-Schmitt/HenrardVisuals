@@ -42,6 +42,7 @@ const en = {
     position: 'Photo {{current}} of {{total}}',
     hint: '← → navigate · Esc to close',
     credit: 'Ph. {{name}}',
+    loading: 'Loading photo',
   },
   notFound: {
     message: 'Page not found',

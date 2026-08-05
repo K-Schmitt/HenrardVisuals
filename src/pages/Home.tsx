@@ -31,6 +31,16 @@ export function Home() {
 
   const selectedIndex = selectedPhoto ? photos.findIndex((p) => p.id === selectedPhoto.id) : -1;
 
+  // The lightbox wraps at both ends, so the neighbours of the first plate are
+  // the second and the last.
+  const neighbourPaths =
+    selectedIndex < 0
+      ? []
+      : [
+          photos[(selectedIndex + 1) % photos.length],
+          photos[(selectedIndex - 1 + photos.length) % photos.length],
+        ].flatMap((p) => (p && p.id !== selectedPhoto?.id ? [p.storage_path] : []));
+
   return (
     <div className="min-h-screen bg-ink text-bone">
       <HeroSection heroPhoto={heroPhoto} profileSettings={profileSettings} />
@@ -59,6 +69,7 @@ export function Home() {
           onClose={closeModal}
           onPrevious={goToPreviousPhoto}
           onNext={goToNextPhoto}
+          neighbourPaths={neighbourPaths}
         />
       )}
     </div>
