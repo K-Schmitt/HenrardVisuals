@@ -1,12 +1,8 @@
 import { ContactSection } from '@/components/Layout/ContactSection';
-import { useLanguage } from '@/context/LanguageContext';
 import { useSiteContent } from '@/context/SiteContentContext';
-import { useDocumentMeta } from '@/hooks/useDocumentMeta';
 
 export function Contact() {
-  const { t } = useLanguage();
   const { text } = useSiteContent();
-  useDocumentMeta({ title: t('meta.contact.title'), description: t('meta.contact.description') });
 
   return (
     <div className="min-h-screen bg-ink text-bone pt-[58px] lg:pt-[84px]">

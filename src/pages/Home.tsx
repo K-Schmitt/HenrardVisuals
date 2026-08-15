@@ -2,15 +2,10 @@ import { HeroSection } from '@/components/HeroSection';
 import { ContactSection } from '@/components/Layout/ContactSection';
 import { PhotoGallery } from '@/components/PhotoGallery';
 import { PhotoLightbox } from '@/components/PhotoLightbox';
-import { useLanguage } from '@/context/LanguageContext';
-import { useDocumentMeta } from '@/hooks/useDocumentMeta';
 import { useHomeData } from '@/hooks/useHomeData';
 import { useLightbox } from '@/hooks/useLightbox';
 
 export function Home() {
-  const { t } = useLanguage();
-  useDocumentMeta({ title: t('meta.home.title'), description: t('meta.home.description') });
-
   const {
     photos,
     heroPhoto,
