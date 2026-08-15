@@ -8,7 +8,10 @@
       "path": "/",
       "out": "index.html",
       "noindex": false,
-      "sitemap": { "changefreq": "weekly", "priority": "1.0" },
+      "sitemap": {
+        "changefreq": "weekly",
+        "priority": "1.0"
+      },
       "fr": {
         "title": "Tristan Henrard — Portfolio mannequin | HenrardVisuals",
         "description": "Portfolio de Tristan Henrard, mannequin éditorial et mode basé en France. Mensurations, biographie et travaux sélectionnés.",
@@ -24,7 +27,10 @@
       "path": "/contact",
       "out": "contact.html",
       "noindex": false,
-      "sitemap": { "changefreq": "monthly", "priority": "0.6" },
+      "sitemap": {
+        "changefreq": "monthly",
+        "priority": "0.6"
+      },
       "fr": {
         "title": "Contact — Tristan Henrard | HenrardVisuals",
         "description": "Pour un booking, une collaboration ou un projet photographique : coordonnées et délai de réponse de Tristan Henrard.",
@@ -40,10 +46,13 @@
       "path": "/admin",
       "out": "admin.html",
       "noindex": true,
-      "sitemap": { "changefreq": "never", "priority": "0.0" },
+      "sitemap": {
+        "changefreq": "never",
+        "priority": "0.0"
+      },
       "fr": {
         "title": "Administration | HenrardVisuals",
-        "description": "Espace d'administration privé.",
+        "description": "Espace d’administration privé.",
         "ogImageAlt": "HenrardVisuals"
       },
       "en": {
@@ -56,7 +65,10 @@
       "path": "/404",
       "out": "404.html",
       "noindex": true,
-      "sitemap": { "changefreq": "never", "priority": "0.0" },
+      "sitemap": {
+        "changefreq": "never",
+        "priority": "0.0"
+      },
       "fr": {
         "title": "Page non trouvée | HenrardVisuals",
         "description": "Cette planche ne figure pas dans le book.",
