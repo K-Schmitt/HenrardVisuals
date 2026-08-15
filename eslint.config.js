@@ -32,6 +32,7 @@ export default [
         HTMLElement: 'readonly',
         HTMLImageElement: 'readonly',
         HTMLInputElement: 'readonly',
+        HTMLLinkElement: 'readonly',
         HTMLMetaElement: 'readonly',
         HTMLTextAreaElement: 'readonly',
         FileList: 'readonly',

@@ -5,6 +5,7 @@ import { Footer } from '@/components/Layout/Footer';
 import { BurgerMenu } from '@/components/Navigation/BurgerMenu';
 import { useLanguage } from '@/context/LanguageContext';
 import { useSiteContent } from '@/context/SiteContentContext';
+import { useSeo } from '@/hooks/useSeo';
 
 interface SiteLayoutProps {
   children: React.ReactNode;
@@ -13,6 +14,10 @@ interface SiteLayoutProps {
 export function SiteLayout({ children }: SiteLayoutProps) {
   const { language, setLanguage, t } = useLanguage();
   const { contact } = useSiteContent();
+
+  // One writer for the document head, above every route including the 404.
+  useSeo();
+
   const [isMenuOpen, setIsMenuOpen] = useState(false);
   const [showNavbar, setShowNavbar] = useState(true);
   const overlayRef = useRef<HTMLDivElement>(null);
