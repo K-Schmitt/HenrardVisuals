@@ -41,8 +41,17 @@ const en = {
     loading: 'Loading photo',
   },
   notFound: {
-    message: 'Page not found',
-    back: 'Go back home →',
+    eyebrow: 'Error 404',
+    title: 'This plate is not in the book.',
+    lead: 'The address you asked for matches no series. It may have been withdrawn, or the URL has a typo.',
+    plateRef: 'Unknown ref.',
+    plateStatus: 'Print withdrawn',
+    navLabel: 'Ways out',
+    home: 'Back to home',
+    portfolio: 'View the portfolio',
+    write: 'Write',
+    suggestionsTitle: 'You may have been looking for',
+    suggestionsLabel: 'From the book',
   },
   // The English copy here is asserted verbatim by Login.test.tsx.
   upload: {
