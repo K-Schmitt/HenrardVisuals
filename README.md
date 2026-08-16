@@ -220,7 +220,7 @@ Copy `.env.example` to `.env` and fill in every value. Run `node generate-keys.c
 - **Signup disabled** — `DISABLE_SIGNUP` defaults to `true` in `docker-compose.yml`; an unset variable used to read as `false`
 - **Security headers** — CSP, HSTS, `X-Frame-Options`, `X-Content-Type-Options`, `Referrer-Policy` and `Permissions-Policy` are emitted from every nginx location block, and CI fails if a response arrives without all six
 - **Rate limiting** — Kong meters `/auth/v1` at 20 requests per minute per IP
-- **Credentials** — see [SECURITY.md](SECURITY.md) for the rotation runbook, the dependency policy, and a frank account of what leaked in this repository's history
+- **Credentials** — see [SECURITY.md](docs/SECURITY.md) for the rotation runbook, the dependency policy, and a frank account of what leaked in this repository's history
 
 ---
 
@@ -231,9 +231,9 @@ Copy `.env.example` to `.env` and fill in every value. Run `node generate-keys.c
 | [ARCHITECTURE.md](docs/ARCHITECTURE.md) | System architecture & data flow |
 | [SETUP.md](docs/SETUP.md) | Developer setup guide & testing |
 | [DEPLOY.md](docs/DEPLOY.md) | VPS / Coolify deployment guide |
-| [CONTRIBUTING.md](CONTRIBUTING.md) | Local setup, checks to run, commit and migration conventions |
-| [SECURITY.md](SECURITY.md) | Reporting, credential rotation, dependency policy |
-| [OPERATOR-ACTIONS.md](OPERATOR-ACTIONS.md) | Steps that must be run by hand against production |
+| [CONTRIBUTING.md](docs/CONTRIBUTING.md) | Local setup, checks to run, commit and migration conventions |
+| [SECURITY.md](docs/SECURITY.md) | Reporting, credential rotation, dependency policy |
+| [OPERATOR-ACTIONS.md](docs/OPERATOR-ACTIONS.md) | Steps that must be run by hand against production |
 
 ---
 

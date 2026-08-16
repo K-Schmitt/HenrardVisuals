@@ -76,9 +76,14 @@ uploads/
 *.tsbuildinfo
 
 # ----------------------------------------
-# Claude AI
+# AI planning artefacts (local only)
 # ----------------------------------------
+# Session context, plans, specs and subagent ledgers. These are working
+# material for building the project, not documentation of it — the public
+# docs live in docs/. Kept on disk, never pushed.
 .claude/
+.superpowers/
+docs/superpowers/
 
 # ----------------------------------------
 # Misc
