@@ -42,7 +42,11 @@ export function SuggestedPlates() {
             <figure key={photo.id} className="m-0 flex-1">
               {/* No deep link to a single plate exists, so the strip returns
                   the visitor to the gallery rather than nowhere. */}
-              <Link to="/#portfolio" aria-label={photo.title} className="block overflow-hidden bg-frame">
+              <Link
+                to="/#portfolio"
+                aria-label={`${photo.title} — ${t('notFound.portfolio')}`}
+                className="block overflow-hidden bg-frame"
+              >
                 <OptimizedImage
                   src={buildImageUrl(photo.storage_path, { width: 800 })}
                   fallbackSrc={buildImageUrl(photo.storage_path)}
