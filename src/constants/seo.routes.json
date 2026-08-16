@@ -1,0 +1,84 @@
+{
+  "siteUrl": "https://henrardvisuals.com",
+  "ogImage": "/og-image.jpg",
+  "ogImageWidth": 1200,
+  "ogImageHeight": 630,
+  "routes": [
+    {
+      "path": "/",
+      "out": "index.html",
+      "noindex": false,
+      "sitemap": {
+        "changefreq": "weekly",
+        "priority": "1.0"
+      },
+      "fr": {
+        "title": "Tristan Henrard — Portfolio mannequin | HenrardVisuals",
+        "description": "Portfolio de Tristan Henrard, mannequin éditorial et mode basé en France. Mensurations, biographie et travaux sélectionnés.",
+        "ogImageAlt": "Tristan Henrard, portrait éditorial en noir et blanc"
+      },
+      "en": {
+        "title": "Tristan Henrard — Model Portfolio | HenrardVisuals",
+        "description": "Portfolio of Tristan Henrard, editorial and fashion model based in France. Measurements, biography and selected work.",
+        "ogImageAlt": "Tristan Henrard, black and white editorial portrait"
+      }
+    },
+    {
+      "path": "/contact",
+      "out": "contact.html",
+      "noindex": false,
+      "sitemap": {
+        "changefreq": "monthly",
+        "priority": "0.6"
+      },
+      "fr": {
+        "title": "Contact — Tristan Henrard | HenrardVisuals",
+        "description": "Pour un booking, une collaboration ou un projet photographique : coordonnées et délai de réponse de Tristan Henrard.",
+        "ogImageAlt": "Tristan Henrard, portrait éditorial en noir et blanc"
+      },
+      "en": {
+        "title": "Contact — Tristan Henrard | HenrardVisuals",
+        "description": "Get in touch for bookings, collaborations and photographic projects: contact details and response time for Tristan Henrard.",
+        "ogImageAlt": "Tristan Henrard, black and white editorial portrait"
+      }
+    },
+    {
+      "path": "/admin",
+      "out": "admin.html",
+      "noindex": true,
+      "sitemap": {
+        "changefreq": "never",
+        "priority": "0.0"
+      },
+      "fr": {
+        "title": "Administration | HenrardVisuals",
+        "description": "Espace d’administration privé.",
+        "ogImageAlt": "HenrardVisuals"
+      },
+      "en": {
+        "title": "Administration | HenrardVisuals",
+        "description": "Private administration area.",
+        "ogImageAlt": "HenrardVisuals"
+      }
+    },
+    {
+      "path": "/404",
+      "out": "404.html",
+      "noindex": true,
+      "sitemap": {
+        "changefreq": "never",
+        "priority": "0.0"
+      },
+      "fr": {
+        "title": "Page non trouvée | HenrardVisuals",
+        "description": "Cette planche ne figure pas dans le book.",
+        "ogImageAlt": "HenrardVisuals"
+      },
+      "en": {
+        "title": "Page not found | HenrardVisuals",
+        "description": "This plate is not in the book.",
+        "ogImageAlt": "HenrardVisuals"
+      }
+    }
+  ]
+}
