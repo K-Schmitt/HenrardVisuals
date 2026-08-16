@@ -1,6 +1,7 @@
 import { Link } from 'react-router-dom';
 
 import { EmptyPlate } from '@/components/NotFound/EmptyPlate';
+import { SuggestedPlates } from '@/components/NotFound/SuggestedPlates';
 import { useLanguage } from '@/context/LanguageContext';
 import { useSiteContent } from '@/context/SiteContentContext';
 
@@ -73,6 +74,8 @@ export function NotFound() {
           </nav>
         </div>
       </div>
+
+      <SuggestedPlates />
     </div>
   );
 }
