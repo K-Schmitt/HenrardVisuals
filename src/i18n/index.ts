@@ -3,10 +3,9 @@ import { initReactI18next } from 'react-i18next';
 
 import en from './en';
 import fr from './fr';
+import { resolveInitialLanguage } from './initialLanguage';
 
-const STORAGE_KEY = 'language';
-const savedLanguage = localStorage.getItem(STORAGE_KEY);
-const initialLanguage = savedLanguage === 'en' ? 'en' : 'fr';
+const initialLanguage = resolveInitialLanguage();
 
 i18n.use(initReactI18next).init({
   resources: {

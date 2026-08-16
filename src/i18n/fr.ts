@@ -44,8 +44,17 @@ const fr = {
     loading: 'Chargement de la photo',
   },
   notFound: {
-    message: 'Page non trouvée',
-    back: "Retour à l'accueil →",
+    eyebrow: 'Erreur 404',
+    title: "Cette planche n'est pas au book.",
+    lead: "L'adresse demandée ne correspond à aucune série. Elle a peut-être été retirée, ou l'URL comporte une coquille.",
+    plateRef: 'Réf. inconnue',
+    plateStatus: 'Tirage retiré',
+    navLabel: 'Sorties',
+    home: "Retour à l'accueil",
+    portfolio: 'Voir le portfolio',
+    write: 'Écrire',
+    suggestionsTitle: 'Peut-être cherchiez-vous',
+    suggestionsLabel: 'Extrait du book',
   },
   upload: {
     typeUnsupported: 'Type « {{type}} » non supporté',
@@ -56,21 +65,6 @@ const fr = {
   },
   home: {
     loadError: 'Échec du chargement',
-  },
-  meta: {
-    home: {
-      title: 'Tristan Henrard — Portfolio mannequin | HenrardVisuals',
-      description:
-        'Portfolio de Tristan Henrard, mannequin éditorial et mode basé en France. Mensurations, biographie et travaux sélectionnés.',
-    },
-    contact: {
-      title: 'Contact — Tristan Henrard | HenrardVisuals',
-      description: 'Pour un booking, une collaboration ou un projet photographique.',
-    },
-    admin: {
-      title: 'Administration | HenrardVisuals',
-      description: 'Espace d’administration privé.',
-    },
   },
   login: {
     title: 'Content de vous revoir',

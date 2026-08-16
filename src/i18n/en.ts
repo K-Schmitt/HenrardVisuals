@@ -41,8 +41,17 @@ const en = {
     loading: 'Loading photo',
   },
   notFound: {
-    message: 'Page not found',
-    back: 'Go back home →',
+    eyebrow: 'Error 404',
+    title: 'This plate is not in the book.',
+    lead: 'The address you asked for matches no series. It may have been withdrawn, or the URL has a typo.',
+    plateRef: 'Unknown ref.',
+    plateStatus: 'Print withdrawn',
+    navLabel: 'Ways out',
+    home: 'Back to home',
+    portfolio: 'View the portfolio',
+    write: 'Write',
+    suggestionsTitle: 'You may have been looking for',
+    suggestionsLabel: 'From the book',
   },
   // The English copy here is asserted verbatim by Login.test.tsx.
   upload: {
@@ -54,21 +63,6 @@ const en = {
   },
   home: {
     loadError: 'Failed to load',
-  },
-  meta: {
-    home: {
-      title: 'Tristan Henrard — Model Portfolio | HenrardVisuals',
-      description:
-        'Portfolio of Tristan Henrard, editorial and fashion model based in France. Measurements, biography and selected work.',
-    },
-    contact: {
-      title: 'Contact — Tristan Henrard | HenrardVisuals',
-      description: 'Get in touch for bookings, collaborations and photographic projects.',
-    },
-    admin: {
-      title: 'Administration | HenrardVisuals',
-      description: 'Private administration area.',
-    },
   },
   login: {
     title: 'Welcome Back',

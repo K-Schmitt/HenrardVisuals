@@ -49,6 +49,6 @@ test.describe('Public surface', () => {
 
   test('an unknown path renders the not-found view', async ({ page }) => {
     await page.goto('/this-route-does-not-exist');
-    await expect(page.getByText(/page not found|page non trouvée/i)).toBeVisible();
+    await expect(page.getByText(/erreur 404|error 404/i)).toBeVisible();
   });
 });
