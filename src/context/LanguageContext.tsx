@@ -8,11 +8,9 @@ import {
 } from 'react';
 
 import i18n from '@/i18n';
-
 // Activate i18next module augmentation so t() only accepts valid keys.
 import '@/i18n/i18next.d.ts';
-
-type Language = 'fr' | 'en';
+import { resolveInitialLanguage, type Language } from '@/i18n/initialLanguage';
 
 // Derive valid key type from the augmented i18n.t signature — callers of
 // useLanguage().t() get compile-time key checking at no extra cost.
@@ -30,9 +28,7 @@ const LanguageContext = createContext<LanguageContextType | undefined>(undefined
 const STORAGE_KEY = 'language';
 
 export function LanguageProvider({ children }: { children: ReactNode }) {
-  const [language, setLanguageState] = useState<Language>(
-    () => (localStorage.getItem(STORAGE_KEY) as Language | null) ?? 'fr'
-  );
+  const [language, setLanguageState] = useState<Language>(resolveInitialLanguage);
 
   const setLanguage = useCallback((lang: Language) => {
     setLanguageState(lang);
