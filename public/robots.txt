@@ -1,5 +1,8 @@
 User-agent: *
 Allow: /
 Disallow: /admin
+# The prerendered error document is reachable by its own filename; it is a
+# status-code body, not a page, and has no business in an index.
+Disallow: /404.html
 
 Sitemap: https://henrardvisuals.com/sitemap.xml
