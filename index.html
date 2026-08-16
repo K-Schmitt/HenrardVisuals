@@ -33,32 +33,37 @@
 
   <!-- SEO Meta Tags -->
   <!-- No keywords meta: no major engine has used it since 2009. -->
-  <title>Tristan Henrard — Model Portfolio | HenrardVisuals</title>
+  <!-- Everything between the markers is replaced per route by
+       scripts/prerender.mjs at build time, from src/constants/seo.routes.json.
+       What is written here is the dev-server fallback and the home page's
+       values; editing it does not change what ships. -->
+  <!--seo-->
+  <title>Tristan Henrard — Portfolio mannequin | HenrardVisuals</title>
   <meta name="description"
-    content="Portfolio of Tristan Henrard, editorial and fashion model based in France. Measurements, biography and selected work. Book via HenrardVisuals." />
+    content="Portfolio de Tristan Henrard, mannequin éditorial et mode basé en France. Mensurations, biographie et travaux sélectionnés." />
   <meta name="author" content="HenrardVisuals" />
   <link rel="canonical" href="https://henrardvisuals.com/" />
   <link rel="alternate" hreflang="fr" href="https://henrardvisuals.com/" />
   <link rel="alternate" hreflang="en" href="https://henrardvisuals.com/?lang=en" />
   <link rel="alternate" hreflang="x-default" href="https://henrardvisuals.com/" />
-
-  <!-- Open Graph -->
-  <meta property="og:title" content="Tristan Henrard — Model Portfolio" />
-  <meta property="og:description"
-    content="Portfolio of Tristan Henrard, editorial and fashion model based in France." />
   <meta property="og:type" content="website" />
+  <meta property="og:title" content="Tristan Henrard — Portfolio mannequin" />
+  <meta property="og:description"
+    content="Portfolio de Tristan Henrard, mannequin éditorial et mode basé en France." />
   <meta property="og:url" content="https://henrardvisuals.com/" />
   <meta property="og:locale" content="fr_FR" />
   <meta property="og:locale:alternate" content="en_GB" />
   <meta property="og:image" content="https://henrardvisuals.com/og-image.jpg" />
+  <meta property="og:image:alt" content="Tristan Henrard, portrait éditorial en noir et blanc" />
   <meta property="og:image:width" content="1200" />
   <meta property="og:image:height" content="630" />
-
-  <!-- Twitter Card -->
   <meta name="twitter:card" content="summary_large_image" />
-  <meta name="twitter:title" content="Tristan Henrard — Model Portfolio" />
-  <meta name="twitter:description" content="Editorial and fashion model portfolio." />
+  <meta name="twitter:title" content="Tristan Henrard — Portfolio mannequin" />
+  <meta name="twitter:description"
+    content="Portfolio de Tristan Henrard, mannequin éditorial et mode basé en France." />
   <meta name="twitter:image" content="https://henrardvisuals.com/og-image.jpg" />
+  <meta name="twitter:image:alt" content="Tristan Henrard, portrait éditorial en noir et blanc" />
+  <!--/seo-->
 
   <!-- Supabase serves both the API and every image — connect early.
        Substituted from VITE_SUPABASE_URL at build time. -->
