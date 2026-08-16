@@ -11,6 +11,19 @@ vi.mock('@/context/SiteContentContext', () => ({
   }),
 }));
 
+// SuggestedPlates queries Supabase directly; stub it to [] so this stays a
+// markup test rather than one that drags a database call along.
+vi.mock('@/hooks/useSuggestedPhotos', () => ({
+  useSuggestedPhotos: () => [],
+}));
+
+// SuggestedPlates also imports @/lib/imageUrl for its (unreached) image URLs,
+// which imports @/lib/supabase — that throws at import time without env vars,
+// so the module needs a stub even though the mocked hook above never calls it.
+vi.mock('@/lib/supabase', () => ({
+  getStorageUrl: (path: string) => `https://cdn.example.com/${path}`,
+}));
+
 import { LanguageProvider } from '@/context/LanguageContext';
 import i18n from '@/i18n';
 import { NotFound } from '@/pages/NotFound';
