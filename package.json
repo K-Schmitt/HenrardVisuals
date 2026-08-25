@@ -21,7 +21,7 @@
   },
   "dependencies": {
     "@supabase/supabase-js": "^2.39.0",
-    "i18next": "^25.10.9",
+    "i18next": "^26.4.0",
     "react": "^18.2.0",
     "react-dom": "^18.2.0",
     "react-i18next": "^16.6.6",
